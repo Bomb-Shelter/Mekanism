@@ -426,7 +426,7 @@ repositories { RepositoryHandler handler ->
     })
     exclusiveRepo(handler, 'https://maven.terraformersmc.com/', 'dev.emi')
     exclusiveRepo(handler, 'https://maven.theillusivec4.top/', 'top.theillusivec4.curios')
-    exclusiveRepo(handler, 'https://maven.tterrag.com/', 'team.chisel.ctm')
+//    exclusiveRepo(handler, 'https://maven.tterrag.com/', 'team.chisel.ctm')
     exclusiveRepo(handler, 'https://squiddev.cc/maven/', 'cc.tweaked', 'org.squiddev')
     exclusiveRepo(handler, 'https://dogforce-games.com/maven/', 'dev.gigaherz.jsonthings')
     exclusiveRepo(handler, 'https://maven2.bai.lol', 'lol.bai', 'mcp.mobius.waila')//WTHIT
@@ -481,7 +481,7 @@ dependencies {
         datagenMainRuntimeOnly(emi)
     }
 
-    localRuntime("team.chisel.ctm:CTM:${previous_minor_minecraft_version}-${ctm_version}")
+//    localRuntime("team.chisel.ctm:CTM:${previous_minor_minecraft_version}-${ctm_version}")
 
     compileOnly("mcjty.theoneprobe:theoneprobe:${top_version}:api")
     localRuntime("mcjty.theoneprobe:theoneprobe:${top_version}")
