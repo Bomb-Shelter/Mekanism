@@ -3,6 +3,9 @@ package mekanism.api.recipes.ingredients.creator;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+
+import io.github.fabricators_of_create.porting_lib.resources.crafting.DataComponentIngredient;
+import io.github.fabricators_of_create.porting_lib.resources.crafting.SizedIngredient;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.recipes.ingredients.ItemStackIngredient;
 import net.minecraft.core.Holder;
@@ -16,8 +19,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
-import net.neoforged.neoforge.common.crafting.DataComponentIngredient;
-import net.neoforged.neoforge.common.crafting.SizedIngredient;
 
 @NothingNullByDefault
 public interface IItemStackIngredientCreator extends IIngredientCreator<Item, ItemStack, ItemStackIngredient> {
@@ -137,8 +138,8 @@ public interface IItemStackIngredientCreator extends IIngredientCreator<Item, It
      */
     @Override
     @SuppressWarnings("removal")
-    default ItemStackIngredient from(Item item, int amount) {//TODO - 1.22: Ensure we don't end up removing this when we remove super
-        return from(Ingredient.of(item), amount);
+    default ItemStackIngredient from(Item item, long amount) {//TODO - 1.22: Ensure we don't end up removing this when we remove super
+        return from(Ingredient.of(item), (int) amount);
     }
 
     /**
@@ -155,11 +156,11 @@ public interface IItemStackIngredientCreator extends IIngredientCreator<Item, It
      */
     @Override
     @SuppressWarnings("removal")
-    default ItemStackIngredient from(int amount, Item... items) {//TODO - 1.22: Ensure we don't end up removing this when we remove super
+    default ItemStackIngredient from(long amount, Item... items) {//TODO - 1.22: Ensure we don't end up removing this when we remove super
         if (items.length == 0) {
             throw new IllegalArgumentException("Attempted to create an ItemStackIngredient with no items.");
         }
-        return from(Ingredient.of(items), amount);
+        return from(Ingredient.of(items), (int) amount);
     }
 
     @Override

@@ -7,8 +7,8 @@ import mekanism.api.SerializationConstants;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.recipes.ingredients.creator.IngredientCreatorAccess;
+import net.fabricmc.fabric.impl.recipe.ingredient.builtin.DifferenceIngredient;
 import net.minecraft.core.Holder;
-import net.neoforged.neoforge.common.crafting.DifferenceIngredient;
 import org.jetbrains.annotations.Nullable;
 
 /**

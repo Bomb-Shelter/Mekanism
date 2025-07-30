@@ -4,6 +4,9 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
+import io.github.fabricators_of_create.porting_lib.resources.data_maps.DataMapType;
+import io.github.fabricators_of_create.porting_lib.resources.data_maps.IWithData;
 import io.netty.handler.codec.DecoderException;
 import io.netty.handler.codec.EncoderException;
 import java.util.Collection;
@@ -42,8 +45,6 @@ import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.Item.TooltipContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.neoforged.neoforge.registries.datamaps.DataMapType;
-import net.neoforged.neoforge.registries.datamaps.IWithData;
 import org.jetbrains.annotations.Nullable;
 
 @NothingNullByDefault
@@ -150,7 +151,7 @@ public final class ChemicalStack implements IHasTextComponent, IHasTranslationKe
     /**
      * A standard codec for chemical stacks that always deserializes with a fixed amount, and does not accept empty stacks.
      * <p>
-     * Chemical equivalent of {@link ItemStack#SINGLE_ITEM_CODEC}. and {@link net.neoforged.neoforge.fluids.FluidStack#fixedAmountCodec(int)}
+     * Chemical equivalent of {@link ItemStack#SINGLE_ITEM_CODEC}. and {@link FluidStack#fixedAmountCodec(long)}
      *
      * @since 10.6.0
      */
@@ -398,7 +399,7 @@ public final class ChemicalStack implements IHasTextComponent, IHasTranslationKe
      */
     @Deprecated(forRemoval = true, since = "10.7.11")
     public ResourceLocation getTypeRegistryName() {
-        ResourceKey<?> key = getChemicalHolder().getKey();
+        ResourceKey<?> key = getChemicalHolder().port_lib$getKey();
         return key == null ? MekanismAPI.CHEMICAL_REGISTRY.getDefaultKey() : key.location();
     }
 

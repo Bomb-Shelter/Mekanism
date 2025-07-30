@@ -10,7 +10,7 @@ import mekanism.api.IContentsListener;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.functions.ConstantPredicates;
 import mekanism.common.lib.multiblock.MultiblockData;
-import net.neoforged.neoforge.fluids.FluidStack;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -61,12 +61,12 @@ public class VariableCapacityFluidTank extends BasicFluidTank {
     }
 
     @Override
-    public int getCapacity() {
+    public long getCapacity() {
         return capacity.getAsInt();
     }
 
     @Override
-    public int setStackSize(int amount, @NotNull Action action) {
+    public long setStackSize(long amount, @NotNull Action action) {
         if (isEmpty()) {
             return 0;
         } else if (amount <= 0) {
@@ -75,7 +75,7 @@ public class VariableCapacityFluidTank extends BasicFluidTank {
             }
             return 0;
         }
-        int maxStackSize = getCapacity();
+        long maxStackSize = getCapacity();
         //Our capacity should never actually be zero, and given we fake it being zero
         // until we finish building the network, we need to override this method to bypass the upper limit check
         // when our upper limit is zero

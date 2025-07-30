@@ -10,6 +10,7 @@ import mekanism.api.security.ISecurityObject;
 import mekanism.api.security.ISecurityUtils;
 import mekanism.api.security.SecurityMode;
 import mekanism.common.capabilities.Capabilities;
+import net.fabricmc.fabric.api.lookup.v1.block.BlockApiLookup;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -24,20 +25,20 @@ import org.jetbrains.annotations.Nullable;
 @NothingNullByDefault
 public class BlockSecurityUtils implements IBlockSecurityUtils {
 
-    private static final BlockCapability<IOwnerObject, Void> OWNER_CAPABILITY = BlockCapability.createVoid(Capabilities.OWNER_OBJECT_NAME, IOwnerObject.class);
-    private static final BlockCapability<ISecurityObject, Void> SECURITY_CAPABILITY = BlockCapability.createVoid(Capabilities.SECURITY_OBJECT_NAME, ISecurityObject.class);
+    private static final BlockApiLookup<IOwnerObject, Void> OWNER_CAPABILITY = BlockApiLookup.get(Capabilities.OWNER_OBJECT_NAME, IOwnerObject.class, void.class);
+    private static final BlockApiLookup<ISecurityObject, Void> SECURITY_CAPABILITY = BlockApiLookup.get(Capabilities.SECURITY_OBJECT_NAME, ISecurityObject.class, void.class);
 
     public static BlockSecurityUtils get() {
         return (BlockSecurityUtils) INSTANCE;
     }
 
     @Override
-    public BlockCapability<IOwnerObject, Void> ownerCapability() {
+    public BlockApiLookup<IOwnerObject, Void> ownerCapability() {
         return OWNER_CAPABILITY;
     }
 
     @Override
-    public BlockCapability<ISecurityObject, Void> securityCapability() {
+    public BlockApiLookup<ISecurityObject, Void> securityCapability() {
         return SECURITY_CAPABILITY;
     }
 

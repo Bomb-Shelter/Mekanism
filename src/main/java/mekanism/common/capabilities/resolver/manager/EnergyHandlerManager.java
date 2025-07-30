@@ -12,15 +12,15 @@ import mekanism.api.energy.IStrictEnergyHandler;
 import mekanism.common.capabilities.holder.energy.IEnergyContainerHolder;
 import mekanism.common.capabilities.proxy.ProxyStrictEnergyHandler;
 import mekanism.common.integration.energy.EnergyCompatUtils;
+import net.fabricmc.fabric.api.lookup.v1.block.BlockApiLookup;
 import net.minecraft.core.Direction;
-import net.neoforged.neoforge.capabilities.BlockCapability;
 import org.jetbrains.annotations.Nullable;
 
 @NothingNullByDefault
 public class EnergyHandlerManager implements ICapabilityHandlerManager<IEnergyContainer> {
 
-    private final Map<Direction, Map<BlockCapability<?, @Nullable Direction>, Object>> cachedCapabilities;
-    private final Map<BlockCapability<?, @Nullable Direction>, Object> cachedReadOnlyCapabilities;
+    private final Map<Direction, Map<BlockApiLookup<?, @Nullable Direction>, Object>> cachedCapabilities;
+    private final Map<BlockApiLookup<?, @Nullable Direction>, Object> cachedReadOnlyCapabilities;
     private final Map<Direction, IStrictEnergyHandler> handlers;
     private final ISidedStrictEnergyHandler baseHandler;
     private final boolean canHandle;
@@ -55,7 +55,7 @@ public class EnergyHandlerManager implements ICapabilityHandlerManager<IEnergyCo
     }
 
     @Override
-    public List<BlockCapability<?, @Nullable Direction>> getSupportedCapabilities() {
+    public List<BlockApiLookup<?, @Nullable Direction>> getSupportedCapabilities() {
         //Return all loaded energy caps so that we get attached and then just handle config checks in the actual lookup
         return EnergyCompatUtils.getLoadedEnergyCapabilities();
     }
@@ -68,7 +68,7 @@ public class EnergyHandlerManager implements ICapabilityHandlerManager<IEnergyCo
     @Nullable
     @Override
     @SuppressWarnings("unchecked")
-    public <T> T resolve(BlockCapability<T, @Nullable Direction> capability, @Nullable Direction side) {
+    public <T> T resolve(BlockApiLookup<T, @Nullable Direction> capability, @Nullable Direction side) {
         if (getContainers(side).isEmpty()) {
             //If we don't have any containers accessible from that side, don't return a handler
             return null;
@@ -87,7 +87,7 @@ public class EnergyHandlerManager implements ICapabilityHandlerManager<IEnergyCo
             return (T) result;
         }
         //If we already contain a cached object for this instance then just use it, otherwise calculate the base handler and wrap it
-        Map<BlockCapability<?, @Nullable Direction>, Object> cache = cachedCapabilities.computeIfAbsent(side, key -> new IdentityHashMap<>());
+        Map<BlockApiLookup<?, @Nullable Direction>, Object> cache = cachedCapabilities.computeIfAbsent(side, key -> new IdentityHashMap<>());
         Object result = cache.get(capability);
         if (result == null) {
             //If we haven't initiated the backing handler yet, calculate it
@@ -103,13 +103,13 @@ public class EnergyHandlerManager implements ICapabilityHandlerManager<IEnergyCo
     }
 
     @Override
-    public void invalidate(BlockCapability<?, @Nullable Direction> capability, @Nullable Direction side) {
+    public void invalidate(BlockApiLookup<?, @Nullable Direction> capability, @Nullable Direction side) {
         //Note: We don't invalidate the base handlers as they are still valid regardless and are just wrappers with the holder
         // removing slots when they shouldn't be accessible, so we only invalidate the cached exposed handlers
         if (side == null) {
             cachedReadOnlyCapabilities.remove(capability);
         } else {
-            Map<BlockCapability<?, @Nullable Direction>, ?> cachedSide = cachedCapabilities.get(side);
+            Map<BlockApiLookup<?, @Nullable Direction>, ?> cachedSide = cachedCapabilities.get(side);
             if (cachedSide != null) {
                 cachedSide.remove(capability);
             }

@@ -1,8 +1,13 @@
 package mekanism.api.event;
 
 import java.util.Objects;
+
+import io.github.fabricators_of_create.porting_lib.entity.events.EntityTeleportEvent;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.robit.IRobit;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.fabric.api.event.Event;
+import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.resources.ResourceKey;
@@ -11,9 +16,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.entity.EntityTeleportEvent;
 
 /**
  * Base Mekanism extension of the {@link EntityTeleportEvent}.
@@ -21,7 +23,7 @@ import net.neoforged.neoforge.event.entity.EntityTeleportEvent;
  * @since 10.3.9
  */
 @NothingNullByDefault
-public class MekanismTeleportEvent extends EntityTeleportEvent {
+public abstract class MekanismTeleportEvent extends EntityTeleportEvent {
 
     /**
      * @param entity  Entity teleporting.
@@ -42,11 +44,15 @@ public class MekanismTeleportEvent extends EntityTeleportEvent {
      * <br>
      * This event <strong>does not</strong> allow changing the target position.
      * <br>
-     * This event is fired on the {@link NeoForge#EVENT_BUS}.
-     * <br>
-     * This event is only fired on the {@link LogicalSide#SERVER} side.
+     * This event is only fired on the {@link EnvType#SERVER} side.
      */
     public static class MekaTool extends MekanismTeleportEvent {
+
+        public static final Event<Callback> EVENT = EventFactory.createArrayBacked(Callback.class, callbacks -> event -> {
+            for (Callback callback : callbacks) {
+                callback.onMekaToolTeleport(event);
+            }
+        });
 
         private final BlockHitResult targetBlock;
         private final ItemStack mekaTool;
@@ -87,12 +93,27 @@ public class MekanismTeleportEvent extends EntityTeleportEvent {
         public BlockHitResult getTargetBlock() {
             return targetBlock;
         }
+
+        @Override
+        public void sendEvent() {
+            EVENT.invoker().onMekaToolTeleport(this);
+        }
+
+        public interface Callback {
+            void onMekaToolTeleport(MekaTool event);
+        }
     }
 
     /**
      * @since 10.5.2
      */
     public static class GlobalTeleport extends MekanismTeleportEvent {
+
+        public static final Event<Callback> EVENT = EventFactory.createArrayBacked(Callback.class, callbacks -> event -> {
+            for (Callback callback : callbacks) {
+                callback.onGlobalTeleport(event);
+            }
+        });
 
         private final ResourceKey<Level> targetDimension;
 
@@ -121,6 +142,15 @@ public class MekanismTeleportEvent extends EntityTeleportEvent {
         public ResourceKey<Level> getTargetDimension() {
             return targetDimension;
         }
+
+        @Override
+        public void sendEvent() {
+            EVENT.invoker().onGlobalTeleport(this);
+        }
+
+        public interface Callback {
+            void onGlobalTeleport(GlobalTeleport event);
+        }
     }
 
     /**
@@ -132,13 +162,17 @@ public class MekanismTeleportEvent extends EntityTeleportEvent {
      * <br>
      * This event <strong>does not</strong> allow changing the target position.
      * <br>
-     * This event is fired on the {@link NeoForge#EVENT_BUS}.
-     * <br>
-     * This event is only fired on the {@link LogicalSide#SERVER} side.
+     * This event is only fired on the {@link EnvType#SERVER} side.
      *
      * @since 10.5.2
      */
     public static class Robit extends GlobalTeleport {
+
+        public static final Event<Callback> EVENT = EventFactory.createArrayBacked(Callback.class, callbacks -> event -> {
+            for (Callback callback : callbacks) {
+                callback.onRobitTeleport(event);
+            }
+        });
 
         /**
          * @param robit        The robit that is teleporting home.
@@ -149,6 +183,15 @@ public class MekanismTeleportEvent extends EntityTeleportEvent {
 
         private <ROBIT extends Entity & IRobit> Robit(ROBIT robit, GlobalPos homeLocation) {
             super(robit, homeLocation.pos().getX() + 0.5, homeLocation.pos().getY() + 0.3, homeLocation.pos().getZ() + 0.5, homeLocation.dimension());
+        }
+
+        @Override
+        public void sendEvent() {
+            EVENT.invoker().onRobitTeleport(this);
+        }
+
+        public interface Callback {
+            void onRobitTeleport(Robit event);
         }
     }
 
@@ -161,9 +204,7 @@ public class MekanismTeleportEvent extends EntityTeleportEvent {
      * <br>
      * This event <strong>does not</strong> allow changing the target position.
      * <br>
-     * This event is fired on the {@link NeoForge#EVENT_BUS}.
-     * <br>
-     * This event is only fired on the {@link LogicalSide#SERVER} side.
+     * This event is only fired on the {@link EnvType#SERVER} side.
      * <br>
      *
      * @apiNote This event is only fired once for the base entity, and is not fired for any of the passengers that are teleported with it. If you care about seeing
@@ -171,6 +212,12 @@ public class MekanismTeleportEvent extends EntityTeleportEvent {
      * @since 10.5.2
      */
     public static class Teleporter extends GlobalTeleport {
+
+        public static final Event<Callback> EVENT = EventFactory.createArrayBacked(Callback.class, callbacks -> event -> {
+            for (Callback callback : callbacks) {
+                callback.onTeleporter(event);
+            }
+        });
 
         private final long energyCost;
 
@@ -191,6 +238,15 @@ public class MekanismTeleportEvent extends EntityTeleportEvent {
         public long getEnergyCost() {
             return energyCost;
         }
+
+        @Override
+        public void sendEvent() {
+            EVENT.invoker().onTeleporter(this);
+        }
+
+        public interface Callback {
+            void onTeleporter(Teleporter event);
+        }
     }
 
     /**
@@ -202,13 +258,17 @@ public class MekanismTeleportEvent extends EntityTeleportEvent {
      * <br>
      * This event <strong>does not</strong> allow changing the target position.
      * <br>
-     * This event is fired on the {@link NeoForge#EVENT_BUS}.
-     * <br>
-     * This event is only fired on the {@link LogicalSide#SERVER} side.
+     * This event is only fired on the {@link EnvType#SERVER} side.
      *
      * @since 10.5.2
      */
     public static class PortableTeleporter extends Teleporter {
+
+        public static final Event<Callback> EVENT = EventFactory.createArrayBacked(Callback.class, callbacks -> event -> {
+            for (Callback callback : callbacks) {
+                callback.onPortableTeleporter(event);
+            }
+        });
 
         private final ItemStack portableTeleporter;
 
@@ -234,6 +294,15 @@ public class MekanismTeleportEvent extends EntityTeleportEvent {
          */
         public ItemStack getPortableTeleporter() {
             return portableTeleporter;
+        }
+
+        @Override
+        public void sendEvent() {
+            EVENT.invoker().onPortableTeleporter(this);
+        }
+
+        public interface Callback {
+            void onPortableTeleporter(PortableTeleporter event);
         }
     }
 }

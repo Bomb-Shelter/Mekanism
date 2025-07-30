@@ -1,8 +1,8 @@
 package mekanism.api.security;
 
 import mekanism.api.MekanismAPI;
+import net.fabricmc.fabric.api.lookup.v1.entity.EntityApiLookup;
 import net.minecraft.world.entity.Entity;
-import net.neoforged.neoforge.capabilities.EntityCapability;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -23,22 +23,22 @@ public interface IEntitySecurityUtils extends ITypedSecurityUtils<Entity> {
     /**
      * {@return the entity capability representing owner objects}
      */
-    EntityCapability<IOwnerObject, Void> ownerCapability();
+    EntityApiLookup<IOwnerObject, Void> ownerCapability();
 
     @Nullable
     @Override
     default IOwnerObject ownerCapability(@Nullable Entity entity) {
-        return entity == null ? null : entity.getCapability(ownerCapability());
+        return entity == null ? null : ownerCapability().find(entity, null);
     }
 
     /**
      * {@return the entity capability representing security objects}
      */
-    EntityCapability<ISecurityObject, Void> securityCapability();
+    EntityApiLookup<ISecurityObject, Void> securityCapability();
 
     @Nullable
     @Override
     default ISecurityObject securityCapability(@Nullable Entity entity) {
-        return entity == null ? null : entity.getCapability(securityCapability());
+        return entity == null ? null : securityCapability().find(entity, null);
     }
 }

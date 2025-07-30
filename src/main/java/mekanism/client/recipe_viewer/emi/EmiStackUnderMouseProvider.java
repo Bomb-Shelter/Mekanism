@@ -9,7 +9,7 @@ import mekanism.client.gui.GuiMekanism;
 import mekanism.client.recipe_viewer.GuiElementHandler;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.fluids.FluidStack;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 
 public class EmiStackUnderMouseProvider implements EmiStackProvider<Screen> {
 

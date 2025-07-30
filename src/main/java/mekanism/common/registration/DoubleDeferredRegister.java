@@ -7,7 +7,7 @@ import java.util.function.Supplier;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.registries.DeferredHolder;
+import io.github.fabricators_of_create.porting_lib.registry.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 public class DoubleDeferredRegister<PRIMARY, SECONDARY> {

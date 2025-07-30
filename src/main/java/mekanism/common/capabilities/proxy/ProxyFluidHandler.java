@@ -6,7 +6,7 @@ import mekanism.api.fluid.IExtendedFluidHandler;
 import mekanism.api.fluid.ISidedFluidHandler;
 import mekanism.common.capabilities.holder.IHolder;
 import net.minecraft.core.Direction;
-import net.neoforged.neoforge.fluids.FluidStack;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import org.jetbrains.annotations.Nullable;
 
 @NothingNullByDefault
@@ -56,7 +56,7 @@ public class ProxyFluidHandler extends ProxyHandler implements IExtendedFluidHan
     }
 
     @Override
-    public FluidStack extractFluid(int tank, int amount, Action action) {
+    public FluidStack extractFluid(int tank, long amount, Action action) {
         return readOnlyExtract() ? FluidStack.EMPTY : fluidHandler.extractFluid(tank, amount, side, action);
     }
 
@@ -66,7 +66,7 @@ public class ProxyFluidHandler extends ProxyHandler implements IExtendedFluidHan
     }
 
     @Override
-    public FluidStack extractFluid(int amount, Action action) {
+    public FluidStack extractFluid(long amount, Action action) {
         return readOnlyExtract() ? FluidStack.EMPTY : fluidHandler.extractFluid(amount, side, action);
     }
 

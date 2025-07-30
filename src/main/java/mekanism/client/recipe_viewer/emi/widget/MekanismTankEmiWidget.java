@@ -19,7 +19,7 @@ import mekanism.client.render.MekanismRenderer.FluidTextureType;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.world.level.material.Fluid;
-import net.neoforged.neoforge.fluids.FluidStack;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import org.jetbrains.annotations.Nullable;
 
 public class MekanismTankEmiWidget extends SlotWidget {

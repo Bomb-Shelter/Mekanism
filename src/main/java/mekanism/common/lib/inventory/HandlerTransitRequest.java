@@ -8,10 +8,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import mekanism.api.fabric.transfer.items.IItemHandler;
 import mekanism.common.Mekanism;
 import mekanism.common.util.InventoryUtils;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.IItemHandler;
 
 public class HandlerTransitRequest extends CollectionTransitRequest {
 

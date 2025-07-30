@@ -6,6 +6,9 @@ import mekanism.api.IConfigurable;
 import mekanism.api.IEvaporationSolar;
 import mekanism.api.chemical.IChemicalHandler;
 import mekanism.api.energy.IStrictEnergyHandler;
+import mekanism.api.fabric.lookup.ICapabilityProvider;
+import mekanism.api.fabric.transfer.fluids.IFluidHandler;
+import mekanism.api.fabric.transfer.items.IItemHandler;
 import mekanism.api.heat.IHeatHandler;
 import mekanism.api.lasers.ILaserDissipation;
 import mekanism.api.lasers.ILaserReceptor;
@@ -20,23 +23,14 @@ import mekanism.common.integration.energy.EnergyCompatUtils;
 import mekanism.common.lib.radiation.capability.RadiationEntity;
 import mekanism.common.registries.MekanismEntityTypes;
 import mekanism.common.tile.TileEntityBoundingBlock;
+import net.fabricmc.fabric.api.lookup.v1.block.BlockApiLookup;
+import net.fabricmc.fabric.api.lookup.v1.entity.EntityApiLookup;
+import net.fabricmc.fabric.api.lookup.v1.item.ItemApiLookup;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.neoforged.neoforge.capabilities.BlockCapability;
-import net.neoforged.neoforge.capabilities.Capabilities.EnergyStorage;
-import net.neoforged.neoforge.capabilities.Capabilities.FluidHandler;
-import net.neoforged.neoforge.capabilities.Capabilities.ItemHandler;
-import net.neoforged.neoforge.capabilities.EntityCapability;
-import net.neoforged.neoforge.capabilities.ICapabilityProvider;
-import net.neoforged.neoforge.capabilities.ItemCapability;
-import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import net.neoforged.neoforge.energy.IEnergyStorage;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
-import net.neoforged.neoforge.items.IItemHandler;
 import org.jetbrains.annotations.Nullable;
 
 public class Capabilities {
@@ -46,9 +40,9 @@ public class Capabilities {
 
     public static final ICapabilityProvider<?, ?, ?> SIMPLE_PROVIDER = (obj, context) -> obj;
 
-    private record FluidCapability(BlockCapability<IFluidHandler, @Nullable Direction> block,
-                                   ItemCapability<IFluidHandlerItem, Void> item,
-                                   EntityCapability<IFluidHandler, @Nullable Direction> entity) implements IMultiTypeCapability<IFluidHandler, IFluidHandlerItem> {
+    private record FluidCapability(BlockApiLookup<IFluidHandler, @Nullable Direction> block,
+                                   ItemApiLookup<IFluidHandlerItem, Void> item,
+                                   EntityApiLookup<IFluidHandler, @Nullable Direction> entity) implements IMultiTypeCapability<IFluidHandler, IFluidHandlerItem> {
     }
 
     public static final MultiTypeCapability<IEnergyStorage> ENERGY = new MultiTypeCapability<>(EnergyStorage.BLOCK, EnergyStorage.ITEM, EnergyStorage.ENTITY);
@@ -58,25 +52,25 @@ public class Capabilities {
 
     public static final MultiTypeCapability<IChemicalHandler> CHEMICAL = new MultiTypeCapability<>(Mekanism.rl("chemical_handler"), IChemicalHandler.class);
 
-    public static final BlockCapability<IHeatHandler, @Nullable Direction> HEAT = BlockCapability.createSided(Mekanism.rl("heat_handler"), IHeatHandler.class);
+    public static final BlockApiLookup<IHeatHandler, @Nullable Direction> HEAT = BlockApiLookup.get(Mekanism.rl("heat_handler"), IHeatHandler.class, Direction.class);
 
     public static final MultiTypeCapability<IStrictEnergyHandler> STRICT_ENERGY = new MultiTypeCapability<>(Mekanism.rl("strict_energy_handler"), IStrictEnergyHandler.class);
 
-    public static final BlockCapability<IConfigurable, @Nullable Direction> CONFIGURABLE = BlockCapability.createSided(Mekanism.rl("configurable"), IConfigurable.class);
+    public static final BlockApiLookup<IConfigurable, @Nullable Direction> CONFIGURABLE = BlockApiLookup.get(Mekanism.rl("configurable"), IConfigurable.class, Direction.class);
 
-    public static final BlockCapability<IAlloyInteraction, @Nullable Direction> ALLOY_INTERACTION = BlockCapability.createSided(Mekanism.rl("alloy_interaction"), IAlloyInteraction.class);
+    public static final BlockApiLookup<IAlloyInteraction, @Nullable Direction> ALLOY_INTERACTION = BlockApiLookup.get(Mekanism.rl("alloy_interaction"), IAlloyInteraction.class, Direction.class);
 
-    public static final BlockCapability<IConfigCardAccess, @Nullable Direction> CONFIG_CARD = BlockCapability.createSided(Mekanism.rl("config_card"), IConfigCardAccess.class);
+    public static final BlockApiLookup<IConfigCardAccess, @Nullable Direction> CONFIG_CARD = BlockApiLookup.get(Mekanism.rl("config_card"), IConfigCardAccess.class, Direction.class);
 
-    public static final BlockCapability<IEvaporationSolar, Void> EVAPORATION_SOLAR = BlockCapability.createVoid(Mekanism.rl("evaporation_solar"), IEvaporationSolar.class);
+    public static final BlockApiLookup<IEvaporationSolar, Void> EVAPORATION_SOLAR = BlockApiLookup.get(Mekanism.rl("evaporation_solar"), IEvaporationSolar.class, void.class);
 
-    public static final BlockCapability<ILaserReceptor, @Nullable Direction> LASER_RECEPTOR = BlockCapability.createSided(Mekanism.rl("laser_receptor"), ILaserReceptor.class);
+    public static final BlockApiLookup<ILaserReceptor, @Nullable Direction> LASER_RECEPTOR = BlockApiLookup.get(Mekanism.rl("laser_receptor"), ILaserReceptor.class, Direction.class);
 
-    public static final ItemCapability<ILaserDissipation, Void> LASER_DISSIPATION = ItemCapability.createVoid(Mekanism.rl("laser_dissipation"), ILaserDissipation.class);
+    public static final ItemApiLookup<ILaserDissipation, Void> LASER_DISSIPATION = ItemApiLookup.get(Mekanism.rl("laser_dissipation"), ILaserDissipation.class, void.class);
 
-    public static final ItemCapability<IRadiationShielding, Void> RADIATION_SHIELDING = ItemCapability.createVoid(Mekanism.rl("radiation_shielding"), IRadiationShielding.class);
+    public static final ItemApiLookup<IRadiationShielding, Void> RADIATION_SHIELDING = ItemApiLookup.get(Mekanism.rl("radiation_shielding"), IRadiationShielding.class, void.class);
 
-    public static final EntityCapability<IRadiationEntity, Void> RADIATION_ENTITY = EntityCapability.createVoid(Mekanism.rl("radiation"), IRadiationEntity.class);
+    public static final EntityApiLookup<IRadiationEntity, Void> RADIATION_ENTITY = EntityApiLookup.get(Mekanism.rl("radiation"), IRadiationEntity.class, void.class);
 
     public static final ResourceLocation OWNER_OBJECT_NAME = Mekanism.rl("owner_object");
     public static final ResourceLocation SECURITY_OBJECT_NAME = Mekanism.rl("security_object");

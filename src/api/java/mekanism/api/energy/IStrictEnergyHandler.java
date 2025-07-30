@@ -2,9 +2,9 @@ package mekanism.api.energy;
 
 import mekanism.api.Action;
 import mekanism.api.annotations.NothingNullByDefault;
+import mekanism.api.fabric.transfer.fluids.IFluidHandler;
 import mekanism.api.math.LongTransferUtils;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 
 @NothingNullByDefault
 public interface IStrictEnergyHandler {

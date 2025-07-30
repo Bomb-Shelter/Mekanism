@@ -10,7 +10,7 @@ import mekanism.api.recipes.RotaryRecipe;
 import mekanism.api.recipes.ingredients.ChemicalStackIngredient;
 import mekanism.api.recipes.ingredients.FluidStackIngredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.neoforged.neoforge.fluids.FluidStack;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
@@ -250,7 +250,7 @@ public class BasicRotaryRecipe extends RotaryRecipe {
         if (hasChemicalToFluid) {
             hash = 31 * hash + chemicalInput.hashCode();
             hash = 31 * hash + FluidStack.hashFluidAndComponents(fluidOutput);
-            hash = 31 * hash + fluidOutput.getAmount();
+            hash = 31 * hash + Long.hashCode(fluidOutput.getAmount());
         }
         return hash;
     }

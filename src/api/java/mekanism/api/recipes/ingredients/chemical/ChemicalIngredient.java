@@ -10,9 +10,9 @@ import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.recipes.ingredients.creator.IChemicalIngredientCreator;
 import mekanism.api.recipes.ingredients.creator.IngredientCreatorAccess;
+import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredient;
 import net.minecraft.core.Holder;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.neoforged.neoforge.common.crafting.ICustomIngredient;
 
 /**
  * This class serves as the chemical analogue of an item {@link Ingredient}, that is, a representation of both a {@linkplain #test predicate} to test {@link Chemical}s
@@ -68,7 +68,7 @@ public abstract sealed class ChemicalIngredient implements Predicate<Chemical> p
      *
      * @return a stream of all chemicals this ingredient accepts.
      *
-     * @see ICustomIngredient#getItems()
+     * @see CustomIngredient#getMatchingStacks()
      */
     @Deprecated(forRemoval = true, since = "10.7.11")
     public final Stream<Chemical> generateChemicals() {
@@ -86,7 +86,7 @@ public abstract sealed class ChemicalIngredient implements Predicate<Chemical> p
      *
      * @return a stream of all chemicals this ingredient accepts.
      *
-     * @see ICustomIngredient#getItems()
+     * @see CustomIngredient#getMatchingStacks()
      *
      * @since 10.7.11
      */

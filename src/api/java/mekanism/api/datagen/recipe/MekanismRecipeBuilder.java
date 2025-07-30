@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import io.github.fabricators_of_create.porting_lib.resources.conditions.ICondition;
 import mekanism.api.annotations.NothingNullByDefault;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementHolder;
@@ -19,7 +21,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.ItemLike;
-import net.neoforged.neoforge.common.conditions.ICondition;
 
 /**
  * Base recipe builder that declares various common methods between our different builders.
@@ -110,7 +111,7 @@ public abstract class MekanismRecipeBuilder<BUILDER extends MekanismRecipeBuilde
      */
     @Deprecated(forRemoval = true, since = "10.7.11")
     protected void build(RecipeOutput recipeOutput, ItemLike output) {
-        ResourceLocation registryName = BuiltInRegistries.ITEM.getKeyOrNull(output.asItem());
+        ResourceLocation registryName = BuiltInRegistries.ITEM.port_lib$getKeyOrNull(output.asItem());
         if (registryName == null) {
             throw new IllegalStateException("Could not retrieve registry name for output.");
         }
@@ -125,7 +126,7 @@ public abstract class MekanismRecipeBuilder<BUILDER extends MekanismRecipeBuilde
      * @since 10.7.11
      */
     protected void build(RecipeOutput recipeOutput, Holder<Item> output) {
-        ResourceKey<Item> key = output.getKey();
+        ResourceKey<Item> key = output.port_lib$getKey();
         if (key == null) {
             throw new IllegalStateException("Could not retrieve registry name for output.");
         }

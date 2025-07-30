@@ -10,7 +10,7 @@ import mekanism.api.fluid.IExtendedFluidTank;
 import mekanism.api.fluid.IMekanismFluidHandler;
 import mekanism.common.capabilities.DynamicHandler;
 import net.minecraft.core.Direction;
-import net.neoforged.neoforge.fluids.FluidStack;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import org.jetbrains.annotations.Nullable;
 
 @NothingNullByDefault
@@ -33,7 +33,7 @@ public class DynamicFluidHandler extends DynamicHandler<IExtendedFluidTank> impl
     }
 
     @Override
-    public FluidStack extractFluid(int tank, int amount, @Nullable Direction side, Action action) {
+    public FluidStack extractFluid(int tank, long amount, @Nullable Direction side, Action action) {
         //If we can extract from a specific side, try to. Otherwise exit
         return canExtract.test(side) ? IMekanismFluidHandler.super.extractFluid(tank, amount, side, action) : FluidStack.EMPTY;
     }
@@ -45,7 +45,7 @@ public class DynamicFluidHandler extends DynamicHandler<IExtendedFluidTank> impl
     }
 
     @Override
-    public FluidStack extractFluid(int amount, @Nullable Direction side, Action action) {
+    public FluidStack extractFluid(long amount, @Nullable Direction side, Action action) {
         //If we can extract from a specific side, try to. Otherwise exit
         return canExtract.test(side) ? IMekanismFluidHandler.super.extractFluid(amount, side, action) : FluidStack.EMPTY;
     }

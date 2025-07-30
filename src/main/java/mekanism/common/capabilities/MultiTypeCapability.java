@@ -1,21 +1,21 @@
 package mekanism.common.capabilities;
 
+import net.fabricmc.fabric.api.lookup.v1.block.BlockApiLookup;
+import net.fabricmc.fabric.api.lookup.v1.entity.EntityApiLookup;
+import net.fabricmc.fabric.api.lookup.v1.item.ItemApiLookup;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.capabilities.BlockCapability;
-import net.neoforged.neoforge.capabilities.EntityCapability;
-import net.neoforged.neoforge.capabilities.ItemCapability;
 import org.jetbrains.annotations.Nullable;
 
-public record MultiTypeCapability<HANDLER>(BlockCapability<HANDLER, @Nullable Direction> block,
-                                           ItemCapability<HANDLER, Void> item,
-                                           EntityCapability<HANDLER, ?> entity) implements IMultiTypeCapability<HANDLER, HANDLER> {
+public record MultiTypeCapability<HANDLER>(BlockApiLookup<HANDLER, @Nullable Direction> block,
+                                           ItemApiLookup<HANDLER, Void> item,
+                                           EntityApiLookup<HANDLER, ?> entity) implements IMultiTypeCapability<HANDLER, HANDLER> {
 
     public MultiTypeCapability(ResourceLocation name, Class<HANDLER> handlerClass) {
         this(
-              BlockCapability.createSided(name, handlerClass),
-              ItemCapability.createVoid(name, handlerClass),
-              EntityCapability.createVoid(name, handlerClass)
+              BlockApiLookup.get(name, handlerClass, Direction.class),
+              ItemApiLookup.get(name, handlerClass, void.class),
+              EntityApiLookup.get(name, handlerClass, void.class)
         );
     }
 }

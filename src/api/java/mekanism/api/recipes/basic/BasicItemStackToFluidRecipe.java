@@ -7,7 +7,7 @@ import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.recipes.ItemStackToFluidRecipe;
 import mekanism.api.recipes.ingredients.ItemStackIngredient;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.fluids.FluidStack;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import org.jetbrains.annotations.Contract;
 
 @NothingNullByDefault
@@ -65,7 +65,7 @@ public abstract class BasicItemStackToFluidRecipe extends ItemStackToFluidRecipe
     public int hashCode() {
         int hash = input.hashCode();
         hash = 31 * hash + FluidStack.hashFluidAndComponents(output);
-        hash = 31 * hash + output.getAmount();
+        hash = 31 * hash + Long.hashCode(output.getAmount());
         return hash;
     }
 }

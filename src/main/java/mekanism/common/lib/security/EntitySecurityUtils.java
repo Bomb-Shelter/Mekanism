@@ -9,9 +9,9 @@ import mekanism.api.security.ISecurityObject;
 import mekanism.api.security.ISecurityUtils;
 import mekanism.api.security.SecurityMode;
 import mekanism.common.capabilities.Capabilities;
+import net.fabricmc.fabric.api.lookup.v1.entity.EntityApiLookup;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.neoforge.capabilities.EntityCapability;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -20,20 +20,20 @@ import org.jetbrains.annotations.Nullable;
 @NothingNullByDefault
 public class EntitySecurityUtils implements IEntitySecurityUtils {
 
-    private static final EntityCapability<IOwnerObject, Void> OWNER_CAPABILITY = EntityCapability.createVoid(Capabilities.OWNER_OBJECT_NAME, IOwnerObject.class);
-    private static final EntityCapability<ISecurityObject, Void> SECURITY_CAPABILITY = EntityCapability.createVoid(Capabilities.SECURITY_OBJECT_NAME, ISecurityObject.class);
+    private static final EntityApiLookup<IOwnerObject, Void> OWNER_CAPABILITY = EntityApiLookup.get(Capabilities.OWNER_OBJECT_NAME, IOwnerObject.class, void.class);
+    private static final EntityApiLookup<ISecurityObject, Void> SECURITY_CAPABILITY = EntityApiLookup.get(Capabilities.SECURITY_OBJECT_NAME, ISecurityObject.class, void.class);
 
     public static EntitySecurityUtils get() {
         return (EntitySecurityUtils) INSTANCE;
     }
 
     @Override
-    public EntityCapability<IOwnerObject, Void> ownerCapability() {
+    public EntityApiLookup<IOwnerObject, Void> ownerCapability() {
         return OWNER_CAPABILITY;
     }
 
     @Override
-    public EntityCapability<ISecurityObject, Void> securityCapability() {
+    public EntityApiLookup<ISecurityObject, Void> securityCapability() {
         return SECURITY_CAPABILITY;
     }
 

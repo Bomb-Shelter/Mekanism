@@ -5,7 +5,7 @@ import mekanism.api.math.MathUtils;
 import mekanism.common.content.network.transmitter.MechanicalPipe;
 import mekanism.common.lib.distribution.SplitInfo;
 import mekanism.common.lib.distribution.Target;
-import net.neoforged.neoforge.fluids.FluidStack;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 
 //TODO: Improve handling for fluid storage as longs

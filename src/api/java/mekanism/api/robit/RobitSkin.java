@@ -2,6 +2,8 @@ package mekanism.api.robit;
 
 import com.mojang.serialization.MapCodec;
 import java.util.List;
+
+import io.github.fabricators_of_create.porting_lib.data.DatapackBuiltinEntriesProvider;
 import mekanism.api.MekanismAPI;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.text.TextComponentUtil;
@@ -10,7 +12,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.neoforge.common.data.DatapackBuiltinEntriesProvider;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

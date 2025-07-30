@@ -20,5 +20,5 @@ public interface IntContainerInteraction<TYPE> {
      *
      * @return Result of the interaction (for example the result of an insert or extraction)
      */
-    TYPE interact(int container, int amount, @Nullable Direction side, Action action);
+    TYPE interact(int container, long amount, @Nullable Direction side, Action action);
 }

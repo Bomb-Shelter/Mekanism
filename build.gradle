@@ -9,6 +9,7 @@ import mekanism.OptimizePng
 import mekanism.OutputChangelog
 import net.darkhax.curseforgegradle.TaskPublishCurseForge
 import net.darkhax.curseforgegradle.UploadArtifact
+import net.fabricmc.loom.configuration.providers.minecraft.MinecraftSourceSets
 import org.gradle.buildconfiguration.tasks.UpdateDaemonJvm
 
 import java.util.function.Consumer
@@ -21,7 +22,7 @@ plugins {
     id('eclipse')
     id('idea')
     id('maven-publish')
-    id('net.neoforged.moddev') version('2.0.88')//https://projects.neoforged.net/neoforged/moddevgradle
+    id('fabric-loom') version('1.11-SNAPSHOT')//https://projects.neoforged.net/neoforged/moddevgradle
 }
 
 tasks.named('wrapper', Wrapper) {
@@ -57,6 +58,7 @@ sourceSets {
     api {
         //The API has no resources
         resources.srcDirs = []
+        compileClasspath += configurations.compileClasspath
     }
     main {
         resources {
@@ -92,6 +94,15 @@ sourceSets {
     runData {
         compileClasspath += runMain.compileClasspath
         runtimeClasspath += runMain.runtimeClasspath
+    }
+}
+
+loom {
+    mods {
+        mekanism {
+            sourceSet sourceSets.main
+            sourceSet sourceSets.api
+        }
     }
 }
 
@@ -150,6 +161,7 @@ def setupExtraSourceSets(SourceSet base, boolean includeExtra = true) {
         baseRuntimeOnly.extendsFrom(project.configurations.named('runtimeOnly').get())
         baseLocalRuntime.extendsFrom(project.configurations.named('localRuntime').get())
     }
+    base.compileClasspath += project.configurations.compileClasspath
     base.runtimeClasspath += baseLocalRuntime
     if (includeExtra) {
         //And then setup and have all the extra sourceSets have their configurations extend the ones for the base module so that they can
@@ -164,11 +176,14 @@ def setupExtraSourceSets(SourceSet base, boolean includeExtra = true) {
                 sourceSets.runData.compileClasspath += extraSourceSet.output
                 sourceSets.runData.runtimeClasspath += extraSourceSet.runtimeClasspath
             }
+            extraSourceSet.compileClasspath += project.configurations.compileClasspath
             project.configurations.maybeCreate(extraSourceSet.getTaskName(null, 'implementation')).extendsFrom(*implExtends)
             project.configurations.maybeCreate(extraSourceSet.getTaskName(null, 'compileOnly')).extendsFrom(baseCompileOnly)
             project.configurations.maybeCreate(extraSourceSet.getTaskName(null, 'runtimeOnly')).extendsFrom(baseRuntimeOnly)
             project.configurations.maybeCreate(extraSourceSet.getTaskName(null, 'localRuntime')).extendsFrom(baseLocalRuntime)
         }
+
+        loom.mods.mekanism.sourceSet(base)
     }
     if (base != project.sourceSets.gameTest) {
         sourceSets.runMain.compileClasspath += base.output
@@ -261,15 +276,15 @@ java {
     withSourcesJar()
 }
 
-final runsFolder = layout.projectDirectory.dir('runs')
-final clientRunsFolder = runsFolder.dir('client')
+final runsFolder = 'runs'
+final clientRunsFolder = runsFolder + '/client'
 
-neoForge {
+loom {
     // This enables modding tasks and configurations
-    enable {
-        version = neo_version
-        enabledSourceSets = sourceSets // All source sets use Minecraft code
-    }
+//    enable {
+//        version = neo_version
+//        enabledSourceSets = sourceSets // All source sets use Minecraft code
+//    }
 
     mods {
         mekanism {
@@ -287,20 +302,22 @@ neoForge {
     }
     for (String name : secondaryModules) {
         final sourceSet = sourceSets.named(name)
-        mods.maybeCreate(name).modSourceSets.add(sourceSet)
+        mods.maybeCreate(name).sourceSet(sourceSet.get())
         // Create a secondary mod group for the modules main code + its datagen code
         final datagenMod = mods.maybeCreate(name + 'Data')
-        datagenMod.modSourceSets.add(sourceSet)
-        datagenMod.modSourceSets.add(sourceSet.flatMap(s -> getExtraSourceSet(s, 'datagen')))
+        datagenMod.sourceSet(sourceSet.get())
+        datagenMod.sourceSet(sourceSet.flatMap(s -> getExtraSourceSet(s, 'datagen')).get())
     }
 
-    accessTransformers = [
-            'src/main/resources/META-INF/accesstransformer.cfg',
-            'src/additions/resources/META-INF/accesstransformer.cfg',
-            //Dev time only ATs so the file name doesn't have to match accesstransformer.cfg
-            'src/datagen/main/resources/META-INF/datagen_ats.cfg',
-            'src/gameTest/resources/META-INF/gametest_ats.cfg',
-    ]
+    accessWidenerPath = file('src/main/resources/mekanism.accesswidener')
+
+//    accessTransformers = [
+//            'src/main/resources/META-INF/accesstransformer.cfg',
+//            'src/additions/resources/META-INF/accesstransformer.cfg',
+//            //Dev time only ATs so the file name doesn't have to match accesstransformer.cfg
+//            'src/datagen/main/resources/META-INF/datagen_ats.cfg',
+//            'src/gameTest/resources/META-INF/gametest_ats.cfg',
+//    ]
 
     runs {
         configureEach {
@@ -310,96 +327,96 @@ neoForge {
                 systemProperties.put('terminal.ansi', (String) property('forge_force_ansi'))
             }
 
-            loadedMods = [mods.mekanism]
-            for (String name : secondaryModules) {
-                loadedMods.add(mods.named(name))
-            }
+//            loadedMods = [mods.mekanism]
+//            for (String name : secondaryModules) {
+//                loadedMods.add(mods.named(name))
+//            }
             //if the selected toolchain is a JBR, enable DCEVM
             if (javaToolchains.launcherFor(java.toolchain).map { it.metadata.vendor }.getOrElse('').contains('JetBrains')) {
-                jvmArguments.addAll('-XX:+IgnoreUnrecognizedVMOptions', '-XX:+AllowEnhancedClassRedefinition')
+                vmArgs.addAll('-XX:+IgnoreUnrecognizedVMOptions', '-XX:+AllowEnhancedClassRedefinition')
             }
 
             // Uncomment this to get verbose debug logging
             // logLevel = org.slf4j.event.Level.DEBUG
 
-            sourceSet = sourceSets.runMain
+            source = sourceSets.runMain
         }
         //Note: To enable logging into the client account, set the mc_devlogin property to true in your gradle user home
         // You can also run gradlew runClient -Pmc_devlogin=true
         client {
             client()
-            gameDirectory.value(clientRunsFolder)
+            runDir(clientRunsFolder)
             if (findProperty('mc_devlogin') ?: false) {
                 devLogin = true
             }
         }
         clientAlt {
             client()
-            gameDirectory.value(runsFolder.dir('clientAlt'))
+            runDir(runsFolder + '/clientAlt')
             // Force dev login to be disabled for this run to allow using a secondary username
-            devLogin = false
-            programArguments.addAll('--username', 'AltDev')
+//            devLogin = false
+            programArgs.addAll('--username', 'AltDev')
         }
         server {
             server()
-            gameDirectory.value(runsFolder.dir('server'))
+            runDir(runsFolder + '/server')
         }
-        gameTestServer {
-            type = 'gameTestServer'
-            gameDirectory.value(runsFolder.dir('gameTestServer'))
-            sourceSet = sourceSets.gameTest
-            loadedMods.add(mods.mekanismtests)
-        }
-        gameTestClient {
-            client()
-            gameDirectory.value(clientRunsFolder)
-            if (findProperty('mc_devlogin') ?: false) {
-                devLogin = true
-            }
-            sourceSet = sourceSets.gameTest
-            loadedMods.add(mods.mekanismtests)
-            programArguments.addAll('--quickPlaySingleplayer', 'GameTestWorld')
-        }
-        dataGameTest {
-            data()
-            gameDirectory.value(runsFolder.dir('gameTestServer'))
-            programArguments.addAll('--all', '--output', file('src/gameTest/generated/').absolutePath,
-                    '--mod', 'mekanismtests', '--existing', file('src/gameTest/resources/').absolutePath,
-                    '--existing-mod', 'mekanism')
-            for (String name : secondaryModules) {
-                programArguments.addAll('--existing-mod', 'mekanism' + name)
-            }
-
-            sourceSet = sourceSets.gameTest
-            loadedMods.add(mods.mekanismtests)
-        }
-        data {
-            data()
-            gameDirectory.value(runsFolder.dir('data'))
-            programArguments.addAll('--all', '--output', file('src/datagen/generated/').absolutePath,
-                    '--mod', 'mekanism', '--existing', file('src/main/resources/').absolutePath)
-
-            sourceSet = sourceSets.runData
-            loadedMods = [mods.mekanismData]
-
-            for (String name : secondaryModules) {
-                //println("Adding $name")
-                loadedMods.add(mods.named(name + 'Data'))
-                programArguments.addAll('--mod', 'mekanism' + name, '--existing', file("src/${name}/resources/").absolutePath)
-            }
-        }
+//        gameTestServer {
+//            type = 'gameTestServer'
+//            runDir(runsFolder + '/gameTestServer')
+//            sourceSet = sourceSets.gameTest
+//            loadedMods.add(mods.mekanismtests)
+//        }
+//        gameTestClient {
+//            client()
+//            runDir(clientRunsFolder)
+//            if (findProperty('mc_devlogin') ?: false) {
+//                devLogin = true
+//            }
+//            sourceSet = sourceSets.gameTest
+//            loadedMods.add(mods.mekanismtests)
+//            programArgs.addAll('--quickPlaySingleplayer', 'GameTestWorld')
+//        }
+//        dataGameTest {
+//            data()
+//            runDir(runsFolder + '/gameTestServer')
+//            programArgs.addAll('--all', '--output', file('src/gameTest/generated/').absolutePath,
+//                    '--mod', 'mekanismtests', '--existing', file('src/gameTest/resources/').absolutePath,
+//                    '--existing-mod', 'mekanism')
+//            for (String name : secondaryModules) {
+//                programArgs.addAll('--existing-mod', 'mekanism' + name)
+//            }
+//
+//            sourceSet = sourceSets.gameTest
+//            loadedMods.add(mods.mekanismtests)
+//        }
+//        data {
+//            data()
+//            runDir(runsFolder.dir('data'))
+//            programArgs.addAll('--all', '--output', file('src/datagen/generated/').absolutePath,
+//                    '--mod', 'mekanism', '--existing', file('src/main/resources/').absolutePath)
+//
+//            sourceSet = sourceSets.runData
+//            loadedMods = [mods.mekanismData]
+//
+//            for (String name : secondaryModules) {
+//                //println("Adding $name")
+//                loadedMods.add(mods.named(name + 'Data'))
+//                programArgs.addAll('--mod', 'mekanism' + name, '--existing', file("src/${name}/resources/").absolutePath)
+//            }
+//        }
     }
 
-    unitTest {
-        enable()
-        testedMod = mods.mekanism
-        loadedMods = runs.client.loadedMods
-    }
+//    unitTest {
+//        enable()
+//        testedMod = mods.mekanism
+//        loadedMods = runs.client.loadedMods
+//    }
 }
 
 // Ensure any jar without the necessary FML manifest attributes gets picked up via legacy classpath.
 // This configuration only exists after setting the neoForge version above.
-configurations.dataAdditionalRuntimeClasspath.extendsFrom configurations.datagenNonMod
+//configurations.dataAdditionalRuntimeClasspath.extendsFrom configurations.datagenNonMod
 
 static void exclusiveRepo(RepositoryHandler handler, String url, String... groups) {
     exclusiveRepo(handler, url, filter -> {
@@ -435,6 +452,8 @@ repositories { RepositoryHandler handler ->
     exclusiveRepo(handler, 'https://maven.minecraftforge.net/releases/', 'com.github.glitchfiend')
     exclusiveRepo(handler, 'https://maven.thiakil.com', 'com.thiakil', 'moze_intel.projecte')
     exclusiveRepo(handler, 'https://maven.parchmentmc.org/', 'org.parchmentmc.data')
+    exclusiveRepo(handler, 'https://jitpack.io', 'com.github.Chocohead')
+    exclusiveRepo(handler, 'https://mvn.devos.one/snapshots', 'io.github.fabricators_of_create.Porting-Lib')
     handler.exclusiveContent {
         it.forRepositories(handler.mavenCentral())
         it.filter {
@@ -448,17 +467,27 @@ tasks.named('test', Test) {
 }
 
 dependencies {
+    minecraft("com.mojang:minecraft:${project.minecraft_version}")
+    mappings(loom.officialMojangMappings())
+
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+
+    for (String module in port_lib_modules.split(",")) {
+        modImplementation(include("io.github.fabricators_of_create.Porting-Lib:$module:$port_lib_version+$minecraft_version"))
+    }
+
     compileOnly(project(':annotation-processor'))
     localRuntime(project(':annotation-processor'))
     annotationProcessor(project(':annotation-processor'))
 
-    def testFrameWork = "net.neoforged:testframework:${neo_version}"
-    gameTestImplementation(testFrameWork) {
-        transitive = false
-    }
-    testImplementation(testFrameWork) {
-        transitive = false
-    }
+//    def testFrameWork = "net.neoforged:testframework:${neo_version}"
+//    gameTestImplementation(testFrameWork) {
+//        transitive = false
+//    }
+//    testImplementation(testFrameWork) {
+//        transitive = false
+//    }
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junit_version}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junit_version}")
     //We use https://github.com/jqwik-team/jqwik to allow for implementing property based testing

@@ -4,7 +4,7 @@ import mekanism.common.Mekanism;
 import mekanism.common.world.height.ConfigurableHeightProvider;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.levelgen.heightproviders.HeightProviderType;
-import net.neoforged.neoforge.registries.DeferredHolder;
+import io.github.fabricators_of_create.porting_lib.registry.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 public class MekanismHeightProviderTypes {

@@ -1,5 +1,6 @@
 package mekanism.api.recipes.basic;
 
+import io.github.fabricators_of_create.porting_lib.registry.DeferredHolder;
 import mekanism.api.MekanismAPI;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.recipes.MekanismRecipeSerializers;
@@ -12,7 +13,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.neoforged.neoforge.registries.DeferredHolder;
 
 @NothingNullByDefault
 public class BasicInjectingRecipe extends BasicItemStackChemicalToItemStackRecipe {

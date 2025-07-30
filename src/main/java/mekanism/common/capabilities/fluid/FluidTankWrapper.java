@@ -9,7 +9,7 @@ import mekanism.common.capabilities.merged.ChemicalTankWrapper;
 import mekanism.common.capabilities.merged.MergedTank;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.neoforged.neoforge.fluids.FluidStack;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -54,7 +54,7 @@ public class FluidTankWrapper implements IExtendedFluidTank {
     }
 
     @Override
-    public FluidStack extract(int amount, Action action, AutomationType automationType) {
+    public FluidStack extract(long amount, Action action, AutomationType automationType) {
         return internal.extract(amount, action, automationType);
     }
 
@@ -64,17 +64,17 @@ public class FluidTankWrapper implements IExtendedFluidTank {
     }
 
     @Override
-    public int setStackSize(int amount, Action action) {
+    public long setStackSize(long amount, Action action) {
         return internal.setStackSize(amount, action);
     }
 
     @Override
-    public int growStack(int amount, Action action) {
+    public long growStack(long amount, Action action) {
         return internal.growStack(amount, action);
     }
 
     @Override
-    public int shrinkStack(int amount, Action action) {
+    public long shrinkStack(long amount, Action action) {
         return internal.shrinkStack(amount, action);
     }
 
@@ -94,7 +94,7 @@ public class FluidTankWrapper implements IExtendedFluidTank {
     }
 
     @Override
-    public int getNeeded() {
+    public long getNeeded() {
         return internal.getNeeded();
     }
 
@@ -115,12 +115,12 @@ public class FluidTankWrapper implements IExtendedFluidTank {
     }
 
     @Override
-    public int getFluidAmount() {
+    public long getFluidAmount() {
         return internal.getFluidAmount();
     }
 
     @Override
-    public int getCapacity() {
+    public long getCapacity() {
         return internal.getCapacity();
     }
 

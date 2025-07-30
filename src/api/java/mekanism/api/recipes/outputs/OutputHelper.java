@@ -16,7 +16,7 @@ import mekanism.api.recipes.SawmillRecipe.ChanceOutput;
 import mekanism.api.recipes.cache.CachedRecipe.OperationTracker;
 import mekanism.api.recipes.cache.CachedRecipe.OperationTracker.RecipeError;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.fluids.FluidStack;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 
 @NothingNullByDefault
@@ -305,9 +305,9 @@ public class OutputHelper {
             FluidStack maxOutput = toOutput.copyWithAmount(Integer.MAX_VALUE);
             //Then simulate filling the fluid tank, so we can see how much actually can fit
             FluidStack remainder = tank.insert(maxOutput, Action.SIMULATE, AutomationType.INTERNAL);
-            int amountUsed = maxOutput.getAmount() - remainder.getAmount();
+            long amountUsed = maxOutput.getAmount() - remainder.getAmount();
             //Divide the amount we can actually use by the amount one output operation is equal to, capping it at the max we were told about
-            int operations = amountUsed / toOutput.getAmount();
+            int operations = (int) (amountUsed / toOutput.getAmount());
             tracker.updateOperations(operations);
             if (operations == 0) {
                 if (amountUsed == 0 && tank.getNeeded() > 0) {

@@ -2,19 +2,20 @@ package mekanism.common.attachments.containers.fluid;
 
 import java.util.function.BiPredicate;
 import java.util.function.IntSupplier;
+import java.util.function.LongSupplier;
 import java.util.function.Predicate;
 import mekanism.api.Action;
 import mekanism.api.AutomationType;
 import mekanism.api.SerializationConstants;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.fluid.IExtendedFluidTank;
+import mekanism.api.fabric.transfer.fluids.IFluidHandler.FluidAction;
 import mekanism.common.attachments.containers.ComponentBackedContainer;
 import mekanism.common.attachments.containers.ContainerType;
 import net.minecraft.core.HolderLookup.Provider;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -24,11 +25,11 @@ public class ComponentBackedFluidTank extends ComponentBackedContainer<FluidStac
     private final BiPredicate<@NotNull FluidStack, @NotNull AutomationType> canExtract;
     private final BiPredicate<@NotNull FluidStack, @NotNull AutomationType> canInsert;
     private final Predicate<@NotNull FluidStack> validator;
-    private final IntSupplier capacity;
-    private final IntSupplier rate;
+    private final LongSupplier capacity;
+    private final LongSupplier rate;
 
     public ComponentBackedFluidTank(ItemStack attachedTo, int tankIndex, BiPredicate<@NotNull FluidStack, @NotNull AutomationType> canExtract,
-          BiPredicate<@NotNull FluidStack, @NotNull AutomationType> canInsert, Predicate<@NotNull FluidStack> validator, IntSupplier rate, IntSupplier capacity) {
+          BiPredicate<@NotNull FluidStack, @NotNull AutomationType> canInsert, Predicate<@NotNull FluidStack> validator, LongSupplier rate, LongSupplier capacity) {
         super(attachedTo, tankIndex);
         this.canExtract = canExtract;
         this.canInsert = canInsert;
@@ -71,18 +72,18 @@ public class ComponentBackedFluidTank extends ComponentBackedContainer<FluidStac
     }
 
     @Override
-    public int getCapacity() {
-        return capacity.getAsInt();
+    public long getCapacity() {
+        return capacity.getAsLong();
     }
 
-    protected int getInsertRate(@Nullable AutomationType automationType) {
+    protected long getInsertRate(@Nullable AutomationType automationType) {
         //Allow unknown or manual interaction to bypass rate limit for the item
-        return automationType == null || automationType == AutomationType.MANUAL ? Integer.MAX_VALUE : rate.getAsInt();
+        return automationType == null || automationType == AutomationType.MANUAL ? Long.MAX_VALUE : rate.getAsLong();
     }
 
-    protected int getExtractRate(@Nullable AutomationType automationType) {
+    protected long getExtractRate(@Nullable AutomationType automationType) {
         //Allow unknown or manual interaction to bypass rate limit for the item
-        return automationType == null || automationType == AutomationType.MANUAL ? Integer.MAX_VALUE : rate.getAsInt();
+        return automationType == null || automationType == AutomationType.MANUAL ? Long.MAX_VALUE : rate.getAsLong();
     }
 
     @Override
@@ -95,12 +96,12 @@ public class ComponentBackedFluidTank extends ComponentBackedContainer<FluidStac
         }
         AttachedFluids attachedFluids = getAttached();
         FluidStack stored = getContents(attachedFluids);
-        int needed = Math.min(getInsertRate(automationType), getNeeded(stored));
+        long needed = Math.min(getInsertRate(automationType), getNeeded(stored));
         if (needed <= 0) {
             //Fail if we are a full tank or our rate is zero
             return stack;
         } else if (stored.isEmpty() || FluidStack.isSameFluidSameComponents(stored, stack)) {
-            int toAdd = Math.min(stack.getAmount(), needed);
+            long toAdd = Math.min(stack.getAmount(), needed);
             if (action.execute()) {
                 //Note: We let setStack handle updating the backing holding stack
                 // We use stored.getAmount + toAdd so that if we are empty we end up at toAdd
@@ -114,7 +115,7 @@ public class ComponentBackedFluidTank extends ComponentBackedContainer<FluidStac
     }
 
     @Override
-    public final FluidStack extract(int amount, Action action, AutomationType automationType) {
+    public final FluidStack extract(long amount, Action action, AutomationType automationType) {
         if (amount < 1) {
             //"Fail quick" if the amount being requested is less than one
             return FluidStack.EMPTY;
@@ -123,14 +124,14 @@ public class ComponentBackedFluidTank extends ComponentBackedContainer<FluidStac
         return extract(attachedFluids, getContents(attachedFluids), amount, action, automationType);
     }
 
-    protected FluidStack extract(AttachedFluids attachedFluids, FluidStack stored, int amount, Action action, AutomationType automationType) {
+    protected FluidStack extract(AttachedFluids attachedFluids, FluidStack stored, long amount, Action action, AutomationType automationType) {
         if (amount < 1 || stored.isEmpty() || !canExtract.test(stored, automationType)) {
             //"Fail quick" if we don't can never extract from this tank, have a fluid stored, or the amount being requested is less than one
             return FluidStack.EMPTY;
         }
         //Note: While we technically could just return the stack itself if we are removing all that we have, it would require a lot more checks
         // We also are limiting it by the rate this tank has
-        int size = Math.min(Math.min(getExtractRate(automationType), stored.getAmount()), amount);
+        long size = Math.min(Math.min(getExtractRate(automationType), stored.getAmount()), amount);
         FluidStack ret = stored.copyWithAmount(size);
         if (!ret.isEmpty() && action.execute()) {
             //Note: We let setStack handle updating the backing holding stack
@@ -140,12 +141,12 @@ public class ComponentBackedFluidTank extends ComponentBackedContainer<FluidStac
     }
 
     @Override
-    public final int setStackSize(int amount, Action action) {
+    public final long setStackSize(long amount, Action action) {
         AttachedFluids attachedFluids = getAttached();
         return setStackSize(attachedFluids, getContents(attachedFluids), amount, action);
     }
 
-    protected int setStackSize(AttachedFluids attachedFluids, FluidStack stored, int amount, Action action) {
+    protected long setStackSize(AttachedFluids attachedFluids, FluidStack stored, long amount, Action action) {
         if (stored.isEmpty()) {
             return 0;
         } else if (amount <= 0) {
@@ -154,7 +155,7 @@ public class ComponentBackedFluidTank extends ComponentBackedContainer<FluidStac
             }
             return 0;
         }
-        int maxStackSize = getCapacity();
+        long maxStackSize = getCapacity();
         if (amount > maxStackSize) {
             amount = maxStackSize;
         }
@@ -167,10 +168,10 @@ public class ComponentBackedFluidTank extends ComponentBackedContainer<FluidStac
     }
 
     @Override
-    public int growStack(int amount, Action action) {
+    public long growStack(long amount, Action action) {
         AttachedFluids attachedFluids = getAttached();
         FluidStack stored = getContents(attachedFluids);
-        int current = stored.getAmount();
+        long current = stored.getAmount();
         if (current == 0) {
             //"Fail quick" if our stack is empty, so we can't grow it
             return 0;
@@ -182,11 +183,11 @@ public class ComponentBackedFluidTank extends ComponentBackedContainer<FluidStac
             //If we are decreasing the stack's size, use the extract rate
             amount = Math.max(amount, -getExtractRate(null));
         }
-        int newSize = setStackSize(attachedFluids, stored,current + amount, action);
+        long newSize = setStackSize(attachedFluids, stored,current + amount, action);
         return newSize - current;
     }
 
-    protected int getNeeded(FluidStack stored) {
+    protected long getNeeded(FluidStack stored) {
         //Skip the stack lookup for getNeeded
         return Math.max(0, getCapacity() - stored.getAmount());
     }

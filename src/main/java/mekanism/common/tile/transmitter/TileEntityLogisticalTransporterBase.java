@@ -5,6 +5,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import mekanism.api.annotations.NothingNullByDefault;
+import mekanism.api.fabric.transfer.items.IItemHandler;
 import mekanism.common.capabilities.Capabilities;
 import mekanism.common.capabilities.item.CursedTransporterItemHandler;
 import mekanism.common.capabilities.resolver.ICapabilityResolver;
@@ -13,14 +14,13 @@ import mekanism.common.content.transporter.TransporterStack;
 import mekanism.common.lib.transmitter.ConnectionType;
 import mekanism.common.util.TransporterUtils;
 import mekanism.common.util.WorldUtils;
+import net.fabricmc.fabric.api.lookup.v1.block.BlockApiLookup;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.capabilities.BlockCapability;
-import net.neoforged.neoforge.items.IItemHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -81,13 +81,13 @@ public abstract class TileEntityLogisticalTransporterBase extends TileEntityTran
     @NothingNullByDefault
     private class TransporterCapabilityResolver implements ICapabilityResolver<@Nullable Direction> {
 
-        private static final List<BlockCapability<?, @Nullable Direction>> SUPPORTED_CAPABILITY = Collections.singletonList(Capabilities.ITEM.block());
+        private static final List<BlockApiLookup<?, @Nullable Direction>> SUPPORTED_CAPABILITY = Collections.singletonList(Capabilities.ITEM.block());
 
         private final Map<Direction, CursedTransporterItemHandler> cursedHandlers = new EnumMap<>(Direction.class);
         private final Map<Direction, IItemHandler> handlers = new EnumMap<>(Direction.class);
 
         @Override
-        public List<BlockCapability<?, @Nullable Direction>> getSupportedCapabilities() {
+        public List<BlockApiLookup<?, @Nullable Direction>> getSupportedCapabilities() {
             return SUPPORTED_CAPABILITY;
         }
 
@@ -96,7 +96,7 @@ public abstract class TileEntityLogisticalTransporterBase extends TileEntityTran
          */
         @Nullable
         @Override
-        public <T> T resolve(BlockCapability<T, @Nullable Direction> capability, @Nullable Direction side) {
+        public <T> T resolve(BlockApiLookup<T, @Nullable Direction> capability, @Nullable Direction side) {
             if (side == null) {
                 //We provide no readonly item handler view
                 return null;
@@ -119,7 +119,7 @@ public abstract class TileEntityLogisticalTransporterBase extends TileEntityTran
         }
 
         @Override
-        public void invalidate(BlockCapability<?, @Nullable Direction> capability, @Nullable Direction side) {
+        public void invalidate(BlockApiLookup<?, @Nullable Direction> capability, @Nullable Direction side) {
             if (side != null) {
                 handlers.remove(side);
             }

@@ -2,6 +2,11 @@ package mekanism.api.recipes.ingredients.creator;
 
 import java.util.Arrays;
 import java.util.Objects;
+
+import io.github.fabricators_of_create.porting_lib.resources.fluids.crafting.CompoundFluidIngredient;
+import io.github.fabricators_of_create.porting_lib.resources.fluids.crafting.DataComponentFluidIngredient;
+import io.github.fabricators_of_create.porting_lib.resources.fluids.crafting.FluidIngredient;
+import io.github.fabricators_of_create.porting_lib.resources.fluids.crafting.SizedFluidIngredient;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.providers.IFluidProvider;
 import mekanism.api.recipes.ingredients.FluidStackIngredient;
@@ -9,11 +14,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponentPredicate;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.material.Fluid;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.crafting.CompoundFluidIngredient;
-import net.neoforged.neoforge.fluids.crafting.DataComponentFluidIngredient;
-import net.neoforged.neoforge.fluids.crafting.FluidIngredient;
-import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 
 @NothingNullByDefault
 public interface IFluidStackIngredientCreator extends IIngredientCreator<Fluid, FluidStack, FluidStackIngredient> {
@@ -26,12 +27,12 @@ public interface IFluidStackIngredientCreator extends IIngredientCreator<Fluid, 
      *
      * @throws NullPointerException     if the given instance is null.
      * @throws IllegalArgumentException if the given instance is empty or an amount smaller than one.
-     * @implNote This wraps via {@link #from(FluidIngredient, int)} so if there are any default components it will <strong>NOT</strong> be included in the
-     * ingredient. If this is not desired, manually create the ingredient via {@link DataComponentFluidIngredient} and call {@link #from(FluidIngredient, int)}.
+     * @implNote This wraps via {@link #from(FluidIngredient, long)} so if there are any default components it will <strong>NOT</strong> be included in the
+     * ingredient. If this is not desired, manually create the ingredient via {@link DataComponentFluidIngredient} and call {@link #from(FluidIngredient, long)}.
      */
     @SuppressWarnings("removal")
     @Deprecated(forRemoval = true, since = "10.7.11")
-    default FluidStackIngredient from(IFluidProvider provider, int amount) {
+    default FluidStackIngredient from(IFluidProvider provider, long amount) {
         Objects.requireNonNull(provider, "FluidStackIngredients cannot be created from a null fluid provider.");
         return from(provider.getFluidStack(amount));
     }
@@ -42,8 +43,8 @@ public interface IFluidStackIngredientCreator extends IIngredientCreator<Fluid, 
      * @param amount Amount needed.
      * @param fluids Fluid providers that provides the items to match.
      *
-     * @implNote This wraps via {@link #from(FluidIngredient, int)} so if there are any default components it will <strong>NOT</strong> be included in the
-     * ingredient. If this is not desired, manually create the ingredient via {@link DataComponentFluidIngredient} and call {@link #from(FluidIngredient, int)}.
+     * @implNote This wraps via {@link #from(FluidIngredient, long)} so if there are any default components it will <strong>NOT</strong> be included in the
+     * ingredient. If this is not desired, manually create the ingredient via {@link DataComponentFluidIngredient} and call {@link #from(FluidIngredient, long)}.
      * @since 10.6.0
      */
     @SuppressWarnings("removal")
@@ -53,8 +54,8 @@ public interface IFluidStackIngredientCreator extends IIngredientCreator<Fluid, 
     }
 
     /**
-     * @implNote This wraps via {@link #from(FluidIngredient, int)} so if there are any default components it will <strong>NOT</strong> be included in the
-     * ingredient. If this is not desired, manually create the ingredient via {@link DataComponentFluidIngredient} and call {@link #from(FluidIngredient, int)}.
+     * @implNote This wraps via {@link #from(FluidIngredient, long)} so if there are any default components it will <strong>NOT</strong> be included in the
+     * ingredient. If this is not desired, manually create the ingredient via {@link DataComponentFluidIngredient} and call {@link #from(FluidIngredient, long)}.
      * @since 10.7.11
      */
     @Override
@@ -67,34 +68,34 @@ public interface IFluidStackIngredientCreator extends IIngredientCreator<Fluid, 
     }
 
     /**
-     * @implNote This wraps via {@link #from(FluidIngredient, int)} so if there are any default components it will <strong>NOT</strong> be included in the ingredient. If
-     * this is not desired, manually create the ingredient via {@link DataComponentFluidIngredient} and call {@link #from(FluidIngredient, int)}.
+     * @implNote This wraps via {@link #from(FluidIngredient, long)} so if there are any default components it will <strong>NOT</strong> be included in the ingredient. If
+     * this is not desired, manually create the ingredient via {@link DataComponentFluidIngredient} and call {@link #from(FluidIngredient, long)}.
      */
     @Override
     @SuppressWarnings("removal")
     @Deprecated(forRemoval = true, since = "10.7.11")
-    default FluidStackIngredient from(Fluid instance, int amount) {
+    default FluidStackIngredient from(Fluid instance, long amount) {
         return from(SizedFluidIngredient.of(instance, amount));
     }
 
     /**
-     * @implNote This wraps via {@link #from(FluidIngredient, int)} so if there are any default components it will <strong>NOT</strong> be included in the ingredient. If
-     * this is not desired, manually create the ingredient via {@link DataComponentFluidIngredient} and call {@link #from(FluidIngredient, int)}.
+     * @implNote This wraps via {@link #from(FluidIngredient, long)} so if there are any default components it will <strong>NOT</strong> be included in the ingredient. If
+     * this is not desired, manually create the ingredient via {@link DataComponentFluidIngredient} and call {@link #from(FluidIngredient, long)}.
      */
     @Override
-    default FluidStackIngredient fromHolder(Holder<Fluid> instance, int amount) {
+    default FluidStackIngredient fromHolder(Holder<Fluid> instance, long amount) {
         return from(FluidIngredient.single(instance), amount);
     }
 
     /**
-     * @implNote This wraps via {@link #from(FluidIngredient, int)} so if there are any default components it will <strong>NOT</strong> be included in the
-     * ingredient. If this is not desired, manually create the ingredient via {@link DataComponentFluidIngredient} and call {@link #from(FluidIngredient, int)}.
+     * @implNote This wraps via {@link #from(FluidIngredient, long)} so if there are any default components it will <strong>NOT</strong> be included in the
+     * ingredient. If this is not desired, manually create the ingredient via {@link DataComponentFluidIngredient} and call {@link #from(FluidIngredient, long)}.
      * @since 10.6.0
      */
     @Override
     @SuppressWarnings("removal")
     @Deprecated(forRemoval = true, since = "10.7.11")
-    default FluidStackIngredient from(int amount, Fluid... fluids) {
+    default FluidStackIngredient from(long amount, Fluid... fluids) {
         if (fluids.length == 0) {
             throw new IllegalArgumentException("Attempted to create an FluidStackIngredient with no fluids.");
         }
@@ -137,7 +138,7 @@ public interface IFluidStackIngredientCreator extends IIngredientCreator<Fluid, 
      * @throws IllegalArgumentException if the given instance is empty or an amount smaller than one.
      * @since 10.6.0
      */
-    default FluidStackIngredient from(FluidIngredient ingredient, int amount) {
+    default FluidStackIngredient from(FluidIngredient ingredient, long amount) {
         Objects.requireNonNull(ingredient, "FluidStackIngredients cannot be created from a null fluid ingredient.");
         return from(new SizedFluidIngredient(ingredient, amount));
     }

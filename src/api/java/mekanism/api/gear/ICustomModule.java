@@ -3,7 +3,10 @@ package mekanism.api.gear;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.LongSupplier;
+
+import io.github.fabricators_of_create.porting_lib.tool.ItemAbility;
 import mekanism.api.annotations.NothingNullByDefault;
+import mekanism.api.fabric.ItemAttributeModifierEvent;
 import mekanism.api.functions.FloatSupplier;
 import mekanism.api.radial.RadialData;
 import mekanism.api.radial.mode.IRadialMode;
@@ -18,8 +21,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
-import net.neoforged.neoforge.common.ItemAbility;
-import net.neoforged.neoforge.event.ItemAttributeModifierEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -285,7 +286,7 @@ public interface ICustomModule<MODULE extends ICustomModule<MODULE>> {
     }
 
     /**
-     * Called to check if this module allows the Meka-Tool to perform a specific {@link net.neoforged.neoforge.common.ItemAbility}.
+     * Called to check if this module allows the Meka-Tool to perform a specific {@link ItemAbility}.
      *
      * @param module          Module instance.
      * @param moduleContainer The container this module is part of.

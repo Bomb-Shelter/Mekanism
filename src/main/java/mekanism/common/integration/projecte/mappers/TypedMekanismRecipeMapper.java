@@ -41,8 +41,8 @@ import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.neoforged.neoforge.common.util.TriPredicate;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.registries.DeferredHolder;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
+import io.github.fabricators_of_create.porting_lib.registry.DeferredHolder;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class TypedMekanismRecipeMapper<RECIPE extends Recipe<?>> implements IRecipeTypeMapper {

@@ -9,14 +9,14 @@ import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.common.Mekanism;
 import mekanism.common.capabilities.resolver.ICapabilityResolver;
 import mekanism.common.tile.component.TileComponentConfig;
+import net.fabricmc.fabric.api.lookup.v1.block.BlockApiLookup;
 import net.minecraft.core.Direction;
-import net.neoforged.neoforge.capabilities.BlockCapability;
 import org.jetbrains.annotations.Nullable;
 
 @NothingNullByDefault
 public class CapabilityCache {
 
-    private final Map<BlockCapability<?, @Nullable Direction>, ICapabilityResolver<@Nullable Direction>> capabilityResolvers = new IdentityHashMap<>();
+    private final Map<BlockApiLookup<?, @Nullable Direction>, ICapabilityResolver<@Nullable Direction>> capabilityResolvers = new IdentityHashMap<>();
     /**
      * List of unique resolvers to make invalidating all easier as some resolvers (energy) may support multiple capabilities.
      */
@@ -29,13 +29,13 @@ public class CapabilityCache {
      */
     public void addCapabilityResolver(ICapabilityResolver<@Nullable Direction> resolver) {
         uniqueResolvers.add(resolver);
-        List<BlockCapability<?, @Nullable Direction>> supportedCapabilities = resolver.getSupportedCapabilities();
-        for (BlockCapability<?, @Nullable Direction> supportedCapability : supportedCapabilities) {
+        List<BlockApiLookup<?, @Nullable Direction>> supportedCapabilities = resolver.getSupportedCapabilities();
+        for (BlockApiLookup<?, @Nullable Direction> supportedCapability : supportedCapabilities) {
             //Note: We add the capability regardless of if it is registered as we will just short circuit and always disable the capability
             // if it isn't in use by the time the capability is queried. In theory, we shouldn't ever be getting created before the capabilities
             // have been registered, but just in case we ensure it works properly
             if (capabilityResolvers.put(supportedCapability, resolver) != null) {
-                Mekanism.logger.warn("Multiple capability resolvers registered for {}. Overriding", supportedCapability.name(), new Exception());
+                Mekanism.logger.warn("Multiple capability resolvers registered for {}. Overriding", supportedCapability.getId(), new Exception());
             }
         }
     }
@@ -55,16 +55,16 @@ public class CapabilityCache {
      *
      * @return {@code true} if the capability is disabled, {@code false} otherwise.
      */
-    public boolean isCapabilityDisabled(BlockCapability<?, @Nullable Direction> capability, @Nullable Direction side) {
+    public boolean isCapabilityDisabled(BlockApiLookup<?, @Nullable Direction> capability, @Nullable Direction side) {
         return config != null && config.isCapabilityDisabled(capability, side);
     }
 
     @Nullable
-    public ICapabilityResolver<@Nullable Direction> getResolver(BlockCapability<?, @Nullable Direction> capability) {
+    public ICapabilityResolver<@Nullable Direction> getResolver(BlockApiLookup<?, @Nullable Direction> capability) {
         return capabilityResolvers.get(capability);
     }
 
-    public ICapabilityResolver<@Nullable Direction> getResolver(BlockCapability<?, @Nullable Direction> capability,
+    public ICapabilityResolver<@Nullable Direction> getResolver(BlockApiLookup<?, @Nullable Direction> capability,
           Supplier<ICapabilityResolver<@Nullable Direction>> resolver) {
         ICapabilityResolver<@Nullable Direction> knownResolver = getResolver(capability);
         if (knownResolver == null) {
@@ -80,7 +80,7 @@ public class CapabilityCache {
      * @param capability Capability
      * @param side       Side
      */
-    public void invalidate(BlockCapability<?, @Nullable Direction> capability, @Nullable Direction side) {
+    public void invalidate(BlockApiLookup<?, @Nullable Direction> capability, @Nullable Direction side) {
         ICapabilityResolver<@Nullable Direction> capabilityResolver = capabilityResolvers.get(capability);
         if (capabilityResolver != null) {
             capabilityResolver.invalidate(capability, side);
@@ -92,7 +92,7 @@ public class CapabilityCache {
      *
      * @param capability Capability
      */
-    public void invalidateAll(BlockCapability<?, @Nullable Direction> capability) {
+    public void invalidateAll(BlockApiLookup<?, @Nullable Direction> capability) {
         ICapabilityResolver<@Nullable Direction> capabilityResolver = capabilityResolvers.get(capability);
         if (capabilityResolver != null) {
             capabilityResolver.invalidateAll();

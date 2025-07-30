@@ -27,7 +27,7 @@ import mekanism.api.recipes.basic.BasicRotaryRecipe;
 import mekanism.api.recipes.basic.BasicSawmillRecipe;
 import mekanism.api.recipes.basic.BasicSmeltingRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.neoforged.neoforge.registries.DeferredHolder;
+import io.github.fabricators_of_create.porting_lib.registry.DeferredHolder;
 
 public class MekanismRecipeSerializers {
 

@@ -6,7 +6,7 @@ import mekanism.api.AutomationType;
 import mekanism.api.IContentsListener;
 import mekanism.api.annotations.NothingNullByDefault;
 import net.minecraft.core.Direction;
-import net.neoforged.neoforge.fluids.FluidStack;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import org.jetbrains.annotations.Nullable;
 
 @NothingNullByDefault
@@ -72,7 +72,7 @@ public interface IMekanismFluidHandler extends ISidedFluidHandler, IContentsList
     }
 
     @Override
-    default int getTankCapacity(int tank, @Nullable Direction side) {
+    default long getTankCapacity(int tank, @Nullable Direction side) {
         IExtendedFluidTank fluidTank = getFluidTank(tank, side);
         return fluidTank == null ? 0 : fluidTank.getCapacity();
     }
@@ -94,11 +94,11 @@ public interface IMekanismFluidHandler extends ISidedFluidHandler, IContentsList
     }
 
     /**
-     * @implNote Any overrides to this should also override {@link #extractFluid(int, Direction, Action)} and {@link #extractFluid(FluidStack, Direction, Action)} as they
+     * @implNote Any overrides to this should also override {@link #extractFluid(long, Direction, Action)} and {@link #extractFluid(FluidStack, Direction, Action)} as they
      * bypass calling this method in order to skip looking up the containers for every sub operation.
      */
     @Override
-    default FluidStack extractFluid(int tank, int amount, @Nullable Direction side, Action action) {
+    default FluidStack extractFluid(int tank, long amount, @Nullable Direction side, Action action) {
         IExtendedFluidTank fluidTank = getFluidTank(tank, side);
         return fluidTank == null ? FluidStack.EMPTY : fluidTank.extract(amount, action, AutomationType.handler(side));
     }
@@ -109,7 +109,7 @@ public interface IMekanismFluidHandler extends ISidedFluidHandler, IContentsList
     }
 
     @Override
-    default FluidStack extractFluid(int amount, @Nullable Direction side, Action action) {
+    default FluidStack extractFluid(long amount, @Nullable Direction side, Action action) {
         return ExtendedFluidHandlerUtils.extract(amount, side, this::getFluidTanks, action, AutomationType.handler(side));
     }
 

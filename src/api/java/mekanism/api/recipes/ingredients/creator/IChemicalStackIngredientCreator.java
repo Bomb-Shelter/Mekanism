@@ -22,13 +22,8 @@ public interface IChemicalStackIngredientCreator extends IIngredientCreator<Chem
     @Override
     @SuppressWarnings("removal")
     @Deprecated(forRemoval = true, since = "10.7.11")
-    default ChemicalStackIngredient from(Chemical instance, int amount) {
+    default ChemicalStackIngredient from(Chemical instance, long amount) {
         return fromHolder(instance.getAsHolder(), amount);
-    }
-
-    @Override
-    default ChemicalStackIngredient fromHolder(Holder<Chemical> instance, int amount) {
-        return fromHolder(instance, (long) amount);
     }
 
     /**
@@ -52,14 +47,8 @@ public interface IChemicalStackIngredientCreator extends IIngredientCreator<Chem
     @Override
     @SuppressWarnings("removal")
     @Deprecated(forRemoval = true, since = "10.7.11")
-    default ChemicalStackIngredient from(int amount, Chemical... chemicals) {
+    default ChemicalStackIngredient from(long amount, Chemical... chemicals) {
         return from((long) amount, chemicals);
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    default ChemicalStackIngredient fromHolders(int amount, Holder<Chemical>... holders) {
-        return fromHolders((long) amount, holders);
     }
 
     /**

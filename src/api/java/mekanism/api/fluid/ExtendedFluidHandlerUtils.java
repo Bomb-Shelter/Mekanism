@@ -12,7 +12,7 @@ import mekanism.api.container.ContainerInteraction;
 import mekanism.api.container.InContainerGetter;
 import mekanism.api.container.IntContainerInteraction;
 import net.minecraft.core.Direction;
-import net.neoforged.neoforge.fluids.FluidStack;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import org.jetbrains.annotations.Nullable;
 
 public class ExtendedFluidHandlerUtils {
@@ -126,7 +126,7 @@ public class ExtendedFluidHandlerUtils {
      *
      * @since 10.5.13
      */
-    public static FluidStack extract(int amount, @Nullable Direction side, Action action, ToIntFunction<@Nullable Direction> tankCount, InContainerGetter<FluidStack> inTankGetter,
+    public static FluidStack extract(long amount, @Nullable Direction side, Action action, ToIntFunction<@Nullable Direction> tankCount, InContainerGetter<FluidStack> inTankGetter,
           IntContainerInteraction<FluidStack> extractFluid) {
         if (amount == 0) {
             return FluidStack.EMPTY;
@@ -138,7 +138,7 @@ public class ExtendedFluidHandlerUtils {
             return extractFluid.interact(0, amount, side, action);
         }
         FluidStack extracted = FluidStack.EMPTY;
-        int toDrain = amount;
+        long toDrain = amount;
         for (int tank = 0; tank < tanks; tank++) {
             if (extracted.isEmpty() || FluidStack.isSameFluidSameComponents(extracted, inTankGetter.getStored(tank, side))) {
                 //If there is fluid in the tank that matches the type we have started draining, or we haven't found a type yet
@@ -168,7 +168,7 @@ public class ExtendedFluidHandlerUtils {
      *
      * @since 10.5.13
      */
-    public static FluidStack extract(int amount, @Nullable Direction side, Function<@Nullable Direction, List<IExtendedFluidTank>> fluidTankSupplier,
+    public static FluidStack extract(long amount, @Nullable Direction side, Function<@Nullable Direction, List<IExtendedFluidTank>> fluidTankSupplier,
           Action action, AutomationType automationType) {
         if (amount == 0) {
             return FluidStack.EMPTY;
@@ -182,7 +182,7 @@ public class ExtendedFluidHandlerUtils {
      *
      * @since 10.6.0
      */
-    public static FluidStack extract(int amount, Action action, AutomationType automationType, int size, List<IExtendedFluidTank> fluidTanks) {
+    public static FluidStack extract(long amount, Action action, AutomationType automationType, int size, List<IExtendedFluidTank> fluidTanks) {
         if (amount == 0 || size == 0) {
             return FluidStack.EMPTY;
         } else if (size == 1) {
@@ -190,7 +190,7 @@ public class ExtendedFluidHandlerUtils {
             return fluidTanks.get(0).extract(amount, action, automationType);
         }
         FluidStack extracted = FluidStack.EMPTY;
-        int toDrain = amount;
+        long toDrain = amount;
         for (IExtendedFluidTank fluidTank : fluidTanks) {
             if (extracted.isEmpty() || fluidTank.isFluidEqual(extracted)) {
                 //If there is fluid in the tank that matches the type we have started draining, or we haven't found a type yet
@@ -236,7 +236,7 @@ public class ExtendedFluidHandlerUtils {
             return extractFluid.interact(0, stack.getAmount(), side, action);
         }
         FluidStack extracted = FluidStack.EMPTY;
-        int toDrain = stack.getAmount();
+        long toDrain = stack.getAmount();
         for (int tank = 0; tank < tanks; tank++) {
             if (FluidStack.isSameFluidSameComponents(stack, inTankGetter.getStored(tank, side))) {
                 //If there is fluid in the tank that matches the type we are trying to drain, try to drain from it
@@ -291,7 +291,7 @@ public class ExtendedFluidHandlerUtils {
             return tank.extract(stack.getAmount(), action, automationType);
         }
         FluidStack extracted = FluidStack.EMPTY;
-        int toDrain = stack.getAmount();
+        long toDrain = stack.getAmount();
         for (IExtendedFluidTank fluidTank : fluidTanks) {
             if (fluidTank.isFluidEqual(stack)) {
                 //If there is fluid in the tank that matches the type we are trying to drain, try to drain from it

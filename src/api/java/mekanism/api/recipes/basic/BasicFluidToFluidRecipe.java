@@ -8,7 +8,7 @@ import mekanism.api.recipes.FluidToFluidRecipe;
 import mekanism.api.recipes.MekanismRecipeSerializers;
 import mekanism.api.recipes.ingredients.FluidStackIngredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.neoforged.neoforge.fluids.FluidStack;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import org.jetbrains.annotations.Contract;
 
 @NothingNullByDefault
@@ -75,7 +75,7 @@ public class BasicFluidToFluidRecipe extends FluidToFluidRecipe {
     public int hashCode() {
         int hash = input.hashCode();
         hash = 31 * hash + FluidStack.hashFluidAndComponents(output);
-        hash = 31 * hash + output.getAmount();
+        hash = 31 * hash + Long.hashCode(output.getAmount());
         return hash;
     }
 }

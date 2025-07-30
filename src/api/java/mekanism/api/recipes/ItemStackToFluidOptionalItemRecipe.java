@@ -11,7 +11,7 @@ import mekanism.api.recipes.ingredients.ItemStackIngredient;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.fluids.FluidStack;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -115,7 +115,7 @@ public abstract class ItemStackToFluidOptionalItemRecipe extends MekanismRecipe<
         @Override
         public int hashCode() {
             int hash = FluidStack.hashFluidAndComponents(fluid);
-            hash = 31 * hash + fluid.getAmount();
+            hash = 31 * hash + Long.hashCode(fluid.getAmount());
             if (!optionalItem.isEmpty()) {
                 hash = 31 * hash + ItemStack.hashItemAndComponents(optionalItem);
                 hash = 31 * hash + optionalItem.getCount();

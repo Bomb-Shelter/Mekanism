@@ -37,7 +37,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
-import net.neoforged.neoforge.fluids.FluidStack;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 
 public abstract class MekanismRecipeHandler<RECIPE extends MekanismRecipe<?>> implements IRecipeHandler<RECIPE> {
 

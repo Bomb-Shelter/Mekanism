@@ -4,11 +4,12 @@ import java.util.function.BiPredicate;
 import java.util.function.BooleanSupplier;
 import java.util.function.LongSupplier;
 import java.util.function.Predicate;
+
+import io.github.fabricators_of_create.porting_lib.common.util.TriPredicate;
 import mekanism.api.AutomationType;
 import mekanism.api.chemical.ChemicalStack;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.common.util.TriPredicate;
-import net.neoforged.neoforge.fluids.FluidStack;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 
 /**

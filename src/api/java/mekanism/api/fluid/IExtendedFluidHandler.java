@@ -2,8 +2,8 @@ package mekanism.api.fluid;
 
 import mekanism.api.Action;
 import mekanism.api.annotations.NothingNullByDefault;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
+import mekanism.api.fabric.transfer.fluids.IFluidHandler;
 
 /**
  * Extended version of {@link IFluidHandler} to make it easier to integrate with Mekanism
@@ -49,7 +49,7 @@ public interface IExtendedFluidHandler extends IFluidHandler {
      * @return {@link FluidStack} extracted from the tank, must be empty if nothing can be extracted. The returned {@link FluidStack} can be safely modified after, so the
      * tank should return a new or copied stack.
      */
-    FluidStack extractFluid(int tank, int amount, Action action);
+    FluidStack extractFluid(int tank, long amount, Action action);
 
     /**
      * <p>
@@ -89,7 +89,7 @@ public interface IExtendedFluidHandler extends IFluidHandler {
      * extracted is found, all future extractions will make sure to also make sure they are for the same type of fluid.
      * @apiNote It is not guaranteed that the default implementation will be how this {@link IExtendedFluidHandler} ends up distributing the extraction.
      */
-    default FluidStack extractFluid(int amount, Action action) {
+    default FluidStack extractFluid(long amount, Action action) {
         return ExtendedFluidHandlerUtils.extract(amount, null, action, side -> getTanks(), (tank, side) -> getFluidInTank(tank),
               (tank, amt, side, act) -> extractFluid(tank, amt, act));
     }
@@ -121,7 +121,7 @@ public interface IExtendedFluidHandler extends IFluidHandler {
      */
     @Override
     @Deprecated
-    default int fill(FluidStack stack, FluidAction action) {
+    default long fill(FluidStack stack, FluidAction action) {
         return stack.getAmount() - insertFluid(stack, Action.fromFluidAction(action)).getAmount();
     }
 
@@ -143,7 +143,7 @@ public interface IExtendedFluidHandler extends IFluidHandler {
      */
     @Override
     @Deprecated
-    default FluidStack drain(int amount, FluidAction action) {
+    default FluidStack drain(long amount, FluidAction action) {
         return extractFluid(amount, Action.fromFluidAction(action));
     }
 }

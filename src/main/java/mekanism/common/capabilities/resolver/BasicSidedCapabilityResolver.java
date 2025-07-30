@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Map;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.common.capabilities.holder.IHolder;
+import net.fabricmc.fabric.api.lookup.v1.block.BlockApiLookup;
 import net.minecraft.core.Direction;
-import net.neoforged.neoforge.capabilities.BlockCapability;
 import org.jetbrains.annotations.Nullable;
 
 @NothingNullByDefault
@@ -15,17 +15,17 @@ public class BasicSidedCapabilityResolver<HANDLER, SIDED_HANDLER extends HANDLER
 
     private final ProxyCreator<HANDLER, SIDED_HANDLER> proxyCreator;
     private final Map<Direction, HANDLER> handlers;
-    private final List<BlockCapability<?, @Nullable Direction>> supportedCapability;
+    private final List<BlockApiLookup<?, @Nullable Direction>> supportedCapability;
     private final SIDED_HANDLER baseHandler;
     @Nullable
     private HANDLER readOnlyHandler;
 
-    public BasicSidedCapabilityResolver(SIDED_HANDLER baseHandler, BlockCapability<HANDLER, @Nullable Direction> supportedCapability, BasicProxyCreator<HANDLER, SIDED_HANDLER> proxyCreator) {
+    public BasicSidedCapabilityResolver(SIDED_HANDLER baseHandler, BlockApiLookup<HANDLER, @Nullable Direction> supportedCapability, BasicProxyCreator<HANDLER, SIDED_HANDLER> proxyCreator) {
         this(baseHandler, supportedCapability, proxyCreator, true);
     }
 
-    protected BasicSidedCapabilityResolver(SIDED_HANDLER baseHandler, BlockCapability<HANDLER, @Nullable Direction> supportedCapability, ProxyCreator<HANDLER, SIDED_HANDLER> proxyCreator,
-          boolean canHandle) {
+    protected BasicSidedCapabilityResolver(SIDED_HANDLER baseHandler, BlockApiLookup<HANDLER, @Nullable Direction> supportedCapability, ProxyCreator<HANDLER, SIDED_HANDLER> proxyCreator,
+                                           boolean canHandle) {
         this.supportedCapability = Collections.singletonList(supportedCapability);
         this.baseHandler = baseHandler;
         this.proxyCreator = proxyCreator;
@@ -41,7 +41,7 @@ public class BasicSidedCapabilityResolver<HANDLER, SIDED_HANDLER extends HANDLER
     }
 
     @Override
-    public List<BlockCapability<?, @Nullable Direction>> getSupportedCapabilities() {
+    public List<BlockApiLookup<?, @Nullable Direction>> getSupportedCapabilities() {
         return supportedCapability;
     }
 
@@ -55,7 +55,7 @@ public class BasicSidedCapabilityResolver<HANDLER, SIDED_HANDLER extends HANDLER
      */
     @Nullable
     @Override
-    public <T> T resolve(BlockCapability<T, @Nullable Direction> capability, @Nullable Direction side) {
+    public <T> T resolve(BlockApiLookup<T, @Nullable Direction> capability, @Nullable Direction side) {
         if (side == null) {
             if (readOnlyHandler == null) {
                 readOnlyHandler = proxyCreator.create(baseHandler, null, getHolder());
@@ -71,7 +71,7 @@ public class BasicSidedCapabilityResolver<HANDLER, SIDED_HANDLER extends HANDLER
     }
 
     @Override
-    public void invalidate(BlockCapability<?, @Nullable Direction> capability, @Nullable Direction side) {
+    public void invalidate(BlockApiLookup<?, @Nullable Direction> capability, @Nullable Direction side) {
         if (side == null) {
             readOnlyHandler = null;
         } else {

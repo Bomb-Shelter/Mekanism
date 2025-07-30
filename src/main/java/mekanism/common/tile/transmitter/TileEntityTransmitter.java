@@ -3,8 +3,11 @@ package mekanism.common.tile.transmitter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
+
+import io.github.fabricators_of_create.porting_lib.blocks.extensions.ChunkUnloadListeningBlockEntity;
 import mekanism.api.IAlloyInteraction;
 import mekanism.api.IConfigurable;
+import mekanism.api.fabric.lookup.ICapabilityProvider;
 import mekanism.api.text.EnumColor;
 import mekanism.api.tier.BaseTier;
 import mekanism.api.tier.IAlloyTier;
@@ -34,6 +37,7 @@ import mekanism.common.util.EnumUtils;
 import mekanism.common.util.MultipartUtils;
 import mekanism.common.util.MultipartUtils.AdvancedRayTraceResult;
 import mekanism.common.util.WorldUtils;
+import net.fabricmc.fabric.api.lookup.v1.block.BlockApiLookup;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
@@ -48,18 +52,13 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.neoforged.neoforge.capabilities.ICapabilityProvider;
-import net.neoforged.neoforge.client.model.data.ModelData;
-import net.neoforged.neoforge.client.model.data.ModelProperty;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class TileEntityTransmitter extends CapabilityTileEntity implements ISidedConfigurable, IAlloyInteraction {
+public abstract class TileEntityTransmitter extends CapabilityTileEntity implements ISidedConfigurable, IAlloyInteraction, ChunkUnloadListeningBlockEntity {
 
     public static final ICapabilityProvider<TileEntityTransmitter, @Nullable Direction, IConfigurable> CONFIGURABLE_PROVIDER =
           capabilityProvider(Capabilities.CONFIGURABLE, (tile, cap) -> new BasicSidedCapabilityResolver<>(tile, cap, ProxyConfigurable::new));
-
-    public static final ModelProperty<TransmitterModelData> TRANSMITTER_PROPERTY = new ModelProperty<>();
 
     private final Transmitter<?, ?, ?> transmitter;
     private boolean forceUpdate = true;
@@ -154,7 +153,7 @@ public abstract class TileEntityTransmitter extends CapabilityTileEntity impleme
             //Only take the transmitter's share if it was unloaded and not if we are being removed
             getTransmitter().validateAndTakeShare();
         }
-        super.onChunkUnloaded();
+        ChunkUnloadListeningBlockEntity.super.onChunkUnloaded();
     }
 
     @Override
@@ -301,10 +300,10 @@ public abstract class TileEntityTransmitter extends CapabilityTileEntity impleme
 
     @NotNull
     @Override
-    public ModelData getModelData() {
+    public TransmitterModelData getRenderData() {
         TransmitterModelData data = initModelData();
         updateModelData(data);
-        return ModelData.of(TRANSMITTER_PROPERTY, data);
+        return data;
     }
 
     protected void updateModelData(TransmitterModelData modelData) {

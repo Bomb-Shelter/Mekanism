@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.function.Function;
 import mekanism.api.Action;
 import mekanism.api.AutomationType;
+import mekanism.api.fabric.transfer.items.IItemHandler;
 import mekanism.api.gear.IModuleContainer;
 import mekanism.api.gear.IModuleHelper;
 import mekanism.api.inventory.IInventorySlot;
@@ -26,8 +27,6 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -67,7 +66,7 @@ public final class InventoryUtils {
             } else if (ContainerType.ITEM.supports(stack)) {
                 dropItemContents(level, blockPos, ContainerType.ITEM.getAttachmentContainersIfPresent(stack), scalar, dropper);
             }
-            UpgradeAware upgradeAware = stack.get(MekanismDataComponents.UPGRADES);
+            UpgradeAware upgradeAware = stack.get(MekanismDataComponents.UPGRADES.get());
             if (upgradeAware != null) {
                 dropItemContents(level, blockPos, List.of(upgradeAware.inputSlot(), upgradeAware.outputSlot()), scalar, dropper, ItemStack::copy);
                 dropItemContents(level, blockPos, upgradeAware.upgrades().entrySet(), scalar, dropper, entry -> UpgradeUtils.getStack(entry.getKey(), entry.getValue()));

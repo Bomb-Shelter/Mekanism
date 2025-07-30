@@ -11,7 +11,7 @@ import mekanism.common.attachments.containers.ComponentBackedHandler;
 import mekanism.common.attachments.containers.ContainerType;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.fluids.FluidStack;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
 import org.jetbrains.annotations.Nullable;
 
@@ -54,7 +54,7 @@ public class ComponentBackedFluidHandler extends ComponentBackedHandler<FluidSta
     }
 
     @Override
-    public FluidStack extractFluid(int amount, @Nullable Direction side, Action action) {
+    public FluidStack extractFluid(long amount, @Nullable Direction side, Action action) {
         return ExtendedFluidHandlerUtils.extract(amount, action, AutomationType.handler(side), size(), this);
     }
 

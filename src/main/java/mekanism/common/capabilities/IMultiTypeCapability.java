@@ -2,6 +2,10 @@ package mekanism.common.capabilities;
 
 import java.util.function.BooleanSupplier;
 import mekanism.common.util.WorldUtils;
+import net.fabricmc.fabric.api.lookup.v1.block.BlockApiCache;
+import net.fabricmc.fabric.api.lookup.v1.block.BlockApiLookup;
+import net.fabricmc.fabric.api.lookup.v1.entity.EntityApiLookup;
+import net.fabricmc.fabric.api.lookup.v1.item.ItemApiLookup;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -10,29 +14,25 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.capabilities.BlockCapability;
-import net.neoforged.neoforge.capabilities.BlockCapabilityCache;
-import net.neoforged.neoforge.capabilities.EntityCapability;
-import net.neoforged.neoforge.capabilities.ItemCapability;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public interface IMultiTypeCapability<HANDLER, ITEM_HANDLER extends HANDLER> {
 
-    BlockCapability<HANDLER, @Nullable Direction> block();
+    BlockApiLookup<HANDLER, @Nullable Direction> block();
 
-    ItemCapability<ITEM_HANDLER, Void> item();
+    ItemApiLookup<ITEM_HANDLER, Void> item();
 
-    EntityCapability<HANDLER, ?> entity();
+    EntityApiLookup<HANDLER, ?> entity();
 
-    default boolean is(BlockCapability<?, ?> capability) {
+    default boolean is(BlockApiLookup<?, ?> capability) {
         return capability == block();
     }
 
     @Nullable
     default ITEM_HANDLER getCapability(ItemStack stack) {
         //Note: Safety handling of empty stack is done when looking up the provider inside getCapability's implementation
-        return stack.getCapability(item());
+        return item().find(stack, null);
     }
 
     /**
@@ -44,7 +44,7 @@ public interface IMultiTypeCapability<HANDLER, ITEM_HANDLER extends HANDLER> {
 
     @Nullable
     default HANDLER getCapability(@Nullable Entity entity) {
-        return entity == null ? null : entity.getCapability(entity(), null);
+        return entity == null ? null : entity().find(entity, null);
     }
 
     @Nullable
@@ -58,16 +58,16 @@ public interface IMultiTypeCapability<HANDLER, ITEM_HANDLER extends HANDLER> {
         return WorldUtils.getCapability(level, block(), pos, state, blockEntity, side);
     }
 
-    default BlockCapabilityCache<HANDLER, @Nullable Direction> createCache(ServerLevel level, BlockPos pos, @Nullable Direction context) {
+    default BlockApiCache<HANDLER, @Nullable Direction> createCache(ServerLevel level, BlockPos pos, @Nullable Direction context) {
         return BlockCapabilityCache.create(block(), level, pos, context);
     }
 
-    default BlockCapabilityCache<HANDLER, @Nullable Direction> createCache(ServerLevel level, BlockPos pos, @Nullable Direction context, BooleanSupplier isValid,
+    default BlockApiCache<HANDLER, @Nullable Direction> createCache(ServerLevel level, BlockPos pos, @Nullable Direction context, BooleanSupplier isValid,
           Runnable invalidationListener) {
-        return BlockCapabilityCache.create(block(), level, pos, context, isValid, invalidationListener);
+        return BlockApiCache.create(block(), level, pos, context, isValid, invalidationListener);
     }
 
-    default BlockCapabilityCache<HANDLER, @Nullable Direction> createCache(ServerLevel level, BlockPos pos, @Nullable Direction context, BooleanSupplier isValid) {
-        return BlockCapabilityCache.create(block(), level, pos, context, isValid, () -> {});
+    default BlockApiCache<HANDLER, @Nullable Direction> createCache(ServerLevel level, BlockPos pos, @Nullable Direction context, BooleanSupplier isValid) {
+        return BlockApiCache.create(block(), level, pos, context, isValid, () -> {});
     }
 }

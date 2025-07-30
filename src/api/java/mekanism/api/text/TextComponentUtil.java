@@ -20,7 +20,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluid;
-import net.neoforged.neoforge.fluids.FluidStack;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 
 public class TextComponentUtil {
 
@@ -82,7 +82,7 @@ public class TextComponentUtil {
                 case FluidStack stack -> current = stack.getHoverName().copy();
                 case Fluid fluid -> current = fluid.getFluidType().getDescription().copy();
                 case EntityType<?> entityType -> current = entityType.getDescription().copy();
-                case Level level -> current = level.getDescription().copy();
+//                case Level level -> current = level.getDescription().copy(); TODO: PORT
                 case Direction direction -> current = getTranslatedDirection(direction);
                 case Boolean bool -> current = getTranslatedBoolean(bool);
                 //Fallback to a generic replacement
@@ -221,7 +221,7 @@ public class TextComponentUtil {
             } else if (component instanceof EntityType<?> entityType) {
                 current = entityType.getDescription().copy();
             } else if (component instanceof Level level) {
-                current = level.getDescription().copy();
+//                current = level.getDescription().copy(); TODO: PORT
             } else if (component instanceof Direction direction) {
                 current = getTranslatedDirection(direction);
             } else if (component instanceof Boolean bool) {

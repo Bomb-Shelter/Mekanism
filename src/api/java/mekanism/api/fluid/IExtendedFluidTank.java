@@ -5,14 +5,14 @@ import mekanism.api.AutomationType;
 import mekanism.api.IContentsListener;
 import mekanism.api.SerializationConstants;
 import mekanism.api.annotations.NothingNullByDefault;
+import mekanism.api.fabric.transfer.fluids.IFluidTank;
+import mekanism.api.fabric.transfer.fluids.IFluidHandler;
+import mekanism.api.fabric.transfer.fluids.IFluidHandler.FluidAction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
-import net.neoforged.neoforge.common.util.INBTSerializable;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.IFluidTank;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
+import io.github.fabricators_of_create.porting_lib.core.util.INBTSerializable;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 
 @NothingNullByDefault
 public interface IExtendedFluidTank extends IFluidTank, INBTSerializable<CompoundTag>, IContentsListener {
@@ -62,14 +62,14 @@ public interface IExtendedFluidTank extends IFluidTank, INBTSerializable<Compoun
             //"Fail quick" if the given stack is empty, or we can never insert the item or currently are unable to insert it
             return stack;
         }
-        int needed = getNeeded();
+        long needed = getNeeded();
         if (needed <= 0) {
             //Fail if we are a full tank
             return stack;
         }
         boolean sameType = false;
         if (isEmpty() || (sameType = FluidStack.isSameFluidSameComponents(stack, getFluid()))) {
-            int toAdd = Math.min(stack.getAmount(), needed);
+            long toAdd = Math.min(stack.getAmount(), needed);
             if (action.execute()) {
                 //If we want to actually insert the fluid, then update the current fluid
                 if (sameType) {
@@ -105,7 +105,7 @@ public interface IExtendedFluidTank extends IFluidTank, INBTSerializable<Compoun
      * sure to call {@link #onContentsChanged()}. It is also recommended to override this if your internal {@link FluidStack} is mutable so that a copy does not have to
      * be made every run
      */
-    default FluidStack extract(int amount, Action action, AutomationType automationType) {
+    default FluidStack extract(long amount, Action action, AutomationType automationType) {
         if (isEmpty() || amount < 1) {
             return FluidStack.EMPTY;
         }
@@ -131,7 +131,7 @@ public interface IExtendedFluidTank extends IFluidTank, INBTSerializable<Compoun
      * @implNote It is recommended to override this if your internal {@link FluidStack} is mutable so that a copy does not have to be made every run. If the internal
      * stack does get updated make sure to call {@link #onContentsChanged()}
      */
-    default int setStackSize(int amount, Action action) {
+    default long setStackSize(long amount, Action action) {
         if (isEmpty()) {
             return 0;
         } else if (amount <= 0) {
@@ -140,7 +140,7 @@ public interface IExtendedFluidTank extends IFluidTank, INBTSerializable<Compoun
             }
             return 0;
         }
-        int maxStackSize = getCapacity();
+        long maxStackSize = getCapacity();
         if (amount > maxStackSize) {
             amount = maxStackSize;
         }
@@ -166,8 +166,8 @@ public interface IExtendedFluidTank extends IFluidTank, INBTSerializable<Compoun
      * @apiNote Negative values for amount are valid, and will instead cause the stack to shrink.
      * @implNote If the internal stack does get updated make sure to call {@link #onContentsChanged()}
      */
-    default int growStack(int amount, Action action) {
-        int current = getFluidAmount();
+    default long growStack(long amount, Action action) {
+        long current = getFluidAmount();
         if (current == 0) {
             //"Fail quick" if our stack is empty, so we can't grow it
             return 0;
@@ -175,7 +175,7 @@ public interface IExtendedFluidTank extends IFluidTank, INBTSerializable<Compoun
             //Cap adding amount at how much we need, so that we don't risk integer overflow
             amount = Math.min(amount, getNeeded());
         }
-        int newSize = setStackSize(current + amount, action);
+        long newSize = setStackSize(current + amount, action);
         return newSize - current;
     }
 
@@ -193,7 +193,7 @@ public interface IExtendedFluidTank extends IFluidTank, INBTSerializable<Compoun
      * @apiNote Negative values for amount are valid, and will instead cause the stack to grow.
      * @implNote If the internal stack does get updated make sure to call {@link #onContentsChanged()}
      */
-    default int shrinkStack(int amount, Action action) {
+    default long shrinkStack(long amount, Action action) {
         return -growStack(-amount, action);
     }
 
@@ -233,12 +233,12 @@ public interface IExtendedFluidTank extends IFluidTank, INBTSerializable<Compoun
      *
      * @return Amount of fluid needed
      */
-    default int getNeeded() {
+    default long getNeeded() {
         return Math.max(0, getCapacity() - getFluidAmount());
     }
 
     @Override
-    default int getFluidAmount() {
+    default long getFluidAmount() {
         return getFluid().getAmount();
     }
 
@@ -265,7 +265,7 @@ public interface IExtendedFluidTank extends IFluidTank, INBTSerializable<Compoun
      */
     @Override
     @Deprecated
-    default int fill(FluidStack stack, FluidAction action) {
+    default long fill(FluidStack stack, FluidAction action) {
         return stack.getAmount() - insert(stack, Action.fromFluidAction(action), AutomationType.EXTERNAL).getAmount();
     }
 
@@ -290,7 +290,7 @@ public interface IExtendedFluidTank extends IFluidTank, INBTSerializable<Compoun
      */
     @Override
     @Deprecated
-    default FluidStack drain(int amount, FluidAction action) {
+    default FluidStack drain(long amount, FluidAction action) {
         return extract(amount, Action.fromFluidAction(action), AutomationType.EXTERNAL);
     }
 }

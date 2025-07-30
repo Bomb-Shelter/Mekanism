@@ -2,9 +2,9 @@ package mekanism.api.security;
 
 import java.util.List;
 import mekanism.api.MekanismAPI;
+import net.fabricmc.fabric.api.lookup.v1.item.ItemApiLookup;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.capabilities.ItemCapability;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -25,23 +25,23 @@ public interface IItemSecurityUtils extends ITypedSecurityUtils<ItemStack> {
     /**
      * {@return the item capability representing security objects}
      */
-    ItemCapability<ISecurityObject, Void> securityCapability();
+    ItemApiLookup<ISecurityObject, Void> securityCapability();
 
     @Nullable
     @Override
     default ISecurityObject securityCapability(@Nullable ItemStack stack) {
-        return stack == null ? null : stack.getCapability(securityCapability());
+        return stack == null ? null : securityCapability().find(stack, null);
     }
 
     /**
      * {@return the item capability representing owner objects}
      */
-    ItemCapability<IOwnerObject, Void> ownerCapability();
+    ItemApiLookup<IOwnerObject, Void> ownerCapability();
 
     @Nullable
     @Override
     default IOwnerObject ownerCapability(@Nullable ItemStack stack) {
-        return stack == null ? null : stack.getCapability(ownerCapability());
+        return stack == null ? null : ownerCapability().find(stack, null);
     }
 
     /**

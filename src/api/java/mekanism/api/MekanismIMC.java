@@ -7,8 +7,6 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
-import net.neoforged.fml.InterModComms;
-import net.neoforged.fml.event.lifecycle.InterModEnqueueEvent;
 
 /**
  * Class containing various helpers for sending IMC messages to Mekanism.
@@ -93,7 +91,7 @@ public class MekanismIMC {
      */
     public static void addModuleContainer(ModuleContainerTarget moduleContainer) {
         Objects.requireNonNull(moduleContainer, "Module container cannot be null");
-        InterModComms.sendTo(MekanismAPI.MEKANISM_MODID, ADD_MODULE_CONTAINER, () -> moduleContainer);
+//        InterModComms.sendTo(MekanismAPI.MEKANISM_MODID, ADD_MODULE_CONTAINER, () -> moduleContainer);
     }
 
     /**
@@ -311,7 +309,7 @@ public class MekanismIMC {
         if (moduleDataProviders == null || moduleDataProviders.length == 0) {
             throw new IllegalArgumentException("No module data providers given.");
         }
-        InterModComms.sendTo(MekanismAPI.MEKANISM_MODID, imcMethod, () -> moduleDataProviders);
+//        InterModComms.sendTo(MekanismAPI.MEKANISM_MODID, imcMethod, () -> moduleDataProviders);
     }
 
     /**
@@ -329,10 +327,10 @@ public class MekanismIMC {
         if (moduleDataProviders == null || moduleDataProviders.length == 0) {
             throw new IllegalArgumentException("No module data providers given.");
         } else if (moduleDataProviders.length == 1) {
-            InterModComms.sendTo(MekanismAPI.MEKANISM_MODID, imcMethod, () -> moduleDataProviders[0]);
+//            InterModComms.sendTo(MekanismAPI.MEKANISM_MODID, imcMethod, () -> moduleDataProviders[0]);
         } else {
             HolderSet<ModuleData<?>> holderSet = HolderSet.direct(moduleDataProviders);
-            InterModComms.sendTo(MekanismAPI.MEKANISM_MODID, imcMethod, () -> holderSet);
+//            InterModComms.sendTo(MekanismAPI.MEKANISM_MODID, imcMethod, () -> holderSet);
         }
     }
 

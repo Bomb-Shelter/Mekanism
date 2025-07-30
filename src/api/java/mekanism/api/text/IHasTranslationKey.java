@@ -1,8 +1,8 @@
 package mekanism.api.text;
 
+import io.github.fabricators_of_create.porting_lib.common.TranslatableEnum;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.network.chat.Component;
-import net.neoforged.neoforge.common.TranslatableEnum;
 import org.jetbrains.annotations.NotNull;
 
 @MethodsReturnNonnullByDefault

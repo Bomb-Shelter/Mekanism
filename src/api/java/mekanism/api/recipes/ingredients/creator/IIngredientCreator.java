@@ -30,10 +30,10 @@ public interface IIngredientCreator<TYPE, STACK, INGREDIENT extends InputIngredi
      *
      * @throws NullPointerException     if the given instance is null.
      * @throws IllegalArgumentException if the given instance is empty or an amount smaller than one.
-     * @deprecated Use {@link #fromHolder(Holder, int)} instead
+     * @deprecated Use {@link #fromHolder(Holder, long)} instead
      */
     @Deprecated(forRemoval = true, since = "10.7.11")
-    INGREDIENT from(TYPE instance, int amount);
+    INGREDIENT from(TYPE instance, long amount);
 
     /**
      * Creates an Ingredient that matches any of the provided types.
@@ -48,7 +48,7 @@ public interface IIngredientCreator<TYPE, STACK, INGREDIENT extends InputIngredi
      */
     @SuppressWarnings("unchecked")
     @Deprecated(forRemoval = true, since = "10.7.11")
-    INGREDIENT from(int amount, TYPE... items);
+    INGREDIENT from(long amount, TYPE... items);
 
     /**
      * Creates an Ingredient that matches a provided type and amount.
@@ -60,8 +60,8 @@ public interface IIngredientCreator<TYPE, STACK, INGREDIENT extends InputIngredi
      * @throws IllegalArgumentException if the given instance is empty or an amount smaller than one.
      * @since 10.5.0
      */
-    default INGREDIENT fromHolder(Holder<TYPE> instance, int amount) {
-        return from(instance.value(), amount);
+    default INGREDIENT fromHolder(Holder<TYPE> instance, long amount) {
+        return from(instance.value(), (int) amount);
     }
 
     /**

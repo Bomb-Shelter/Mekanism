@@ -3,6 +3,8 @@ package mekanism.api.radiation;
 import com.google.common.collect.Table;
 import java.util.Collections;
 import java.util.List;
+
+import io.github.fabricators_of_create.porting_lib.core.util.ServerLifecycleHooks;
 import mekanism.api.Chunk3D;
 import mekanism.api.MekanismAPI;
 import mekanism.api.annotations.NothingNullByDefault;
@@ -19,7 +21,6 @@ import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.ApiStatus.Internal;
 import org.jetbrains.annotations.Nullable;
 

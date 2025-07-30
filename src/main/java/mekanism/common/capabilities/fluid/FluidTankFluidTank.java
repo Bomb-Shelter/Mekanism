@@ -10,7 +10,7 @@ import mekanism.api.functions.ConstantPredicates;
 import mekanism.common.tier.FluidTankTier;
 import mekanism.common.tile.TileEntityFluidTank;
 import mekanism.common.util.WorldUtils;
-import net.neoforged.neoforge.fluids.FluidStack;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import org.jetbrains.annotations.Nullable;
 
 @NothingNullByDefault
@@ -71,15 +71,15 @@ public class FluidTankFluidTank extends BasicFluidTank {
     }
 
     @Override
-    public int growStack(int amount, Action action) {
-        int grownAmount = super.growStack(amount, action);
+    public long growStack(long amount, Action action) {
+        long grownAmount = super.growStack(amount, action);
         if (amount > 0 && grownAmount < amount) {
             //If we grew our stack less than we tried to, and we were actually growing and not shrinking it
             // try inserting into above tiles
             if (!tile.getActive()) {
                 TileEntityFluidTank tileAbove = WorldUtils.getTileEntity(TileEntityFluidTank.class, this.tile.getLevel(), this.tile.getBlockPos().above());
                 if (tileAbove != null) {
-                    int leftOverToInsert = amount - grownAmount;
+                    long leftOverToInsert = amount - grownAmount;
                     //Note: We do external so that it is not limited by the internal rate limits
                     FluidStack remainder = tileAbove.fluidTank.insert(stored.copyWithAmount(leftOverToInsert), action, AutomationType.EXTERNAL);
                     grownAmount += leftOverToInsert - remainder.getAmount();
@@ -90,18 +90,18 @@ public class FluidTankFluidTank extends BasicFluidTank {
     }
 
     @Override
-    public FluidStack extract(int amount, Action action, AutomationType automationType) {
+    public FluidStack extract(long amount, Action action, AutomationType automationType) {
         return super.extract(amount, action.combine(!isCreative), automationType);
     }
 
     /**
      * {@inheritDoc}
      *
-     * Note: We are only patching {@link #setStackSize(int, Action)}, as both {@link #growStack(int, Action)} and {@link #shrinkStack(int, Action)} are wrapped through
+     * Note: We are only patching {@link #setStackSize(long, Action)}, as both {@link #growStack(long, Action)} and {@link #shrinkStack(int, Action)} are wrapped through
      * this method.
      */
     @Override
-    public int setStackSize(int amount, Action action) {
+    public long setStackSize(long amount, Action action) {
         return super.setStackSize(amount, action.combine(!isCreative));
     }
 }

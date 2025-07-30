@@ -3,6 +3,8 @@ package mekanism.api.recipes.ingredients;
 import com.mojang.serialization.Codec;
 import java.util.List;
 import java.util.Objects;
+
+import io.github.fabricators_of_create.porting_lib.resources.crafting.SizedIngredient;
 import mekanism.api.MekanismAPI;
 import mekanism.api.SerializerHelper;
 import mekanism.api.annotations.NothingNullByDefault;
@@ -12,7 +14,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Ingredient.TagValue;
 import net.minecraft.world.item.crafting.Ingredient.Value;
-import net.neoforged.neoforge.common.crafting.SizedIngredient;
 import org.jetbrains.annotations.ApiStatus.Internal;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -92,18 +93,18 @@ public final class ItemStackIngredient implements InputIngredient<@NotNull ItemS
 
     @Override
     public boolean hasNoMatchingInstances() {
-        return ingredient.ingredient().hasNoItems();
+        return ingredient.ingredient().port_lib$hasNoItems();
     }
 
     @Override
     public void logMissingTags() {
         if (hasNoMatchingInstances()) {
             Ingredient unsized = ingredient.ingredient();
-            if (unsized.isSimple()) {
+            if (!unsized.requiresTesting()) {
                 if (unsized.isEmpty()) {
                     MekanismAPI.logger.error("Empty ingredient: {}", unsized);
                 } else {
-                    for (Value ingredientValue : unsized.getValues()) {
+                    for (Value ingredientValue : unsized.port_lib$getValues()) {
                         if (ingredientValue instanceof TagValue tagValue) {
                             MekanismAPI.logger.error("Empty tag: {}", tagValue);
                         } else {

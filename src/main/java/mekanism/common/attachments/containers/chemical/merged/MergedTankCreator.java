@@ -1,5 +1,6 @@
 package mekanism.common.attachments.containers.chemical.merged;
 
+import io.github.fabricators_of_create.porting_lib.core.util.INBTSerializable;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.common.attachments.containers.ContainerType;
 import mekanism.common.attachments.containers.chemical.ComponentBackedChemicalTank;
@@ -8,7 +9,6 @@ import mekanism.common.attachments.containers.fluid.ComponentBackedFluidTank;
 import mekanism.common.capabilities.merged.MergedTank;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.common.util.INBTSerializable;
 
 //TODO: Re-evaluate/rethink this as using rawtypes to get around things like this is very cursed
 @NothingNullByDefault

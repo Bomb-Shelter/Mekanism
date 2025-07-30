@@ -12,7 +12,7 @@ import mekanism.api.fluid.IExtendedFluidTank;
 import mekanism.api.functions.ConstantPredicates;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.neoforged.neoforge.fluids.FluidStack;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -186,14 +186,14 @@ public class BasicFluidTank implements IExtendedFluidTank {
             //"Fail quick" if the given stack is empty, or we can never insert the fluid or currently are unable to insert it
             return stack;
         }
-        int needed = Math.min(getInsertRate(automationType), getNeeded());
+        long needed = Math.min(getInsertRate(automationType), getNeeded());
         if (needed <= 0) {
             //Fail if we are a full tank or our rate is zero
             return stack;
         }
         boolean sameType = false;
         if (isEmpty() || (sameType = isFluidEqual(stack))) {
-            int toAdd = Math.min(stack.getAmount(), needed);
+            long toAdd = Math.min(stack.getAmount(), needed);
             if (action.execute()) {
                 //If we want to actually insert the fluid, then update the current fluid
                 if (sameType) {
@@ -214,14 +214,14 @@ public class BasicFluidTank implements IExtendedFluidTank {
     }
 
     @Override
-    public FluidStack extract(int amount, Action action, AutomationType automationType) {
+    public FluidStack extract(long amount, Action action, AutomationType automationType) {
         if (isEmpty() || amount < 1 || !canExtract.test(stored, automationType)) {
             //"Fail quick" if we don't can never extract from this tank, have a fluid stored, or the amount being requested is less than one
             return FluidStack.EMPTY;
         }
         //Note: While we technically could just return the stack itself if we are removing all that we have, it would require a lot more checks
         // We also are limiting it by the rate this tank has
-        int size = Math.min(Math.min(getExtractRate(automationType), getFluidAmount()), amount);
+        long size = Math.min(Math.min(getExtractRate(automationType), getFluidAmount()), amount);
         FluidStack ret = stored.copyWithAmount(size);
         if (!ret.isEmpty() && action.execute()) {
             //If shrink gets the size to zero it will update the empty state so that isEmpty() returns true.
@@ -241,7 +241,7 @@ public class BasicFluidTank implements IExtendedFluidTank {
      * directly modify our stack instead of having to make a copy.
      */
     @Override
-    public int setStackSize(int amount, Action action) {
+    public long setStackSize(long amount, Action action) {
         if (isEmpty()) {
             return 0;
         } else if (amount <= 0) {
@@ -250,7 +250,7 @@ public class BasicFluidTank implements IExtendedFluidTank {
             }
             return 0;
         }
-        int maxStackSize = getCapacity();
+        long maxStackSize = getCapacity();
         if (amount > maxStackSize) {
             amount = maxStackSize;
         }
@@ -267,8 +267,8 @@ public class BasicFluidTank implements IExtendedFluidTank {
      * @implNote Overwritten so that we can make this obey the rate limit our tank may have
      */
     @Override
-    public int growStack(int amount, Action action) {
-        int current = getFluidAmount();
+    public long growStack(long amount, Action action) {
+        long current = getFluidAmount();
         if (current == 0) {
             //"Fail quick" if our stack is empty, so we can't grow it
             return 0;
@@ -280,7 +280,7 @@ public class BasicFluidTank implements IExtendedFluidTank {
             //If we are decreasing the stack's size, use the extract rate
             amount = Math.max(amount, -getExtractRate(null));
         }
-        int newSize = setStackSize(current + amount, action);
+        long newSize = setStackSize(current + amount, action);
         return newSize - current;
     }
 
@@ -304,12 +304,12 @@ public class BasicFluidTank implements IExtendedFluidTank {
      * @implNote Overwritten so that if we decide to change to returning a cached/copy of our stack in {@link #getFluid()}, we can optimize out the copying.
      */
     @Override
-    public int getFluidAmount() {
+    public long getFluidAmount() {
         return stored.getAmount();
     }
 
     @Override
-    public int getCapacity() {
+    public long getCapacity() {
         return capacity;
     }
 

@@ -3,7 +3,7 @@ package mekanism.api.recipes.vanilla_input;
 import com.mojang.datafixers.util.Either;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.ChemicalStack;
-import net.neoforged.neoforge.fluids.FluidStack;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 
 /**
  * Simple implementation of a recipe input of for {@link mekanism.api.recipes.RotaryRecipe}.
@@ -58,7 +58,7 @@ public record RotaryRecipeInput(Either<FluidStack, ChemicalStack> input) impleme
     public int hashCode() {
         return input.map(fluid -> {
             int hash = FluidStack.hashFluidAndComponents(fluid);
-            return 31 * hash + fluid.getAmount();
+            return 31 * hash + Long.hashCode(fluid.getAmount());
         }, ChemicalStack::hashCode);
     }
 }

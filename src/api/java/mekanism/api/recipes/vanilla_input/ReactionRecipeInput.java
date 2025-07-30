@@ -3,7 +3,7 @@ package mekanism.api.recipes.vanilla_input;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.ChemicalStack;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.fluids.FluidStack;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 
 /**
  * Simple implementation of a recipe input for {@link mekanism.api.recipes.PressurizedReactionRecipe}.
@@ -64,7 +64,7 @@ public record ReactionRecipeInput(ItemStack item, FluidStack fluid, ChemicalStac
         hash = 31 * hash + ItemStack.hashItemAndComponents(item);
         hash = 31 + hash + item.getCount();
         hash = 31 * hash + FluidStack.hashFluidAndComponents(fluid);
-        hash = 31 + hash + fluid.getAmount();
+        hash = 31 + hash + Long.hashCode(fluid.getAmount());
         return hash;
     }
 }

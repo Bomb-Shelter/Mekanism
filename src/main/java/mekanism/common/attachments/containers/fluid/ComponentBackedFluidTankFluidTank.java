@@ -8,7 +8,7 @@ import mekanism.common.attachments.containers.ContainerType;
 import mekanism.common.item.block.machine.ItemBlockFluidTank;
 import mekanism.common.tier.FluidTankTier;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.fluids.FluidStack;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 
 @NothingNullByDefault
 public class ComponentBackedFluidTankFluidTank extends ComponentBackedFluidTank {
@@ -44,7 +44,7 @@ public class ComponentBackedFluidTankFluidTank extends ComponentBackedFluidTank 
      * {@link #shrinkStack(int, Action)} are wrapped through this method.
      */
     @Override
-    public int setStackSize(AttachedFluids attachedFluids, FluidStack stored, int amount, Action action) {
+    public long setStackSize(AttachedFluids attachedFluids, FluidStack stored, long amount, Action action) {
         return super.setStackSize(attachedFluids, stored, amount, action.combine(!isCreative));
     }
 }

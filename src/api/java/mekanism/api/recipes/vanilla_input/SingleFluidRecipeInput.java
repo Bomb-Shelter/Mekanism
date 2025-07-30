@@ -1,7 +1,7 @@
 package mekanism.api.recipes.vanilla_input;
 
 import mekanism.api.annotations.NothingNullByDefault;
-import net.neoforged.neoforge.fluids.FluidStack;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 
 /**
  * Simple implementation of a recipe input of one fluid.
@@ -42,6 +42,6 @@ public record SingleFluidRecipeInput(FluidStack fluid) implements FluidRecipeInp
     @Override
     public int hashCode() {
         int hash = FluidStack.hashFluidAndComponents(fluid);
-        return 31 * hash + fluid.getAmount();
+        return 31 * hash + Long.hashCode(fluid.getAmount());
     }
 }

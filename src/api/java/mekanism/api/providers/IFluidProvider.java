@@ -5,7 +5,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.material.Fluid;
-import net.neoforged.neoforge.fluids.FluidStack;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 
 @SuppressWarnings("removal")
 @MethodsReturnNonnullByDefault
@@ -22,7 +22,7 @@ public interface IFluidProvider extends IBaseProvider {
      *
      * @param size Size of the stack.
      */
-    default FluidStack getFluidStack(int size) {
+    default FluidStack getFluidStack(long size) {
         return new FluidStack(getFluid(), size);
     }
 

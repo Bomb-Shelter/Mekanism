@@ -13,7 +13,7 @@ import mekanism.api.recipes.cache.CachedRecipe.OperationTracker;
 import mekanism.api.recipes.cache.CachedRecipe.OperationTracker.RecipeError;
 import mekanism.api.recipes.ingredients.InputIngredient;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.fluids.FluidStack;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 
 @NothingNullByDefault
@@ -148,7 +148,7 @@ public class InputHelper {
                 }
                 FluidStack inputFluid = getInput();
                 if (!inputFluid.isEmpty()) {
-                    int amount = recipeInput.getAmount() * operations;
+                    long amount = recipeInput.getAmount() * operations;
                     logMismatchedStackSize(tank.shrinkStack(amount, Action.EXECUTE), amount);
                 }
             }
@@ -162,7 +162,7 @@ public class InputHelper {
                     // where we may want to allow not having the input be required for recipe matching
                     if (!recipeInput.isEmpty()) {
                         //TODO: Simulate the drain?
-                        int operations = getInput().getAmount() / (recipeInput.getAmount() * usageMultiplier);
+                        int operations = (int) (getInput().getAmount() / (recipeInput.getAmount() * usageMultiplier));
                         if (operations > 0) {
                             tracker.updateOperations(operations);
                             return;

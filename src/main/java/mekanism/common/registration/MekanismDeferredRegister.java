@@ -2,11 +2,12 @@ package mekanism.common.registration;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
+
+import io.github.fabricators_of_create.porting_lib.registry.DeferredRegister;
 import mekanism.api.annotations.NothingNullByDefault;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.registries.DeferredRegister;
 
 @NothingNullByDefault
 public class MekanismDeferredRegister<T> extends DeferredRegister<T> {

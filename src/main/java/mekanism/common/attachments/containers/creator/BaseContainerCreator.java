@@ -1,12 +1,13 @@
 package mekanism.common.attachments.containers.creator;
 
 import java.util.List;
+
+import io.github.fabricators_of_create.porting_lib.core.util.INBTSerializable;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.common.attachments.containers.ContainerType;
 import mekanism.common.attachments.containers.IAttachedContainers;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.common.util.INBTSerializable;
 
 @NothingNullByDefault
 public abstract class BaseContainerCreator<ATTACHED extends IAttachedContainers<?, ATTACHED>, CONTAINER extends INBTSerializable<CompoundTag>> implements IContainerCreator<CONTAINER, ATTACHED> {

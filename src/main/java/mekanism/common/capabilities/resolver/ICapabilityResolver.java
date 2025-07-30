@@ -2,7 +2,7 @@ package mekanism.common.capabilities.resolver;
 
 import java.util.List;
 import mekanism.api.annotations.NothingNullByDefault;
-import net.neoforged.neoforge.capabilities.BlockCapability;
+import net.fabricmc.fabric.api.lookup.v1.block.BlockApiLookup;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
@@ -14,7 +14,7 @@ public interface ICapabilityResolver<CONTEXT> {
      *
      * @return List of capabilities this resolver can resolve.
      */
-    List<BlockCapability<?, CONTEXT>> getSupportedCapabilities();
+    List<BlockApiLookup<?, CONTEXT>> getSupportedCapabilities();
 
     /**
      * Resolves a given capability from a given side. This value should be cached for later invalidation, as well as quicker re-lookup.
@@ -28,7 +28,7 @@ public interface ICapabilityResolver<CONTEXT> {
      * @implNote The result should be cached
      */
     @Nullable
-    <T> T resolve(BlockCapability<T, CONTEXT> capability, @UnknownNullability CONTEXT side);
+    <T> T resolve(BlockApiLookup<T, CONTEXT> capability, @UnknownNullability CONTEXT side);
 
     /**
      * Invalidates the given capability on the given side.
@@ -36,7 +36,7 @@ public interface ICapabilityResolver<CONTEXT> {
      * @param capability Capability
      * @param context    Context
      */
-    void invalidate(BlockCapability<?, CONTEXT> capability, @UnknownNullability CONTEXT context);
+    void invalidate(BlockApiLookup<?, CONTEXT> capability, @UnknownNullability CONTEXT context);
 
     /**
      * Invalidates all cached capabilities.
