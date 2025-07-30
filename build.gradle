@@ -264,6 +264,18 @@ def setupTasks(SourceSet sourceSet) {
     }
 }
 
+loom {
+    mods {
+        mekanism_generators {
+            sourceSet sourceSets.generators
+        }
+
+        mekanism_tools {
+            sourceSet sourceSets.tools
+        }
+    }
+}
+
 group = 'mekanism'
 def basicVersion = "${mod_version}." + (System.getenv('BUILD_NUMBER') ?: 'homebaked')
 version = "${minecraft_version}-${basicVersion}"
@@ -438,6 +450,7 @@ static void exclusiveRepo(RepositoryHandler handler, String url, Consumer<Inclus
 repositories { RepositoryHandler handler ->
     exclusiveRepo(handler, 'https://maven.blamejared.com', filter -> {
         filter.includeGroupAndSubgroups('com.blamejared')
+        filter.includeGroupAndSubgroups('com.faux')
         filter.includeGroup('mezz.jei')
         filter.includeGroup('org.openzen.zencode')
     })
@@ -454,6 +467,7 @@ repositories { RepositoryHandler handler ->
     exclusiveRepo(handler, 'https://maven.parchmentmc.org/', 'org.parchmentmc.data')
     exclusiveRepo(handler, 'https://jitpack.io', 'com.github.Chocohead')
     exclusiveRepo(handler, 'https://mvn.devos.one/snapshots', 'io.github.fabricators_of_create.Porting-Lib')
+    exclusiveRepo(handler, 'https://maven.ladysnake.org/releases', 'org.ladysnake.cardinal-components-api')
     handler.exclusiveContent {
         it.forRepositories(handler.mavenCentral())
         it.filter {
@@ -498,13 +512,13 @@ dependencies {
         localRuntime("mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}")
     }
 
-    compileOnly("dev.emi:emi-neoforge:${emi_version}+${minecraft_version}:api")
-    def emi = "dev.emi:emi-neoforge:${emi_version}+${minecraft_version}"
+    modCompileOnly("dev.emi:emi-fabric:${emi_version}+${minecraft_version}:api")
+    def emi = "dev.emi:emi-fabric:${emi_version}+${minecraft_version}"
     //TODO: Re-evaluate (https://github.com/emilyploszaj/emi/issues/537) might allow us to not have to do this
     //Compile against full emi in datagen
     datagenMainCompileOnly(emi)
     if (recipe_viewer == 'emi' || recipe_viewer == 'hybrid') {
-        localRuntime(emi)
+        modRuntimeOnly(emi)
     } else {
         //We still need it to load in datagen regardless of if we are using emi or a different viewer so that we can access EMI related objects
         datagenMainRuntimeOnly(emi)
@@ -512,47 +526,48 @@ dependencies {
 
 //    localRuntime("team.chisel.ctm:CTM:${previous_minor_minecraft_version}-${ctm_version}")
 
-    compileOnly("mcjty.theoneprobe:theoneprobe:${top_version}:api")
-    localRuntime("mcjty.theoneprobe:theoneprobe:${top_version}")
-    compileOnly("curse.maven:jade-api-324717:${jade_api_id}")
-    localRuntime("curse.maven:jade-324717:${jade_id}")
-    compileOnly("mcp.mobius.waila:wthit-api:neo-${wthit_version}")
+    //compileOnly("mcjty.theoneprobe:theoneprobe:${top_version}:api")
+    //localRuntime("mcjty.theoneprobe:theoneprobe:${top_version}")
+    modCompileOnly("curse.maven:jade-api-324717:${jade_api_id}")
+    modRuntimeOnly("curse.maven:jade-324717:${jade_id}")
+    modCompileOnly("mcp.mobius.waila:wthit-api:fabric-${wthit_version}")
     //localRuntime("mcp.mobius.waila:wthit:neo-${wthit_version}")
     //localRuntime('lol.bai:badpackets:neo-0.8.1')
 
-    def crt = "com.blamejared.crafttweaker:CraftTweaker-neoforge-${minecraft_version}:${crafttweaker_version}"
-    compileOnly(crt)
-    localRuntime(crt)
-    def jeiTweaker = "com.blamejared.jeitweaker:JeiTweaker-forge-1.20.1:${jeitweaker_version}"
-    compileOnly(jeiTweaker)
+    def crt = "com.blamejared.crafttweaker:CraftTweaker-fabric-${minecraft_version}:${crafttweaker_version}"
+    modCompileOnly(crt)
+    modRuntimeOnly(crt)
+    def jeiTweaker = "com.blamejared.jeitweaker:JeiTweaker-fabric-1.20.1:${jeitweaker_version}"
+    modCompileOnly(jeiTweaker)
     //TODO: Re-enable when it updates
     //localRuntime(jeiTweaker)
 
     compileOnly("dev.gigaherz.jsonthings:JsonThings-${minecraft_version}:${json_things_version}")
 
     //Mods we have dependencies on but don't bother loading into the dev environment
-    compileOnly("curse.maven:projecte-api-226410:${projecte_api_id}")
-    compileOnly("curse.maven:flux-networks-248020:${flux_networks_id}")
-    compileOnly("dev.technici4n:GrandPower:${grand_power_version}")
-    compileOnly("top.theillusivec4.curios:curios-neoforge:${curios_version}:api")
-    compileOnly("com.blamejared.recipestages:RecipeStages:${recipe_stages_version}")
-    compileOnly("curse.maven:opencomputers2-437654:${oc2_id}")
-    compileOnly("cc.tweaked:cc-tweaked-${previous_minor_minecraft_version}-forge-api:${cc_tweaked_version}")
-    //localRuntime("cc.tweaked:cc-tweaked-${previous_minor_minecraft_version}-forge:${cc_tweaked_version}")
-    compileOnly("curse.maven:female-gender-forge-481655:${wildfire_gender_mod_id}")
-    compileOnly("curse.maven:framedblocks-441647:${framedblocks_mod_id}")
+    //compileOnly("curse.maven:projecte-api-226410:${projecte_api_id}")
+    //compileOnly("curse.maven:flux-networks-248020:${flux_networks_id}")
+    //compileOnly("dev.technici4n:GrandPower:${grand_power_version}")
+    //compileOnly("top.theillusivec4.curios:curios-neoforge:${curios_version}:api")
+    modCompileOnly("dev.emi:trinkets:${trinkets_version}")
+    //compileOnly("com.blamejared.recipestages:RecipeStages:${recipe_stages_version}")
+    //compileOnly("curse.maven:opencomputers2-437654:${oc2_id}")
+    modCompileOnly("cc.tweaked:cc-tweaked-${previous_minor_minecraft_version}-fabric-api:${cc_tweaked_version}")
+    //localRuntime("cc.tweaked:cc-tweaked-${previous_minor_minecraft_version}-fabric:${cc_tweaked_version}")
+    modCompileOnly("curse.maven:female-gender-fabric-456319:${wildfire_gender_mod_id}")
+    //compileOnly("curse.maven:framedblocks-441647:${framedblocks_mod_id}")
 
     //Dependencies for data generators for mod compat reference
-    datagenMainImplementation("org.appliedenergistics:appliedenergistics2:${ae2_version}")
-    datagenMainRuntimeOnly("com.github.glitchfiend:GlitchCore-neoforge:${minecraft_version}-${glitchcore_version}")
-    datagenMainRuntimeOnly("com.github.glitchfiend:TerraBlender-neoforge:${minecraft_version}-${terrablender_version}")
-    datagenMainImplementation("com.github.glitchfiend:BiomesOPlenty-neoforge:${minecraft_version}-${biomesoplenty_version}")
+    //datagenMainImplementation("org.appliedenergistics:appliedenergistics2:${ae2_version}")
+    datagenMainRuntimeOnly("com.github.glitchfiend:GlitchCore-fabric:${minecraft_version}-${glitchcore_version}")
+    datagenMainRuntimeOnly("com.github.glitchfiend:TerraBlender-fabric:${minecraft_version}-${terrablender_version}")
+    datagenMainImplementation("com.github.glitchfiend:BiomesOPlenty-fabric:${minecraft_version}-${biomesoplenty_version}")
     datagenMainRuntimeOnly("curse.maven:corgilib-693313:${corgilib_id}")
     datagenMainRuntimeOnly("curse.maven:geckolib-388172:${geckolib_id}")
     datagenMainRuntimeOnly("curse.maven:oh-the-trees-youll-grow-962544:${ohthetreesyoullgrow_id}")
     datagenMainImplementation("curse.maven:oh-the-biomes-weve-gone-1070751:${biomeswevegone_id}")
-    datagenMainImplementation("curse.maven:farmers-delight-398521:${farmers_delight_id}")
-    datagenMainRuntimeOnly("curse.maven:projecte-226410:${projecte_id}")
+    datagenMainImplementation("curse.maven:farmers-delight-refabricated-993166:${farmers_delight_id}")
+    //datagenMainRuntimeOnly("curse.maven:projecte-226410:${projecte_id}")
 
     //Note: Even though yaml ops defines a FMLModType we have to pretend FML doesn't know how to handle it due to a lib yaml ops bundles not defining it
     datagenNonMod("com.thiakil:yaml-ops:${yamlops_version}")
