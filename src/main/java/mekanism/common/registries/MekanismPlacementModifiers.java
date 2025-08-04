@@ -5,7 +5,7 @@ import mekanism.common.world.DisableableFeaturePlacement;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.levelgen.placement.PlacementModifierType;
 import io.github.fabricators_of_create.porting_lib.registry.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import io.github.fabricators_of_create.porting_lib.registry.DeferredRegister;
 
 public class MekanismPlacementModifiers {
 

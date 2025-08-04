@@ -5,6 +5,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import mekanism.common.Mekanism;
+import net.fabricmc.fabric.api.renderer.v1.Renderer;
+import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
+import net.fabricmc.fabric.api.renderer.v1.material.BlendMode;
+import net.fabricmc.fabric.api.renderer.v1.material.RenderMaterial;
+import net.fabricmc.fabric.api.renderer.v1.mesh.Mesh;
+import net.fabricmc.fabric.api.renderer.v1.mesh.MeshBuilder;
+import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -206,8 +213,27 @@ public class BaseModelCache {
             return getBakedModel().getQuads(null, null, random);
         }
 
-        public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, RandomSource rand, ModelData data, @Nullable RenderType renderType) {
-            return getBakedModel().getQuads(state, side, rand, data, renderType);
+        public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, RandomSource rand) {
+            return getBakedModel().getQuads(state, side, rand);
+        }
+
+        public Mesh emitMesh(RandomSource random) {
+            //TODO: Decide if this should just redirect to the other get quads method (some impls might be different depending on if it gets data and render type vs not)
+            return emitMesh(null, null, random, BlendMode.DEFAULT);
+        }
+
+        public Mesh emitMesh(@Nullable BlockState state, @Nullable Direction side, RandomSource rand, BlendMode blendMode) {
+            List<BakedQuad> quads = getBakedModel().getQuads(state, side, rand);
+            Renderer renderer = RendererAccess.INSTANCE.getRenderer();
+            RenderMaterial material = renderer.materialFinder().blendMode(blendMode).find();
+            MeshBuilder builder = renderer.meshBuilder();
+            QuadEmitter emitter = builder.getEmitter();
+            for (BakedQuad quad : quads) {
+                emitter.fromVanilla(quad, material, side);
+                emitter.emit();
+            }
+
+            return builder.build();
         }
 
         public BakedModel getBakedModel() {

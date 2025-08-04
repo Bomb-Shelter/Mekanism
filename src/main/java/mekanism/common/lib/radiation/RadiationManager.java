@@ -35,7 +35,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
-import net.neoforged.neoforge.server.ServerLifecycleHooks;
+import io.github.fabricators_of_create.porting_lib.core.util.ServerLifecycleHooks;
 import org.jetbrains.annotations.Nullable;
 
 /**

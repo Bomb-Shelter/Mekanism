@@ -10,6 +10,7 @@ import mekanism.api.RelativeSide;
 import mekanism.api.SerializationConstants;
 import mekanism.api.chemical.IChemicalHandler;
 import mekanism.api.chemical.IChemicalTank;
+import mekanism.api.fabric.lookup.BlockApiCacheWithContext;
 import mekanism.api.functions.ConstantPredicates;
 import mekanism.common.attachments.containers.ContainerType;
 import mekanism.common.capabilities.Capabilities;
@@ -36,7 +37,6 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.capabilities.BlockCapabilityCache;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -52,7 +52,7 @@ public class TileEntityRadioactiveWasteBarrel extends TileEntityMekanism impleme
     private boolean resolvedBelowTank;
 
     private int processTicks;
-    private List<BlockCapabilityCache<IChemicalHandler, @Nullable Direction>> chemicalHandlerBelow = Collections.emptyList();
+    private List<BlockApiCacheWithContext<IChemicalHandler, @Nullable Direction>> chemicalHandlerBelow = Collections.emptyList();
 
     public TileEntityRadioactiveWasteBarrel(BlockPos pos, BlockState state) {
         super(MekanismBlocks.RADIOACTIVE_WASTE_BARREL, pos, state);
@@ -109,7 +109,7 @@ public class TileEntityRadioactiveWasteBarrel extends TileEntityMekanism impleme
     private IChemicalTank getBelowTank() {
         if (!resolvedBelowTank) {
             resolvedBelowTank = true;
-            IChemicalHandler belowHandler = chemicalHandlerBelow.getFirst().getCapability();
+            IChemicalHandler belowHandler = chemicalHandlerBelow.getFirst().find();
             if (belowHandler instanceof ProxyChemicalHandler chemicalHandler && chemicalHandler.getInternalHandler() instanceof TileEntityRadioactiveWasteBarrel barrel) {
                 //Note: We don't need to bother with weak references as these are vertical so will always be in the same chunk
                 belowTank = barrel.chemicalTank;

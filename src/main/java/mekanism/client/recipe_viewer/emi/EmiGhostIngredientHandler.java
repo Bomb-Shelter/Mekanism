@@ -9,13 +9,13 @@ import mekanism.client.gui.GuiMekanism;
 import mekanism.client.gui.GuiUtils;
 import mekanism.client.recipe_viewer.GhostIngredientHandler;
 import mekanism.client.recipe_viewer.interfaces.IRecipeViewerGhostTarget.IGhostIngredientConsumer;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.material.Fluid;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.FluidType;
 import org.jetbrains.annotations.Nullable;
 
 public class EmiGhostIngredientHandler implements EmiDragDropHandler<Screen> {
@@ -51,7 +51,7 @@ public class EmiGhostIngredientHandler implements EmiDragDropHandler<Screen> {
             if (emiStack.getKey() instanceof Item) {
                 raw = emiStack.getItemStack();
             } else if (emiStack.getKey() instanceof Fluid fluid) {
-                raw = new FluidStack(fluid.builtInRegistryHolder(), FluidType.BUCKET_VOLUME, emiStack.getComponentChanges());
+                raw = new FluidStack(fluid.builtInRegistryHolder(), FluidConstants.BUCKET, emiStack.getComponentChanges());
             } else if (emiStack instanceof ChemicalEmiStack chemicalEmiStack) {
                 raw = chemicalEmiStack.getStack();
             }

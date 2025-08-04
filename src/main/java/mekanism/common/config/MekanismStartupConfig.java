@@ -4,8 +4,8 @@ import mekanism.common.config.value.CachedFloatValue;
 import mekanism.common.config.value.CachedIntValue;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ArmorMaterials;
-import net.neoforged.fml.config.ModConfig.Type;
-import net.neoforged.neoforge.common.ModConfigSpec;
+import io.github.fabricators_of_create.porting_lib.config.ModConfig.Type;
+import io.github.fabricators_of_create.porting_lib.config.ModConfigSpec;
 
 public class MekanismStartupConfig extends BaseMekanismConfig {
 

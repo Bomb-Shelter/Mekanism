@@ -3,6 +3,7 @@ package mekanism.common.integration.energy;
 import java.util.Objects;
 import java.util.function.BooleanSupplier;
 import mekanism.api.energy.IStrictEnergyHandler;
+import mekanism.api.fabric.lookup.ICapabilityInvalidationListener;
 import mekanism.api.functions.ConstantPredicates;
 import mekanism.common.util.WorldUtils;
 import net.minecraft.core.BlockPos;
@@ -11,7 +12,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.capabilities.ICapabilityInvalidationListener;
 import org.jetbrains.annotations.Nullable;
 
 /**

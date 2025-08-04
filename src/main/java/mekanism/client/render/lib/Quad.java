@@ -2,11 +2,21 @@ package mekanism.client.render.lib;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.blaze3d.vertex.VertexFormatElement;
-import java.util.Arrays;
+
 import java.util.function.Consumer;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.common.lib.Color;
+import net.fabricmc.fabric.api.renderer.v1.Renderer;
+import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
+import net.fabricmc.fabric.api.renderer.v1.material.BlendMode;
+import net.fabricmc.fabric.api.renderer.v1.material.MaterialFinder;
+import net.fabricmc.fabric.api.renderer.v1.material.RenderMaterial;
+import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
+import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
+import net.fabricmc.fabric.api.renderer.v1.mesh.QuadView;
+import net.fabricmc.fabric.api.renderer.v1.model.SpriteFinder;
+import net.fabricmc.fabric.api.util.TriState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -14,7 +24,9 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
 import net.minecraft.core.Vec3i;
-import net.neoforged.neoforge.client.model.pipeline.QuadBakingVertexConsumer;
+import net.minecraft.util.FastColor;
+import net.minecraft.world.inventory.InventoryMenu;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
 public class Quad {
@@ -25,6 +37,7 @@ public class Quad {
     private int tintIndex;
     private boolean shade;
     private boolean hasAmbientOcclusion;
+    private RenderMaterial material;
 
     public Quad(TextureAtlasSprite sprite, Direction side, Vertex[] vertices) {
         this(sprite, side, vertices, -1, false, true);
@@ -39,14 +52,34 @@ public class Quad {
         this.hasAmbientOcclusion = hasAmbientOcclusion;
     }
 
+    public Quad(QuadView quad) {
+        side = quad.lightFace();
+        sprite = SpriteFinder.get(Minecraft.getInstance().getModelManager().getAtlas(InventoryMenu.BLOCK_ATLAS)).find(quad);
+        tintIndex = quad.colorIndex();
+        shade = !quad.material().disableDiffuse();
+        hasAmbientOcclusion = quad.material().ambientOcclusion().get();
+        vertices = new Vertex[4];
+        material = quad.material();
+        for (int i = 0; i < 4; i++) {
+            Vertex vertex = new Vertex();
+            vertex.pos(quad.copyPos(i, null));
+            int color = quad.color(i);
+            vertex.color(FastColor.ARGB32.red(color), FastColor.ARGB32.green(color), FastColor.ARGB32.blue(color), FastColor.ARGB32.alpha(color));
+            vertex.texRaw(quad.u(i), quad.v(i));
+            int overlay = quad.lightmap(i);
+            vertex.light(overlay & 65535, overlay >> 16 & 65535);
+            vertex.normal(quad.copyNormal(i, null));
+        }
+    }
+
     public Quad(BakedQuad quad) {
         side = quad.getDirection();
         sprite = quad.getSprite();
         tintIndex = quad.getTintIndex();
         shade = quad.isShade();
-        hasAmbientOcclusion = quad.hasAmbientOcclusion();
+//        hasAmbientOcclusion = quad.hasAmbientOcclusion();
         BakedQuadUnpacker unpacker = new BakedQuadUnpacker();
-        unpacker.putBulkData(new PoseStack().last(), quad, 1, 1, 1, 1, 0, OverlayTexture.NO_OVERLAY, true);
+        unpacker.putBulkData(new PoseStack().last(), quad, 1, 1, 1, 1, 0, OverlayTexture.NO_OVERLAY);
         vertices = unpacker.getVertices();
     }
 
@@ -108,17 +141,23 @@ public class Quad {
         this.hasAmbientOcclusion = hasAmbientOcclusion;
     }
 
-    public BakedQuad bake() {
-        QuadBakingVertexConsumer quadBaker = new QuadBakingVertexConsumer();
-        quadBaker.setSprite(sprite);
-        quadBaker.setDirection(side);
-        quadBaker.setTintIndex(tintIndex);
-        quadBaker.setShade(shade);
-        quadBaker.setHasAmbientOcclusion(hasAmbientOcclusion);
-        for (Vertex vertex : vertices) {
-            vertex.write(quadBaker);
+    public MutableQuadView bake(MutableQuadView emitter, @Nullable BlendMode blendMode) {
+        Renderer renderer = RendererAccess.INSTANCE.getRenderer();
+        MaterialFinder material = renderer.materialFinder();
+        if (this.material != null)
+            material.copyFrom(this.material);
+        emitter.spriteBake(sprite, 0);
+        emitter.nominalFace(side);
+        emitter.colorIndex(tintIndex);
+        material.disableDiffuse(!shade);
+        material.ambientOcclusion(TriState.of(hasAmbientOcclusion));
+        if (blendMode != null)
+            material.blendMode(blendMode);
+        emitter.material(material.find());
+        for (int i = 0; i < vertices.length; i++) {
+            vertices[i].write(i, emitter);
         }
-        return quadBaker.bakeQuad();
+        return emitter;
     }
 
     public Quad copy() {
@@ -190,12 +229,6 @@ public class Quad {
         @Override
         public VertexConsumer setNormal(float x, float y, float z) {
             vertices[vertexIndex].normal(x, y, z);
-            return this;
-        }
-
-        @Override
-        public VertexConsumer misc(VertexFormatElement element, int... rawData) {
-            vertices[vertexIndex].misc(element, Arrays.copyOf(rawData, rawData.length));
             return this;
         }
     }

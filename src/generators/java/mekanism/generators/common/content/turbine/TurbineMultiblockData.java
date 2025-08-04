@@ -46,7 +46,7 @@ import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.capabilities.BlockCapabilityCache;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidType;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import mekanism.api.fabric.transfer.fluids.IFluidHandler;
 import org.jetbrains.annotations.Nullable;
 
 public class TurbineMultiblockData extends MultiblockData {

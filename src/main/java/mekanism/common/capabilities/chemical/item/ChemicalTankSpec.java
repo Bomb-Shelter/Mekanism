@@ -14,7 +14,7 @@ import mekanism.common.attachments.containers.chemical.ChemicalTanksBuilder;
 import mekanism.common.attachments.containers.chemical.ComponentBackedChemicalTank;
 import mekanism.common.capabilities.GenericTankSpec;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.common.util.TriPredicate;
+import io.github.fabricators_of_create.porting_lib.common.util.TriPredicate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

@@ -3,13 +3,13 @@ package mekanism.common.network.to_client;
 import io.netty.buffer.ByteBuf;
 import mekanism.common.Mekanism;
 import mekanism.common.network.IMekanismPacket;
+import mekanism.common.network.fabric.IPayloadContext;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
 public record PacketPortalFX(BlockPos pos, Direction direction) implements IMekanismPacket {

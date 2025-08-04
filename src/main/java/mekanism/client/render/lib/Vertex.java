@@ -6,8 +6,12 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import mekanism.common.lib.Color;
+import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
+import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 
@@ -202,8 +206,13 @@ public class Vertex {
         consumer.setUv1(overlayU, overlayV);
         consumer.setUv2(lightU, lightV);
         consumer.setNormal(normal.x(), normal.y(), normal.z());
-        for (Map.Entry<VertexFormatElement, int[]> entry : miscData.entrySet()) {
-            consumer.misc(entry.getKey(), entry.getValue());
-        }
+    }
+
+    public void write(int vertexIndex, MutableQuadView consumer) {
+        consumer.pos(vertexIndex, pos.x, pos.y, pos.z);
+        consumer.color(FastColor.ARGB32.color(alpha, red, green, blue));
+        consumer.uv(vertexIndex, texU, texV);
+        consumer.lightmap(vertexIndex, LightTexture.pack(lightU, lightV));
+        consumer.normal(vertexIndex, normal.x(), normal.y(), normal.z());
     }
 }

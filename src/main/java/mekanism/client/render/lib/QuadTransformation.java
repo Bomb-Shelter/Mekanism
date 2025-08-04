@@ -6,10 +6,17 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import mekanism.common.lib.Color;
 import mekanism.common.lib.math.Quaternion;
+import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
+import net.fabricmc.fabric.api.renderer.v1.material.MaterialFinder;
+import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
+import net.fabricmc.fabric.api.renderer.v1.model.SpriteFinder;
+import net.fabricmc.fabric.api.util.TriState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 
@@ -102,7 +109,7 @@ public interface QuadTransformation {
      *
      * @return {@code true} if the quad was changed.
      */
-    boolean transform(Quad quad);
+    boolean transform(MutableQuadView quad);
 
     default QuadTransformation and(QuadTransformation other) {
         return list(this, other);
@@ -117,11 +124,11 @@ public interface QuadTransformation {
         }
 
         @Override
-        public boolean transform(Quad quad) {
+        public boolean transform(MutableQuadView quad) {
             if (side != null) {
-                Direction newSide = ROTATION_MATRIX[quad.getSide().ordinal()][side.ordinal()];
-                if (newSide != quad.getSide()) {
-                    quad.setSide(newSide);
+                Direction newSide = ROTATION_MATRIX[quad.lightFace().ordinal()][side.ordinal()];
+                if (newSide != quad.lightFace()) {
+                    quad.nominalFace(newSide);
                     return true;
                 }
             }
@@ -151,9 +158,9 @@ public interface QuadTransformation {
         }
 
         @Override
-        public boolean transform(Quad quad) {
-            for (Vertex v : quad.getVertices()) {
-                v.color(color);
+        public boolean transform(MutableQuadView quad) {
+            for (int i = 0; i < 4; i++) {
+                quad.color(i, color.argb());
             }
             return true;
         }
@@ -183,9 +190,9 @@ public interface QuadTransformation {
         }
 
         @Override
-        public boolean transform(Quad quad) {
-            for (Vertex v : quad.getVertices()) {
-                v.light(lightU, lightV);
+        public boolean transform(MutableQuadView quad) {
+            for (int i = 0; i < 4; i++) {
+                quad.lightmap(i, LightTexture.pack(lightU, lightV));
             }
             return true;
         }
@@ -217,9 +224,11 @@ public interface QuadTransformation {
         }
 
         @Override
-        public boolean transform(Quad quad) {
-            quad.setHasAmbientOcclusion(ambientOcclusion);
-            quad.setShade(shade);
+        public boolean transform(MutableQuadView quad) {
+            MaterialFinder finder = RendererAccess.INSTANCE.getRenderer().materialFinder().copyFrom(quad.material());
+            finder.ambientOcclusion(TriState.of(ambientOcclusion));
+            finder.disableDiffuse(!shade);
+            quad.material(finder.find());
             return true;
         }
 
@@ -249,10 +258,11 @@ public interface QuadTransformation {
         }
 
         @Override
-        public boolean transform(Quad quad) {
-            for (Vertex v : quad.getVertices()) {
-                v.pos(round(quaternion.rotate(v.getPosD().subtract(0.5, 0.5, 0.5)).add(0.5, 0.5, 0.5)));
-                v.normal(round(quaternion.rotate(v.getNormalD()).normalize()));
+        public boolean transform(MutableQuadView quad) {
+            for (int i = 0; i < 4; i++) {
+                quad.pos(i, round(quaternion.rotate(new Vec3(quad.copyPos(i, null)).subtract(0.5, 0.5, 0.5)).add(0.5, 0.5, 0.5)).toVector3f());
+                if (quad.hasNormal(i))
+                    quad.normal(i, round(quaternion.rotate(new Vec3(quad.copyNormal(i, null))).normalize()).toVector3f());
             }
             return true;
         }
@@ -284,9 +294,9 @@ public interface QuadTransformation {
         }
 
         @Override
-        public boolean transform(Quad quad) {
-            for (Vertex v : quad.getVertices()) {
-                v.getPos().add(translation);
+        public boolean transform(MutableQuadView quad) {
+            for (int i = 0; i < 4; i++) {
+                quad.pos(i, translation);
             }
             return true;
         }
@@ -316,16 +326,16 @@ public interface QuadTransformation {
         }
 
         @Override
-        public boolean transform(Quad quad) {
+        public boolean transform(MutableQuadView quad) {
             //TODO: At some point we may want to add in some form of validation here about bounds and stuff
-            TextureAtlasSprite texture = quad.getTexture();
+            TextureAtlasSprite texture = SpriteFinder.get(Minecraft.getInstance().getModelManager().getAtlas(InventoryMenu.BLOCK_ATLAS)).find(quad);
             float uMin = texture.getU0(), uMax = texture.getU1();
             float vMin = texture.getV0(), vMax = texture.getV1();
             //Calculate how much of a shift it is based on the texture's scale
             float uShift = this.uShift * (uMax - uMin);
             float vShift = this.vShift * (vMax - vMin);
-            for (Vertex v : quad.getVertices()) {
-                v.texRaw(v.getTexU() + uShift, v.getTexV() + vShift);
+            for (int i = 0; i < 4; i++) {
+                quad.uv(i, quad.u(i) + uShift, quad.v(i) + vShift);
             }
             return true;
         }
@@ -355,10 +365,9 @@ public interface QuadTransformation {
         }
 
         @Override
-        public boolean transform(Quad quad) {
-            if (texture != null && quad.getTexture() != texture) {
+        public boolean transform(MutableQuadView quad) {
+            if (texture != null && SpriteFinder.get(Minecraft.getInstance().getModelManager().getAtlas(InventoryMenu.BLOCK_ATLAS)).find(quad) != texture) {
                 QuadUtils.remapUVs(quad, texture);
-                quad.setTexture(texture);
                 return true;
             }
             return false;
@@ -393,8 +402,8 @@ public interface QuadTransformation {
         }
 
         @Override
-        public boolean transform(Quad quad) {
-            return verifier.test(quad.getTexture().contents().name()) && original.transform(quad);
+        public boolean transform(MutableQuadView quad) {
+            return verifier.test(SpriteFinder.get(Minecraft.getInstance().getModelManager().getAtlas(InventoryMenu.BLOCK_ATLAS)).find(quad).contents().name()) && original.transform(quad);
         }
 
         @Override
@@ -428,7 +437,7 @@ public interface QuadTransformation {
         }
 
         @Override
-        public boolean transform(Quad quad) {
+        public boolean transform(MutableQuadView quad) {
             boolean transformed = false;
             for (QuadTransformation transformation : list) {
                 transformed |= transformation.transform(quad);

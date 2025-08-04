@@ -45,8 +45,6 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 
@@ -110,7 +108,7 @@ public class ItemBlockTooltip<BLOCK extends Block & IHasDescription> extends Ite
             tooltip.add(MekanismLang.HAS_INVENTORY.translateColored(EnumColor.AQUA, EnumColor.GRAY, YesNo.hasInventory(stack)));
         }
         if (Attribute.has(getBlock(), AttributeUpgradeSupport.class)) {
-            UpgradeAware upgradeAware = stack.get(MekanismDataComponents.UPGRADES);
+            UpgradeAware upgradeAware = stack.get(MekanismDataComponents.UPGRADES.get());
             if (upgradeAware != null) {
                 for (Entry<Upgrade, Integer> entry : upgradeAware.upgrades().entrySet()) {
                     tooltip.add(UpgradeDisplay.of(entry.getKey(), entry.getValue()).getTextComponent());
@@ -178,19 +176,18 @@ public class ItemBlockTooltip<BLOCK extends Block & IHasDescription> extends Ite
     }
 
     @Override
-    public void attachCapabilities(RegisterCapabilitiesEvent event) {
+    public void attachCapabilities() {
         if (Attribute.has(getBlock(), AttributeSecurity.class)) {
-            event.registerItem(IItemSecurityUtils.INSTANCE.ownerCapability(), (stack, ctx) -> new SecurityObject(stack), this);
-            event.registerItem(IItemSecurityUtils.INSTANCE.securityCapability(), (stack, ctx) -> new SecurityObject(stack), this);
+            IItemSecurityUtils.INSTANCE.ownerCapability().registerForItems((stack, ctx) -> new SecurityObject(stack), this);
+            IItemSecurityUtils.INSTANCE.securityCapability().registerForItems((stack, ctx) -> new SecurityObject(stack), this);
         }
     }
 
     @Override
-    public void attachAttachments(IEventBus eventBus) {
+    public void attachAttachments() {
         if (Attribute.has(getBlock(), AttributeEnergy.class)) {
             //Only expose the capability the required configs are loaded and the item wants to
-            IEventBus energyEventBus = exposesEnergyCap() ? eventBus : null;
-            ContainerType.ENERGY.addDefaultCreators(energyEventBus, this, () -> addDefaultEnergyContainers(EnergyContainersBuilder.builder()).build(),
+            ContainerType.ENERGY.addDefaultCreators(exposesEnergyCap(), this, () -> addDefaultEnergyContainers(EnergyContainersBuilder.builder()).build(),
                   MekanismConfig.storage, MekanismConfig.usage);
         }
     }
@@ -206,7 +203,7 @@ public class ItemBlockTooltip<BLOCK extends Block & IHasDescription> extends Ite
 
         private UpgradeBasedUnsignedLongCache(ItemStack stack, LongSupplier baseStorage) {
             this.stack = stack;
-            UpgradeAware upgradeAware = this.stack.getOrDefault(MekanismDataComponents.UPGRADES, UpgradeAware.EMPTY);
+            UpgradeAware upgradeAware = this.stack.getOrDefault(MekanismDataComponents.UPGRADES.get(), UpgradeAware.EMPTY);
             this.lastInstalled = upgradeAware.getUpgradeCount(Upgrade.ENERGY);
             this.baseStorage = baseStorage;
             this.value = MekanismUtils.getMaxEnergy(this.lastInstalled, this.baseStorage.getAsLong());
@@ -214,7 +211,7 @@ public class ItemBlockTooltip<BLOCK extends Block & IHasDescription> extends Ite
 
         @Override
         public long getAsLong() {
-            UpgradeAware upgradeAware = stack.getOrDefault(MekanismDataComponents.UPGRADES, UpgradeAware.EMPTY);
+            UpgradeAware upgradeAware = stack.getOrDefault(MekanismDataComponents.UPGRADES.get(), UpgradeAware.EMPTY);
             int installed = upgradeAware.getUpgradeCount(Upgrade.ENERGY);
             if (installed != lastInstalled) {
                 lastInstalled = installed;

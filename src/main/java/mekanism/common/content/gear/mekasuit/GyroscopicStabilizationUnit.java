@@ -1,13 +1,13 @@
 package mekanism.common.content.gear.mekasuit;
 
 import mekanism.api.annotations.ParametersAreNotNullByDefault;
+import mekanism.api.fabric.ItemAttributeModifierEvent;
 import mekanism.api.gear.ICustomModule;
 import mekanism.api.gear.IModule;
 import mekanism.common.Mekanism;
 import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.neoforged.neoforge.event.ItemAttributeModifierEvent;
 
 @ParametersAreNotNullByDefault
 public class GyroscopicStabilizationUnit implements ICustomModule<GyroscopicStabilizationUnit> {

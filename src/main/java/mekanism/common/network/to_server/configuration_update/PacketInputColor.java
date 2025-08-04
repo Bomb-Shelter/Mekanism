@@ -6,12 +6,12 @@ import mekanism.common.Mekanism;
 import mekanism.common.network.IMekanismPacket;
 import mekanism.common.network.MekClickType;
 import mekanism.common.network.PacketUtils;
+import mekanism.common.network.fabric.IPayloadContext;
 import mekanism.common.tile.component.TileComponentEjector;
 import mekanism.common.util.TransporterUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
 public record PacketInputColor(BlockPos pos, MekClickType clickType, RelativeSide inputSide) implements IMekanismPacket {

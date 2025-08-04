@@ -2,6 +2,8 @@ package mekanism.common.tile.laser;
 
 import java.util.Comparator;
 import java.util.List;
+
+import io.github.fabricators_of_create.porting_lib.level.events.BlockEvent;
 import mekanism.api.Action;
 import mekanism.api.AutomationType;
 import mekanism.api.IContentsListener;
@@ -54,11 +56,6 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult.Type;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import net.neoforged.neoforge.common.CommonHooks;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.common.damagesource.DamageContainer;
-import net.neoforged.neoforge.event.entity.living.LivingShieldBlockEvent;
-import net.neoforged.neoforge.event.level.BlockEvent;
 import org.jetbrains.annotations.NotNull;
 
 //TODO - V11: Make the laser "shrink" the further distance it goes, If above a certain energy level and in water makes it make a bubble stream
@@ -161,7 +158,7 @@ public abstract class TileEntityBasicLaser extends TileEntityMekanism {
                         double refractionPercent = 0;
                         for (ItemStack armor : livingEntity.getArmorSlots()) {
                             if (!armor.isEmpty()) {
-                                ILaserDissipation laserDissipation = armor.getCapability(Capabilities.LASER_DISSIPATION);
+                                ILaserDissipation laserDissipation = Capabilities.LASER_DISSIPATION.find(armor, null);
                                 if (laserDissipation != null) {
                                     dissipationPercent += laserDissipation.getDissipationPercent();
                                     refractionPercent += laserDissipation.getRefractionPercent();
@@ -327,7 +324,7 @@ public abstract class TileEntityBasicLaser extends TileEntityMekanism {
         MekFakePlayer dummy = MekFakePlayer.setupFakePlayer(level, x, y, z);
         dummy.setEmulatingUUID(getOwnerUUID());//pretend to be the owner
         BlockEvent.BreakEvent event = new BlockEvent.BreakEvent(level, hitPos, hitState, dummy);
-        if (!NeoForge.EVENT_BUS.post(event).isCanceled()) {
+        if (!event.post()) {
             if (hitState.getBlock() instanceof TntBlock && hitState.isFlammable(level, hitPos, hitSide)) {
                 //Convert TNT that can be lit on fire into a tnt entity
                 //Note: We don't mark the fake player as the igniter as then when the tnt explodes if it hits a player

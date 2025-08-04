@@ -1,6 +1,10 @@
 package mekanism.common.entity;
 
 import java.util.Optional;
+
+import io.github.fabricators_of_create.porting_lib.entity.IEntityWithComplexSpawn;
+import io.github.fabricators_of_create.porting_lib.level.BlockSnapshot;
+import io.github.fabricators_of_create.porting_lib.tool.ItemAbility;
 import mekanism.common.config.MekanismConfig;
 import mekanism.common.item.gear.ItemFlamethrower.FlamethrowerMode;
 import mekanism.common.lib.math.Pos3D;
@@ -45,13 +49,6 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.HitResult.Type;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.common.ItemAbilities;
-import net.neoforged.neoforge.common.ItemAbility;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.common.util.BlockSnapshot;
-import net.neoforged.neoforge.entity.IEntityWithComplexSpawn;
-import net.neoforged.neoforge.event.EventHooks;
-import net.neoforged.neoforge.event.level.BlockEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

@@ -3,6 +3,7 @@ package mekanism.common.item;
 import java.util.List;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.IChemicalHandler;
+import mekanism.api.fabric.transfer.fluids.IFluidHandlerItem;
 import mekanism.api.fluid.IExtendedFluidHandler;
 import mekanism.api.functions.ConstantPredicates;
 import mekanism.common.attachments.containers.chemical.ComponentBackedChemicalTank;
@@ -23,7 +24,6 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
 import org.jetbrains.annotations.NotNull;
 
 public class ItemGaugeDropper extends Item {

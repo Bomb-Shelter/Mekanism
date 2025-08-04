@@ -1,12 +1,12 @@
 package mekanism.common.registries;
 
+import io.github.fabricators_of_create.porting_lib.registry.DeferredHolder;
+import io.github.fabricators_of_create.porting_lib.registry.DeferredRegister;
 import mekanism.common.Mekanism;
 import mekanism.common.particle.LaserParticleType;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.core.registries.Registries;
-import io.github.fabricators_of_create.porting_lib.registry.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
 
 public class MekanismParticleTypes {
 

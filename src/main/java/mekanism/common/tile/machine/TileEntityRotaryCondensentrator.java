@@ -58,6 +58,7 @@ import mekanism.common.tile.interfaces.IHasMode;
 import mekanism.common.tile.prefab.TileEntityRecipeMachine;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.NBTUtils;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentMap;
@@ -65,7 +66,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.FluidType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -84,7 +84,7 @@ public class TileEntityRotaryCondensentrator extends TileEntityRecipeMachine<Rot
           NOT_ENOUGH_SPACE_FLUID_OUTPUT_ERROR,
           RecipeError.INPUT_DOESNT_PRODUCE_OUTPUT
     );
-    public static final int CAPACITY = 10 * FluidType.BUCKET_VOLUME;
+    public static final long CAPACITY = 10 * FluidConstants.BUCKET;
 
     @WrappingComputerMethod(wrapper = ComputerChemicalTankWrapper.class, methodNames = {"getGas", "getGasCapacity", "getGasNeeded",
                                                                                         "getGasFilledPercentage"}, docPlaceholder = "gas tank")
@@ -247,13 +247,13 @@ public class TileEntityRotaryCondensentrator extends TileEntityRecipeMachine<Rot
     @Override
     protected void applyImplicitComponents(@NotNull BlockEntity.DataComponentInput input) {
         super.applyImplicitComponents(input);
-        mode = input.getOrDefault(MekanismDataComponents.ROTARY_MODE, mode);
+        mode = input.getOrDefault(MekanismDataComponents.ROTARY_MODE.get(), mode);
     }
 
     @Override
     protected void collectImplicitComponents(@NotNull DataComponentMap.Builder builder) {
         super.collectImplicitComponents(builder);
-        builder.set(MekanismDataComponents.ROTARY_MODE, mode);
+        builder.set(MekanismDataComponents.ROTARY_MODE.get(), mode);
     }
 
     @Override

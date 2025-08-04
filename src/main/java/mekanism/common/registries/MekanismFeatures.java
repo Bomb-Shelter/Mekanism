@@ -8,7 +8,7 @@ import mekanism.common.world.ResizableOreFeature;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import io.github.fabricators_of_create.porting_lib.registry.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import io.github.fabricators_of_create.porting_lib.registry.DeferredRegister;
 
 public class MekanismFeatures {
 

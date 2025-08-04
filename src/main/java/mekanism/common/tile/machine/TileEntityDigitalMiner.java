@@ -28,6 +28,7 @@ import mekanism.api.MekanismAPI;
 import mekanism.api.RelativeSide;
 import mekanism.api.SerializationConstants;
 import mekanism.api.Upgrade;
+import mekanism.api.fabric.transfer.items.IItemHandler;
 import mekanism.api.inventory.IInventorySlot;
 import mekanism.common.CommonWorldTickHandler;
 import mekanism.common.Mekanism;
@@ -83,6 +84,8 @@ import mekanism.common.util.NBTUtils;
 import mekanism.common.util.StackUtils;
 import mekanism.common.util.UpgradeUtils;
 import mekanism.common.util.WorldUtils;
+import net.fabricmc.fabric.api.lookup.v1.block.BlockApiCache;
+import net.fabricmc.fabric.api.lookup.v1.block.BlockApiLookup;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder.Reference;
@@ -110,11 +113,6 @@ import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.neoforged.neoforge.capabilities.BlockCapability;
-import net.neoforged.neoforge.capabilities.BlockCapabilityCache;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.level.BlockEvent;
-import net.neoforged.neoforge.items.IItemHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -129,11 +127,11 @@ public class TileEntityDigitalMiner extends TileEntityMekanism implements IChunk
     public ThreadMinerSearch searcher = new ThreadMinerSearch(this);
 
     @Nullable
-    private BlockCapabilityCache<IItemHandler, @Nullable Direction> pullInventory;
+    private BlockApiCache<IItemHandler, @Nullable Direction> pullInventory;
     @Nullable
-    private BlockCapabilityCache<IItemHandler, @Nullable Direction> selfEjectInventory;
+    private BlockApiCache<IItemHandler, @Nullable Direction> selfEjectInventory;
     @Nullable
-    private BlockCapabilityCache<IItemHandler, @Nullable Direction> ejectInventory;
+    private BlockApiCache<IItemHandler, @Nullable Direction> ejectInventory;
 
     private int radius;
     private boolean inverse;
@@ -280,11 +278,11 @@ public class TileEntityDigitalMiner extends TileEntityMekanism implements IChunk
             if (selfEjectInventory == null) {
                 selfEjectInventory = Capabilities.ITEM.createCache((ServerLevel) level, ejectPos, oppositeDirection);
             }
-            IItemHandler ejectHandler = selfEjectInventory.getCapability();
+            IItemHandler ejectHandler = selfEjectInventory.find(oppositeDirection);
             if (ejectInventory == null) {
                 ejectInventory = Capabilities.ITEM.createCache((ServerLevel) level, ejectPos.relative(oppositeDirection), direction);
             }
-            IItemHandler targetHandler = ejectInventory.getCapability();
+            IItemHandler targetHandler = ejectInventory.find(direction);
             if (ejectHandler != null && targetHandler != null) {
                 TransitRequest ejectMap = InventoryUtils.getEjectItemMap(ejectHandler, mainSlots);
                 if (!ejectMap.isEmpty()) {
@@ -629,7 +627,7 @@ public class TileEntityDigitalMiner extends TileEntityMekanism implements IChunk
             if (pullInventory == null) {
                 pullInventory = Capabilities.ITEM.createCache((ServerLevel) level, getBlockPos().above(2), Direction.DOWN);
             }
-            IItemHandler pullInv = pullInventory.getCapability();
+            IItemHandler pullInv = pullInventory.find(Direction.DOWN);
             if (pullInv != null) {
                 TransitRequest request = TransitRequest.definedItem(pullInv, 1, Finder.item(replaceTarget));
                 if (!request.isEmpty()) {
@@ -835,11 +833,11 @@ public class TileEntityDigitalMiner extends TileEntityMekanism implements IChunk
 
     public static boolean isSavedReplaceTarget(ItemStack stack, Item target) {
         //This method is here to make it easier to maintain parity if we change the logic of isReplaceTarget
-        if (stack.getOrDefault(MekanismDataComponents.INVERSE, false)) {
-            Item inverseReplaceTarget = stack.getOrDefault(MekanismDataComponents.REPLACE_STACK, Items.AIR);
+        if (stack.getOrDefault(MekanismDataComponents.INVERSE.get(), false)) {
+            Item inverseReplaceTarget = stack.getOrDefault(MekanismDataComponents.REPLACE_STACK.get(), Items.AIR);
             return inverseReplaceTarget != Items.AIR && inverseReplaceTarget == target;
         }
-        FilterAware filterAware = stack.get(MekanismDataComponents.FILTER_AWARE);
+        FilterAware filterAware = stack.get(MekanismDataComponents.FILTER_AWARE.get());
         return filterAware != null && filterAware.anyEnabledMatch(MinerFilter.class, filter -> filter.replaceTargetMatches(target));
     }
 
@@ -1070,24 +1068,24 @@ public class TileEntityDigitalMiner extends TileEntityMekanism implements IChunk
     @Override
     protected void collectImplicitComponents(@NotNull DataComponentMap.Builder builder) {
         super.collectImplicitComponents(builder);
-        builder.set(MekanismDataComponents.RADIUS, getRadius());
-        builder.set(MekanismDataComponents.MIN_Y, getMinY());
-        builder.set(MekanismDataComponents.MAX_Y, getMaxY());
-        builder.set(MekanismDataComponents.EJECT, doEject);
-        builder.set(MekanismDataComponents.PULL, doPull);
-        builder.set(MekanismDataComponents.SILK_TOUCH, getSilkTouch());
-        builder.set(MekanismDataComponents.INVERSE, inverse);
-        builder.set(MekanismDataComponents.REPLACE_STACK, inverseReplaceTarget);
-        builder.set(MekanismDataComponents.INVERSE_REQUIRES_REPLACE, inverseRequiresReplacement);
-        builder.set(MekanismDataComponents.OVERFLOW_AWARE, new OverflowAware(new Object2IntLinkedOpenHashMap<>(overflow)));
+        builder.set(MekanismDataComponents.RADIUS.get(), getRadius());
+        builder.set(MekanismDataComponents.MIN_Y.get(), getMinY());
+        builder.set(MekanismDataComponents.MAX_Y.get(), getMaxY());
+        builder.set(MekanismDataComponents.EJECT.get(), doEject);
+        builder.set(MekanismDataComponents.PULL.get(), doPull);
+        builder.set(MekanismDataComponents.SILK_TOUCH.get(), getSilkTouch());
+        builder.set(MekanismDataComponents.INVERSE.get(), inverse);
+        builder.set(MekanismDataComponents.REPLACE_STACK.get(), inverseReplaceTarget);
+        builder.set(MekanismDataComponents.INVERSE_REQUIRES_REPLACE.get(), inverseRequiresReplacement);
+        builder.set(MekanismDataComponents.OVERFLOW_AWARE.get(), new OverflowAware(new Object2IntLinkedOpenHashMap<>(overflow)));
     }
 
     @Override
     protected void applyImplicitComponents(@NotNull BlockEntity.DataComponentInput input) {
         super.applyImplicitComponents(input);
-        setRadius(Math.min(input.getOrDefault(MekanismDataComponents.RADIUS, radius), MekanismConfig.general.minerMaxRadius.get()));
-        int newMinY = input.getOrDefault(MekanismDataComponents.MIN_Y, minY);
-        int newMaxY = input.getOrDefault(MekanismDataComponents.MAX_Y, minY);
+        setRadius(Math.min(input.getOrDefault(MekanismDataComponents.RADIUS.get(), radius), MekanismConfig.general.minerMaxRadius.get()));
+        int newMinY = input.getOrDefault(MekanismDataComponents.MIN_Y.get(), minY);
+        int newMaxY = input.getOrDefault(MekanismDataComponents.MAX_Y.get(), minY);
         if (level != null && !isRemote()) {
             setMinY(Math.max(newMinY, level.getMinBuildHeight()));
             setMaxY(Math.min(newMaxY, level.getMaxBuildHeight() - 1));
@@ -1095,15 +1093,15 @@ public class TileEntityDigitalMiner extends TileEntityMekanism implements IChunk
             setMinY(newMinY);
             setMaxY(newMaxY);
         }
-        doEject = input.getOrDefault(MekanismDataComponents.EJECT, doEject);
-        doPull = input.getOrDefault(MekanismDataComponents.PULL, doPull);
-        setSilkTouch(input.getOrDefault(MekanismDataComponents.SILK_TOUCH, silkTouch));
-        inverse = input.getOrDefault(MekanismDataComponents.INVERSE, inverse);
-        inverseReplaceTarget = input.getOrDefault(MekanismDataComponents.REPLACE_STACK, inverseReplaceTarget);
-        inverseRequiresReplacement = input.getOrDefault(MekanismDataComponents.INVERSE_REQUIRES_REPLACE, inverseRequiresReplacement);
+        doEject = input.getOrDefault(MekanismDataComponents.EJECT.get(), doEject);
+        doPull = input.getOrDefault(MekanismDataComponents.PULL.get(), doPull);
+        setSilkTouch(input.getOrDefault(MekanismDataComponents.SILK_TOUCH.get(), silkTouch));
+        inverse = input.getOrDefault(MekanismDataComponents.INVERSE.get(), inverse);
+        inverseReplaceTarget = input.getOrDefault(MekanismDataComponents.REPLACE_STACK.get(), inverseReplaceTarget);
+        inverseRequiresReplacement = input.getOrDefault(MekanismDataComponents.INVERSE_REQUIRES_REPLACE.get(), inverseRequiresReplacement);
         //Clear any existing overflow and read what is the actual overflow from the stack
         overflow.clear();
-        overflow.putAll(input.getOrDefault(MekanismDataComponents.OVERFLOW_AWARE, OverflowAware.EMPTY).overflow());
+        overflow.putAll(input.getOrDefault(MekanismDataComponents.OVERFLOW_AWARE.get(), OverflowAware.EMPTY).overflow());
         hasOverflow = !overflow.isEmpty();
         //Note: Marking rechecking if any of the overflow can fit probably isn't strictly necessary here as in theory it already tried
         // to insert anything before when it was saving, but it doesn't really hurt and then if the last tick had it get overflow or
@@ -1127,7 +1125,7 @@ public class TileEntityDigitalMiner extends TileEntityMekanism implements IChunk
 
     @Nullable
     @Override
-    public <T> T getOffsetCapabilityIfEnabled(@NotNull BlockCapability<T, @Nullable Direction> capability, Direction side, @NotNull Vec3i offset) {
+    public <T> T getOffsetCapabilityIfEnabled(@NotNull BlockApiLookup<T, @Nullable Direction> capability, Direction side, @NotNull Vec3i offset) {
         if (capability == Capabilities.ITEM.block()) {
             //Get item handler cap directly from here as we disable it entirely for the main block as we only have it enabled from ports
             return Objects.requireNonNull(itemHandlerManager, "Expected to have item handler").resolve(capability, side);
@@ -1137,7 +1135,7 @@ public class TileEntityDigitalMiner extends TileEntityMekanism implements IChunk
     }
 
     @Override
-    public boolean isOffsetCapabilityDisabled(@NotNull BlockCapability<?, @Nullable Direction> capability, Direction side, @NotNull Vec3i offset) {
+    public boolean isOffsetCapabilityDisabled(@NotNull BlockApiLookup<?, @Nullable Direction> capability, Direction side, @NotNull Vec3i offset) {
         if (capability == Capabilities.ITEM.block()) {
             return notItemPort(side, offset);
         } else if (EnergyCompatUtils.isEnergyCapability(capability)) {

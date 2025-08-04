@@ -4,6 +4,7 @@ import com.mojang.datafixers.util.Function4;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import io.github.fabricators_of_create.porting_lib.core.util.PortingLibExtraCodecs;
 import io.netty.handler.codec.DecoderException;
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -19,7 +20,6 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.neoforged.neoforge.common.util.NeoForgeExtraCodecs;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 
 @NothingNullByDefault
@@ -40,14 +40,14 @@ public class RotaryRecipeSerializer implements RecipeSerializer<BasicRotaryRecip
     public RotaryRecipeSerializer(Function4<FluidStackIngredient, ChemicalStackIngredient, ChemicalStack, FluidStack, BasicRotaryRecipe> bothWaysFactory,
           BiFunction<FluidStackIngredient, ChemicalStack, BasicRotaryRecipe> toChemicalFactory,
           BiFunction<ChemicalStackIngredient, FluidStack, BasicRotaryRecipe> toFluidFactory) {
-        this.codec = NeoForgeExtraCodecs.withAlternative(
+        this.codec = PortingLibExtraCodecs.withAlternative(
               RecordCodecBuilder.mapCodec(i -> i.group(
                     FLUID_INPUT_FIELD,
                     CHEMICAL_INPUT_FIELD,
                     CHEMICAL_OUTPUT_FIELD,
                     FLUID_OUTPUT_FIELD
               ).apply(i, bothWaysFactory)),
-              NeoForgeExtraCodecs.withAlternative(
+                PortingLibExtraCodecs.withAlternative(
                     RecordCodecBuilder.mapCodec(i -> i.group(
                           FLUID_INPUT_FIELD,
                           CHEMICAL_OUTPUT_FIELD
@@ -130,7 +130,7 @@ public class RotaryRecipeSerializer implements RecipeSerializer<BasicRotaryRecip
         public int hashCode() {
             int hash = input.hashCode();
             hash = 31 * hash + FluidStack.hashFluidAndComponents(output);
-            hash = 31 * hash + output.getAmount();
+            hash = 31 * hash + Long.hashCode(output.getAmount());
             return hash;
         }
     }

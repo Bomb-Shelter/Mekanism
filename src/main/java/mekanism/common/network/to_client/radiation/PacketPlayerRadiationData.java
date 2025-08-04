@@ -3,12 +3,12 @@ package mekanism.common.network.to_client.radiation;
 import io.netty.buffer.ByteBuf;
 import mekanism.common.Mekanism;
 import mekanism.common.network.IMekanismPacket;
+import mekanism.common.network.fabric.IPayloadContext;
 import mekanism.common.registries.MekanismAttachmentTypes;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
 public record PacketPlayerRadiationData(double radiation) implements IMekanismPacket {
@@ -19,7 +19,7 @@ public record PacketPlayerRadiationData(double radiation) implements IMekanismPa
     );
 
     public PacketPlayerRadiationData(Player player) {
-        this(player.getData(MekanismAttachmentTypes.RADIATION));
+        this(player.getAttachedOrCreate(MekanismAttachmentTypes.RADIATION));
     }
 
     @NotNull
@@ -30,6 +30,6 @@ public record PacketPlayerRadiationData(double radiation) implements IMekanismPa
 
     @Override
     public void handle(IPayloadContext context) {
-        context.player().setData(MekanismAttachmentTypes.RADIATION, radiation);
+        context.player().setAttached(MekanismAttachmentTypes.RADIATION, radiation);
     }
 }

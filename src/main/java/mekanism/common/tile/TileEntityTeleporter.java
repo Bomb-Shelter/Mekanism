@@ -1,5 +1,7 @@
 package mekanism.common.tile;
 
+import io.github.fabricators_of_create.porting_lib.entity.PartEntity;
+import io.github.fabricators_of_create.porting_lib.tags.Tags;
 import it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
@@ -76,10 +78,6 @@ import net.minecraft.world.level.portal.DimensionTransition;
 import net.minecraft.world.level.portal.DimensionTransition.PostDimensionTransition;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.common.Tags;
-import net.neoforged.neoforge.entity.PartEntity;
-import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -334,7 +332,7 @@ public class TileEntityTeleporter extends TileEntityMekanism implements IChunkLo
                 long energyCost = calculateEnergyCost(entity, teleWorld, teleportInfo.closest);
 
                 MekanismTeleportEvent.Teleporter event = new MekanismTeleportEvent.Teleporter(entity, teleporterTargetPos, teleWorld.dimension(), energyCost);
-                if (NeoForge.EVENT_BUS.post(event).isCanceled()) {
+                if (event.post()) {
                     //Skip the entity if the event was cancelled
                     continue;
                 }

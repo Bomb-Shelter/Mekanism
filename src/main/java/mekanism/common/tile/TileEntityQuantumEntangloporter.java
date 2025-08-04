@@ -10,6 +10,7 @@ import java.util.function.Supplier;
 import mekanism.api.IContentsListener;
 import mekanism.api.chemical.IChemicalTank;
 import mekanism.api.energy.IEnergyContainer;
+import mekanism.api.fabric.lookup.BlockApiCacheWithContext;
 import mekanism.api.fluid.IExtendedFluidTank;
 import mekanism.api.heat.HeatAPI.HeatTransfer;
 import mekanism.api.heat.IHeatCapacitor;
@@ -63,13 +64,12 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.capabilities.BlockCapabilityCache;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class TileEntityQuantumEntangloporter extends TileEntityConfigurableMachine implements IChunkLoader {
 
-    private final Map<TransmissionType, Map<Direction, BlockCapabilityCache<?, @Nullable Direction>>> capabilityCaches = new EnumMap<>(TransmissionType.class);
+    private final Map<TransmissionType, Map<Direction, BlockApiCacheWithContext<?, @Nullable Direction>>> capabilityCaches = new EnumMap<>(TransmissionType.class);
     private final Map<Direction, BlockEnergyCapabilityCache> adjacentEnergyCaps = new EnumMap<>(Direction.class);
     private final TileComponentChunkLoader<TileEntityQuantumEntangloporter> chunkLoaderComponent;
 
@@ -204,8 +204,8 @@ public class TileEntityQuantumEntangloporter extends TileEntityConfigurableMachi
             //Not currently handled
             return null;
         }
-        Map<Direction, BlockCapabilityCache<?, @Nullable Direction>> caches = capabilityCaches.computeIfAbsent(transmissionType, type -> new EnumMap<>(Direction.class));
-        BlockCapabilityCache<?, @Nullable Direction> cache = caches.get(side);
+        Map<Direction, BlockApiCacheWithContext<?, @Nullable Direction>> caches = capabilityCaches.computeIfAbsent(transmissionType, type -> new EnumMap<>(Direction.class));
+        BlockApiCacheWithContext<?, @Nullable Direction> cache = caches.get(side);
         if (cache == null) {
             IMultiTypeCapability<HANDLER, ?> capability = (IMultiTypeCapability<HANDLER, ?>) switch (transmissionType) {
                 case FLUID -> Capabilities.FLUID;
@@ -217,7 +217,7 @@ public class TileEntityQuantumEntangloporter extends TileEntityConfigurableMachi
                 caches.put(side, cache);
             }
         }
-        return cache == null ? null : (HANDLER) cache.getCapability();
+        return cache == null ? null : (HANDLER) cache.find();
     }
 
     @Override

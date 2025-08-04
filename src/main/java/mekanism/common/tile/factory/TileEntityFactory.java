@@ -10,6 +10,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.ToIntBiFunction;
+
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenCustomHashMap;
 import mekanism.api.Action;
 import mekanism.api.IContentsListener;
 import mekanism.api.SerializationConstants;
@@ -64,10 +66,10 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackLinkedSet;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.common.util.ItemStackMap;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -416,13 +418,13 @@ public abstract class TileEntityFactory<RECIPE extends MekanismRecipe<?>> extend
     @Override
     protected void collectImplicitComponents(@NotNull DataComponentMap.Builder builder) {
         super.collectImplicitComponents(builder);
-        builder.set(MekanismDataComponents.SORTING, isSorting());
+        builder.set(MekanismDataComponents.SORTING.get(), isSorting());
     }
 
     @Override
     protected void applyImplicitComponents(@NotNull BlockEntity.DataComponentInput input) {
         super.applyImplicitComponents(input);
-        sorting = input.getOrDefault(MekanismDataComponents.SORTING, sorting);
+        sorting = input.getOrDefault(MekanismDataComponents.SORTING.get(), sorting);
     }
 
     @Override
@@ -524,7 +526,7 @@ public abstract class TileEntityFactory<RECIPE extends MekanismRecipe<?>> extend
     //End methods IComputerTile
 
     private void sortInventory() {
-        Map<ItemStack, RecipeProcessInfo<RECIPE>> processes = ItemStackMap.createTypeAndTagMap();
+        Map<ItemStack, RecipeProcessInfo<RECIPE>> processes = new Object2ObjectOpenCustomHashMap<>(ItemStackLinkedSet.TYPE_AND_TAG);
         List<ProcessInfo> emptyProcesses = new ArrayList<>();
         for (ProcessInfo processInfo : processInfoSlots) {
             IInventorySlot inputSlot = processInfo.inputSlot();

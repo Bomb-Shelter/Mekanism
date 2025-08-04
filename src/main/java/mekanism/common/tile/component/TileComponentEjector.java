@@ -18,6 +18,8 @@ import mekanism.api.SerializationConstants;
 import mekanism.api.chemical.IChemicalHandler;
 import mekanism.api.chemical.IChemicalTank;
 import mekanism.api.energy.IEnergyContainer;
+import mekanism.api.fabric.lookup.BlockApiCacheWithContext;
+import mekanism.api.fabric.transfer.items.IItemHandler;
 import mekanism.api.fluid.IExtendedFluidTank;
 import mekanism.api.text.EnumColor;
 import mekanism.common.attachments.component.AttachedEjector;
@@ -61,9 +63,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.neoforge.capabilities.BlockCapabilityCache;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import net.neoforged.neoforge.items.IItemHandler;
+import mekanism.api.fabric.transfer.fluids.IFluidHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -72,7 +72,7 @@ public class TileComponentEjector implements ITileComponent, ISpecificContainerT
     private final TileEntityMekanism tile;
     private final Map<TransmissionType, ConfigInfo> configInfo = new EnumMap<>(TransmissionType.class);
 
-    private final Map<TransmissionType, Map<Direction, BlockCapabilityCache<?, @Nullable Direction>>> capabilityCaches = new EnumMap<>(TransmissionType.class);
+    private final Map<TransmissionType, Map<Direction, BlockApiCacheWithContext<?, @Nullable Direction>>> capabilityCaches = new EnumMap<>(TransmissionType.class);
     private final Map<Direction, BlockEnergyCapabilityCache> energyCapabilityCache = new EnumMap<>(Direction.class);
 
     private final Function<LogisticalTransporterBase, EnumColor> outputColorFunction;
@@ -217,17 +217,17 @@ public class TileComponentEjector implements ITileComponent, ISpecificContainerT
         if (outputData != null && !outputData.isEmpty()) {
             ServerLevel level = (ServerLevel) tile.getLevel();
             BlockPos pos = tile.getBlockPos();
-            Map<Direction, BlockCapabilityCache<?, @Nullable Direction>> typeCapabilityCaches = capabilityCaches.computeIfAbsent(type, t -> new EnumMap<>(Direction.class));
+            Map<Direction, BlockApiCacheWithContext<?, @Nullable Direction>> typeCapabilityCaches = capabilityCaches.computeIfAbsent(type, t -> new EnumMap<>(Direction.class));
             for (Map.Entry<Object, Set<Direction>> entry : outputData.entrySet()) {
                 Set<Direction> sides = entry.getValue();
                 switch (type) {
                     case CHEMICAL -> {
                         IChemicalTank tank = (IChemicalTank) entry.getKey();
-                        List<BlockCapabilityCache<IChemicalHandler, @Nullable Direction>> caches = getCapabilityCaches(level, pos, typeCapabilityCaches, sides, Capabilities.CHEMICAL);
+                        List<BlockApiCacheWithContext<IChemicalHandler, @Nullable Direction>> caches = getCapabilityCaches(level, pos, typeCapabilityCaches, sides, Capabilities.CHEMICAL);
                         ChemicalUtil.emit(caches, tank, chemicalEjectRate.getAsLong());
                     }
                     case FLUID -> {
-                        List<BlockCapabilityCache<IFluidHandler, @Nullable Direction>> caches = getCapabilityCaches(level, pos, typeCapabilityCaches, sides, Capabilities.FLUID);
+                        List<BlockApiCacheWithContext<IFluidHandler, @Nullable Direction>> caches = getCapabilityCaches(level, pos, typeCapabilityCaches, sides, Capabilities.FLUID);
                         FluidUtils.emit(caches, (IExtendedFluidTank) entry.getKey(), fluidEjectRate.getAsInt());
                     }
                     case ENERGY -> {
@@ -249,11 +249,11 @@ public class TileComponentEjector implements ITileComponent, ISpecificContainerT
     }
 
     @SuppressWarnings("unchecked")
-    private static <HANDLER> List<BlockCapabilityCache<HANDLER, @Nullable Direction>> getCapabilityCaches(ServerLevel level, BlockPos pos,
-          Map<Direction, BlockCapabilityCache<?, @Nullable Direction>> typeCapabilityCaches, Set<Direction> sides, IMultiTypeCapability<HANDLER, ?> capability) {
-        List<BlockCapabilityCache<HANDLER, @Nullable Direction>> caches = new ArrayList<>(sides.size());
+    private static <HANDLER> List<BlockApiCacheWithContext<HANDLER, @Nullable Direction>> getCapabilityCaches(ServerLevel level, BlockPos pos,
+          Map<Direction, BlockApiCacheWithContext<?, @Nullable Direction>> typeCapabilityCaches, Set<Direction> sides, IMultiTypeCapability<HANDLER, ?> capability) {
+        List<BlockApiCacheWithContext<HANDLER, @Nullable Direction>> caches = new ArrayList<>(sides.size());
         for (Direction side : sides) {
-            BlockCapabilityCache<HANDLER, @Nullable Direction> cache = (BlockCapabilityCache<HANDLER, @Nullable Direction>) typeCapabilityCaches.get(side);
+            BlockApiCacheWithContext<HANDLER, @Nullable Direction> cache = (BlockApiCacheWithContext<HANDLER, @Nullable Direction>) typeCapabilityCaches.get(side);
             if (cache == null) {
                 cache = capability.createCache(level, pos.relative(side), side.getOpposite());
                 typeCapabilityCaches.put(side, cache);
@@ -268,7 +268,7 @@ public class TileComponentEjector implements ITileComponent, ISpecificContainerT
      */
     private void outputItems(Direction facing, ConfigInfo info) {
         ServerLevel level = (ServerLevel) tile.getLevel();
-        Map<Direction, BlockCapabilityCache<?, @Nullable Direction>> typeCapabilityCaches = null;
+        Map<Direction, BlockApiCacheWithContext<?, @Nullable Direction>> typeCapabilityCaches = null;
         for (DataType dataType : info.getSupportedDataTypes()) {
             if (!dataType.canOutput()) {
                 continue;
@@ -286,12 +286,12 @@ public class TileComponentEjector implements ITileComponent, ISpecificContainerT
                         typeCapabilityCaches = capabilityCaches.computeIfAbsent(TransmissionType.ITEM, t -> new EnumMap<>(Direction.class));
                     }
                     for (Direction side : outputs) {
-                        BlockCapabilityCache<IItemHandler, @Nullable Direction> cache = (BlockCapabilityCache<IItemHandler, @Nullable Direction>) typeCapabilityCaches.get(side);
+                        BlockApiCacheWithContext<IItemHandler, @Nullable Direction> cache = (BlockApiCacheWithContext<IItemHandler, @Nullable Direction>) typeCapabilityCaches.get(side);
                         if (cache == null) {
                             cache = Capabilities.ITEM.createCache(level, tile.getBlockPos().relative(side), side.getOpposite());
                             typeCapabilityCaches.put(side, cache);
                         }
-                        IItemHandler capability = cache.getCapability();
+                        IItemHandler capability = cache.find();
                         if (capability == null) {
                             //Skip sides where there isn't a target
                             continue;
@@ -401,7 +401,7 @@ public class TileComponentEjector implements ITileComponent, ISpecificContainerT
 
     @Override
     public void applyImplicitComponents(@NotNull BlockEntity.DataComponentInput input) {
-        AttachedEjector ejector = input.get(MekanismDataComponents.EJECTOR);
+        AttachedEjector ejector = input.get(MekanismDataComponents.EJECTOR.get());
         if (ejector != null) {
             for (int i = 0; i < inputColors.length; i++) {
                 inputColors[i] = ejector.inputColors().get(i).orElse(null);
@@ -413,7 +413,7 @@ public class TileComponentEjector implements ITileComponent, ISpecificContainerT
 
     @Override
     public void collectImplicitComponents(DataComponentMap.Builder builder) {
-        builder.set(MekanismDataComponents.EJECTOR, AttachedEjector.create(inputColors, strictInput, outputColor));
+        builder.set(MekanismDataComponents.EJECTOR.get(), AttachedEjector.create(inputColors, strictInput, outputColor));
     }
 
     @Override

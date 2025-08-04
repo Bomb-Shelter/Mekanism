@@ -19,8 +19,8 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraft.world.level.biome.MobSpawnSettings.SpawnerData;
-import net.neoforged.fml.config.ModConfig.Type;
-import net.neoforged.neoforge.common.ModConfigSpec;
+import io.github.fabricators_of_create.porting_lib.config.ModConfig.Type;
+import io.github.fabricators_of_create.porting_lib.config.ModConfigSpec;
 
 public class AdditionsConfig extends BaseMekanismConfig {
 

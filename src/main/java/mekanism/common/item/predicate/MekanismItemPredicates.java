@@ -1,11 +1,11 @@
 package mekanism.common.item.predicate;
 
+import io.github.fabricators_of_create.porting_lib.registry.DeferredRegister;
 import mekanism.common.Mekanism;
 import net.minecraft.advancements.critereon.ItemSubPredicate;
 import net.minecraft.advancements.critereon.ItemSubPredicate.Type;
 import net.minecraft.core.registries.Registries;
 import io.github.fabricators_of_create.porting_lib.registry.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
 
 public class MekanismItemPredicates {
 

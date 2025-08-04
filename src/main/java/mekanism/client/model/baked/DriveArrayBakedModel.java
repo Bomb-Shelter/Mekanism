@@ -22,6 +22,12 @@ import mekanism.common.registries.MekanismBlocks;
 import mekanism.common.registries.MekanismDataComponents;
 import mekanism.common.tile.qio.TileEntityQIODriveArray;
 import mekanism.common.tile.qio.TileEntityQIODriveArray.DriveStatus;
+import net.fabricmc.fabric.api.renderer.v1.Renderer;
+import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
+import net.fabricmc.fabric.api.renderer.v1.material.BlendMode;
+import net.fabricmc.fabric.api.renderer.v1.mesh.Mesh;
+import net.fabricmc.fabric.api.renderer.v1.mesh.MeshBuilder;
+import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -50,37 +56,38 @@ public class DriveArrayBakedModel extends ExtensionOverrideBakedModel<byte[]> {
     }
 
     @Override
-    public List<BakedQuad> createQuads(QuadsKey<byte[]> key) {
+    public Mesh createQuads(QuadsKey<byte[]> key) {
         byte[] driveStatus = Objects.requireNonNull(key.getData());
         BlockState blockState = Objects.requireNonNull(key.getBlockState());
-        RenderType renderType = key.getLayer();
+
+        Renderer renderer = RendererAccess.INSTANCE.getRenderer();
+
+        BlendMode renderType = key.getLayer();
         QuadTransformation rotation = QuadTransformation.rotate(Attribute.getFacing(blockState));
         //Side will always be null as we validate it when creating the key as we don't currently have any of the sides get culled
         Direction side = key.getSide();
-        List<BakedQuad> driveQuads = new ArrayList<>();
+        MeshBuilder builder = renderer.meshBuilder();
+        QuadEmitter emitter = builder.getEmitter();
         for (int i = 0; i < driveStatus.length; i++) {
             DriveStatus status = DriveStatus.BY_ID.apply(driveStatus[i]);
             if (status != DriveStatus.NONE) {
                 float[] translation = DRIVE_PLACEMENTS[i];
                 QuadTransformation transformation = QuadTransformation.translate(translation[0], translation[1], 0);
-                for (BakedQuad bakedQuad : MekanismModelCache.INSTANCE.QIO_DRIVES[status.ordinal()].getQuads(blockState, side, key.getRandom(), ModelData.EMPTY, renderType)) {
-                    Quad quad = new Quad(bakedQuad);
+                Mesh mesh = MekanismModelCache.INSTANCE.QIO_DRIVES[status.ordinal()].emitMesh(blockState, side, key.getRandom(), renderType);
+                mesh.forEach(quadView -> {
+                    Quad quad = new Quad(quadView);
                     if (quad.transform(transformation, rotation)) {
                         //Bake and add the quad if we transformed it
-                        driveQuads.add(quad.bake());
+                        quad.bake(emitter, renderType);
                     } else {
                         // otherwise, just add the source quad
-                        driveQuads.add(bakedQuad);
+                        emitter.copyFrom(quadView);
                     }
-                }
+                });
             }
         }
-        if (!driveQuads.isEmpty()) {
-            List<BakedQuad> ret = new ArrayList<>(key.getQuads());
-            ret.addAll(driveQuads);
-            return ret;
-        }
-        return key.getQuads();
+
+        return builder.build();
     }
 
     @Nullable
@@ -126,7 +133,7 @@ public class DriveArrayBakedModel extends ExtensionOverrideBakedModel<byte[]> {
                     if (driveStack.isEmpty() || !(driveStack.getItem() instanceof IQIODriveItem driveItem)) {
                         status = DriveStatus.NONE;
                     } else {
-                        DriveMetadata metadata = driveStack.getOrDefault(MekanismDataComponents.DRIVE_METADATA, DriveMetadata.EMPTY);
+                        DriveMetadata metadata = driveStack.getOrDefault(MekanismDataComponents.DRIVE_METADATA.get(), DriveMetadata.EMPTY);
                         if (metadata.isEmpty()) {
                             status = DriveStatus.NONE;
                         } else if (hasFrequency) {

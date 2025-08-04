@@ -9,6 +9,7 @@ import mekanism.common.MekanismLang;
 import mekanism.common.item.interfaces.IGuiItem;
 import mekanism.common.network.IMekanismPacket;
 import mekanism.common.network.PacketUtils;
+import mekanism.common.network.fabric.IPayloadContext;
 import mekanism.common.registries.MekanismContainerTypes;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -19,7 +20,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

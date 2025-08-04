@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import mekanism.api.SerializationConstants;
+import mekanism.api.fabric.transfer.items.IItemHandler;
 import mekanism.api.text.EnumColor;
 import mekanism.common.content.filter.BaseFilter;
 import mekanism.common.integration.computer.ComputerException;
@@ -21,7 +22,6 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.Item;
-import net.neoforged.neoforge.items.IItemHandler;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class SorterFilter<FILTER extends SorterFilter<FILTER>> extends BaseFilter<FILTER> {

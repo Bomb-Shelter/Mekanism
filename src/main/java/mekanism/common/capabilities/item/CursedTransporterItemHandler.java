@@ -6,6 +6,8 @@ import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.LongSupplier;
+
+import mekanism.api.fabric.transfer.items.IItemHandler;
 import mekanism.common.content.network.transmitter.LogisticalTransporterBase;
 import mekanism.common.content.transporter.TransporterStack;
 import mekanism.common.lib.inventory.TransitRequest;
@@ -13,7 +15,6 @@ import mekanism.common.lib.inventory.TransitRequest.TransitResponse;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.IItemHandler;
 import org.jetbrains.annotations.NotNull;
 
 public class CursedTransporterItemHandler implements IItemHandler {

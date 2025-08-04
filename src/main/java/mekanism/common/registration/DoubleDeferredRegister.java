@@ -4,11 +4,11 @@ import java.util.Collection;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
-import net.neoforged.bus.api.IEventBus;
 import io.github.fabricators_of_create.porting_lib.registry.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import io.github.fabricators_of_create.porting_lib.registry.DeferredRegister;
 
 public class DoubleDeferredRegister<PRIMARY, SECONDARY> {
 
@@ -48,9 +48,9 @@ public class DoubleDeferredRegister<PRIMARY, SECONDARY> {
         return objectWrapper.apply(primaryObject, secondaryRegister.register(name, () -> secondarySupplier.apply(primaryObject)));
     }
 
-    public void register(IEventBus bus) {
-        primaryRegister.register(bus);
-        secondaryRegister.register(bus);
+    public void register() {
+        primaryRegister.register();
+        secondaryRegister.register();
     }
 
     public Collection<DeferredHolder<PRIMARY, ? extends PRIMARY>> getPrimaryEntries() {

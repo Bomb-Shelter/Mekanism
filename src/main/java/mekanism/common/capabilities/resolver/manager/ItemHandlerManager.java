@@ -1,11 +1,11 @@
 package mekanism.common.capabilities.resolver.manager;
 
+import mekanism.api.fabric.transfer.items.IItemHandler;
 import mekanism.api.inventory.IInventorySlot;
 import mekanism.api.inventory.ISidedItemHandler;
 import mekanism.common.capabilities.Capabilities;
 import mekanism.common.capabilities.holder.slot.IInventorySlotHolder;
 import mekanism.common.capabilities.proxy.ProxyItemHandler;
-import net.neoforged.neoforge.items.IItemHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

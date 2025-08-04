@@ -3,12 +3,16 @@ package mekanism.common.integration.energy;
 import java.util.List;
 import java.util.function.BiFunction;
 import mekanism.api.energy.IStrictEnergyHandler;
+import mekanism.api.fabric.lookup.ICapabilityProvider;
 import mekanism.common.capabilities.Capabilities;
 import mekanism.common.integration.energy.fluxnetworks.FNEnergyCompat;
 import mekanism.common.integration.energy.forgeenergy.ForgeEnergyCompat;
 import mekanism.common.integration.energy.grandpower.GPEnergyCompat;
 import mekanism.common.registration.impl.TileEntityTypeDeferredRegister.BlockEntityTypeBuilder;
 import mekanism.common.tile.base.CapabilityTileEntity;
+import net.fabricmc.fabric.api.lookup.v1.block.BlockApiLookup;
+import net.fabricmc.fabric.api.lookup.v1.entity.EntityApiLookup;
+import net.fabricmc.fabric.api.lookup.v1.item.ItemApiLookup;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Entity;
@@ -18,11 +22,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.capabilities.BlockCapability;
-import net.neoforged.neoforge.capabilities.EntityCapability;
-import net.neoforged.neoforge.capabilities.ICapabilityProvider;
-import net.neoforged.neoforge.capabilities.ItemCapability;
-import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -42,13 +41,13 @@ public class EnergyCompatUtils {
     );
 
     //Default the list of enabled caps to our own energy capability and Neo's
-    private static List<BlockCapability<?, @Nullable Direction>> LOADED_ENERGY_CAPS = List.of(Capabilities.STRICT_ENERGY.block(), Capabilities.ENERGY.block());
+    private static List<BlockApiLookup<?, @Nullable Direction>> LOADED_ENERGY_CAPS = List.of(Capabilities.STRICT_ENERGY.block(), Capabilities.ENERGY.block());
 
     /**
      * @apiNote For internal uses, only call this after mods have loaded so that we can properly assume all {@link IEnergyCompat#capabilityExists()} are present.
      */
     public static void initLoadedCache() {
-        LOADED_ENERGY_CAPS = energyCompats.stream().filter(IEnergyCompat::capabilityExists).<BlockCapability<?, @Nullable Direction>>map(compat -> compat.getCapability().block()).toList();
+        LOADED_ENERGY_CAPS = energyCompats.stream().filter(IEnergyCompat::capabilityExists).<BlockApiLookup<?, @Nullable Direction>>map(compat -> compat.getCapability().block()).toList();
     }
 
     public static List<IEnergyCompat> getCompats() {
@@ -58,7 +57,7 @@ public class EnergyCompatUtils {
     /**
      * Checks if it is a known and enabled energy capability
      */
-    public static boolean isEnergyCapability(@NotNull BlockCapability<?, @Nullable Direction> capability) {
+    public static boolean isEnergyCapability(@NotNull BlockApiLookup<?, @Nullable Direction> capability) {
         for (IEnergyCompat energyCompat : energyCompats) {
             //Note: We check the capability exists and usability states separately, given while it does duplicate
             // the exists check it allows us to skip the more complex usability checks if the capability doesn't actually match
@@ -69,37 +68,37 @@ public class EnergyCompatUtils {
         return false;
     }
 
-    public static List<BlockCapability<?, @Nullable Direction>> getLoadedEnergyCapabilities() {
+    public static List<BlockApiLookup<?, @Nullable Direction>> getLoadedEnergyCapabilities() {
         return LOADED_ENERGY_CAPS;
     }
 
-    public static void registerItemCapabilities(RegisterCapabilitiesEvent event, Item item, ICapabilityProvider<ItemStack, Void, IStrictEnergyHandler> mekProvider) {
+    public static void registerItemCapabilities(Item item, ICapabilityProvider<ItemStack, Void, IStrictEnergyHandler> mekProvider) {
         for (IEnergyCompat energyCompat : energyCompats) {
             if (energyCompat.capabilityExists()) {
-                register(event, energyCompat.getCapability().item(), energyCompat.getProviderAs(mekProvider), item);
+                register(energyCompat.getCapability().item(), energyCompat.getProviderAs(mekProvider), item);
             }
         }
     }
 
     //Note: This extra method is required so that the code can compile even though inlining without the cast doesn't display any errors until attempting to compile
     @SuppressWarnings("unchecked")
-    private static <CAP> void register(RegisterCapabilitiesEvent event, ItemCapability<CAP, Void> capability, ICapabilityProvider<ItemStack, Void, ?> provider, Item item) {
-        event.registerItem(capability, (ICapabilityProvider<ItemStack, Void, CAP>) provider, item);
+    private static <CAP> void register(ItemApiLookup<CAP, Void> capability, ICapabilityProvider<ItemStack, Void, ?> provider, Item item) {
+        capability.registerForItems((itemStack, context) -> (CAP) provider.getCapability(itemStack, context), item);
     }
 
-    public static <ENTITY extends Entity> void registerEntityCapabilities(RegisterCapabilitiesEvent event, EntityType<ENTITY> entity,
+    public static <ENTITY extends Entity> void registerEntityCapabilities(EntityType<ENTITY> entity,
           ICapabilityProvider<? super ENTITY, ?, IStrictEnergyHandler> mekProvider) {
         for (IEnergyCompat energyCompat : energyCompats) {
             if (energyCompat.capabilityExists()) {
-                register(event, energyCompat.getCapability().entity(), entity, energyCompat.getProviderAs(mekProvider));
+                register(energyCompat.getCapability().entity(), entity, energyCompat.getProviderAs(mekProvider));
             }
         }
     }
 
     @SuppressWarnings("unchecked")
-    private static <ENTITY extends Entity, CAP, CONTEXT> void register(RegisterCapabilitiesEvent event, EntityCapability<CAP, CONTEXT> capability, EntityType<ENTITY> entity,
-          ICapabilityProvider<? super ENTITY, ?, ?> provider) {
-        event.registerEntity(capability, entity, (ICapabilityProvider<? super ENTITY, CONTEXT, CAP>) provider);
+    private static <ENTITY extends Entity, CAP, CONTEXT> void register(EntityApiLookup<CAP, CONTEXT> capability, EntityType<ENTITY> entity,
+                                                                       ICapabilityProvider<? super ENTITY, ?, ?> provider) {
+        capability.registerForType((e, context) -> ((ICapabilityProvider<? super ENTITY, CONTEXT, CAP>) provider).getCapability(e, context), entity);
     }
 
     public static void addBlockCapabilities(BlockEntityTypeBuilder<? extends CapabilityTileEntity> builder) {
@@ -111,7 +110,7 @@ public class EnergyCompatUtils {
     }
 
     @Nullable
-    public static Object wrapStrictEnergyHandler(BlockCapability<?, @Nullable Direction> capability, IStrictEnergyHandler handler) {
+    public static Object wrapStrictEnergyHandler(BlockApiLookup<?, @Nullable Direction> capability, IStrictEnergyHandler handler) {
         for (IEnergyCompat energyCompat : energyCompats) {
             if (energyCompat.isUsable() && energyCompat.getCapability().block() == capability) {
                 return energyCompat.wrapStrictEnergyHandler(handler);

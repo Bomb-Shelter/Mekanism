@@ -16,6 +16,7 @@ import mekanism.api.Action;
 import mekanism.api.IContentsListener;
 import mekanism.api.SerializationConstants;
 import mekanism.api.RelativeSide;
+import mekanism.api.fabric.transfer.items.IItemHandler;
 import mekanism.api.math.MathUtils;
 import mekanism.common.Mekanism;
 import mekanism.common.attachments.containers.ContainerType;
@@ -49,6 +50,7 @@ import mekanism.common.registries.MekanismDataComponents;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.NBTUtils;
 import mekanism.common.util.StackUtils;
+import net.fabricmc.fabric.api.lookup.v1.block.BlockApiCache;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -60,8 +62,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.capabilities.BlockCapabilityCache;
-import net.neoforged.neoforge.items.IItemHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -74,7 +74,7 @@ public class TileEntityQIOExporter extends TileEntityQIOFilterHandler implements
     private static final int MAX_DELAY = MekanismUtils.TICKS_PER_HALF_SECOND;
 
     @Nullable
-    private BlockCapabilityCache<IItemHandler, @Nullable Direction> backInventory;
+    private BlockApiCache<IItemHandler, @Nullable Direction> backInventory;
     private int delay = 0;
     private boolean exportWithoutFilter;
     private boolean roundRobin;
@@ -122,11 +122,11 @@ public class TileEntityQIOExporter extends TileEntityQIOFilterHandler implements
     }
 
     private void tryEject(QIOFrequency freq) {
+        Direction direction = getDirection();
         if (backInventory == null) {
-            Direction direction = getDirection();
             backInventory = Capabilities.ITEM.createCache((ServerLevel) level, worldPosition.relative(direction.getOpposite()), direction);
         }
-        IItemHandler backHandler = backInventory.getCapability();
+        IItemHandler backHandler = backInventory.find(direction);
         if (backHandler == null) {
             return;
         }
@@ -220,15 +220,15 @@ public class TileEntityQIOExporter extends TileEntityQIOFilterHandler implements
     @Override
     protected void collectImplicitComponents(@NotNull DataComponentMap.Builder builder) {
         super.collectImplicitComponents(builder);
-        builder.set(MekanismDataComponents.AUTO, exportWithoutFilter);
-        builder.set(MekanismDataComponents.ROUND_ROBIN, roundRobin);
+        builder.set(MekanismDataComponents.AUTO.get(), exportWithoutFilter);
+        builder.set(MekanismDataComponents.ROUND_ROBIN.get(), roundRobin);
     }
 
     @Override
     protected void applyImplicitComponents(@NotNull BlockEntity.DataComponentInput input) {
         super.applyImplicitComponents(input);
-        exportWithoutFilter = input.getOrDefault(MekanismDataComponents.AUTO, exportWithoutFilter);
-        roundRobin = input.getOrDefault(MekanismDataComponents.ROUND_ROBIN, roundRobin);
+        exportWithoutFilter = input.getOrDefault(MekanismDataComponents.AUTO.get(), exportWithoutFilter);
+        roundRobin = input.getOrDefault(MekanismDataComponents.ROUND_ROBIN.get(), roundRobin);
     }
 
     @Nullable

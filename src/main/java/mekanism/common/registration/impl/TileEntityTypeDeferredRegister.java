@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
+import mekanism.api.fabric.lookup.ICapabilityProvider;
 import mekanism.api.functions.ConstantPredicates;
 import mekanism.api.security.IBlockSecurityUtils;
 import mekanism.common.Mekanism;
@@ -21,6 +23,8 @@ import mekanism.common.registration.MekanismDeferredRegister;
 import mekanism.common.registration.impl.TileEntityTypeRegistryObject.CapabilityData;
 import mekanism.common.tile.base.CapabilityTileEntity;
 import mekanism.common.tile.base.TileEntityMekanism;
+import net.fabricmc.fabric.api.lookup.v1.block.BlockApiLookup;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.Block;
@@ -28,13 +32,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.BlockEntityType.BlockEntitySupplier;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.loading.FMLEnvironment;
-import net.neoforged.neoforge.capabilities.BlockCapability;
-import net.neoforged.neoforge.capabilities.ICapabilityProvider;
-import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import io.github.fabricators_of_create.porting_lib.registry.DeferredHolder;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class TileEntityTypeDeferredRegister extends MekanismDeferredRegister<BlockEntityType<?>> {
@@ -71,17 +69,17 @@ public class TileEntityTypeDeferredRegister extends MekanismDeferredRegister<Blo
     }
 
     @Override
-    public void register(@NotNull IEventBus bus) {
-        super.register(bus);
-        bus.addListener(this::registerCapabilities);
+    public void register() {
+        super.register();
+        registerCapabilities();
     }
 
-    private void registerCapabilities(RegisterCapabilitiesEvent event) {
+    private void registerCapabilities() {
         for (Holder<BlockEntityType<?>> entry : getEntries()) {
             //Note: All entries should be of this type
             if (entry instanceof TileEntityTypeRegistryObject<?> tileRO) {
-                tileRO.registerCapabilityProviders(event);
-            } else if (!FMLEnvironment.production) {
+                tileRO.registerCapabilityProviders();
+            } else if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
                 throw new IllegalStateException("Expected entry to be a TileEntityTypeRegistryObject");
             }
         }
@@ -102,21 +100,21 @@ public class TileEntityTypeDeferredRegister extends MekanismDeferredRegister<Blo
             this.factory = factory;
         }
 
-        public <CAP, CONTEXT> BlockEntityTypeBuilder<BE> withSimple(BlockCapability<CAP, CONTEXT> capability) {
+        public <CAP, CONTEXT> BlockEntityTypeBuilder<BE> withSimple(BlockApiLookup<CAP, CONTEXT> capability) {
             return withSimple(capability, ConstantPredicates.ALWAYS_TRUE);
         }
 
         @SuppressWarnings("unchecked")
-        public <CAP, CONTEXT> BlockEntityTypeBuilder<BE> withSimple(BlockCapability<CAP, CONTEXT> capability, BooleanSupplier shouldApply) {
+        public <CAP, CONTEXT> BlockEntityTypeBuilder<BE> withSimple(BlockApiLookup<CAP, CONTEXT> capability, BooleanSupplier shouldApply) {
             return with(capability, (ICapabilityProvider<? super BE, CONTEXT, CAP>) Capabilities.SIMPLE_PROVIDER, shouldApply);
         }
 
-        public <CAP, CONTEXT> BlockEntityTypeBuilder<BE> with(BlockCapability<CAP, CONTEXT> capability,
-              Function<BlockCapability<CAP, CONTEXT>, ICapabilityProvider<? super BE, CONTEXT, CAP>> provider) {
+        public <CAP, CONTEXT> BlockEntityTypeBuilder<BE> with(BlockApiLookup<CAP, CONTEXT> capability,
+              Function<BlockApiLookup<CAP, CONTEXT>, ICapabilityProvider<? super BE, CONTEXT, CAP>> provider) {
             return with(capability, provider.apply(capability));
         }
 
-        public <CAP, CONTEXT> BlockEntityTypeBuilder<BE> with(BlockCapability<CAP, CONTEXT> capability, ICapabilityProvider<? super BE, CONTEXT, CAP> provider) {
+        public <CAP, CONTEXT> BlockEntityTypeBuilder<BE> with(BlockApiLookup<CAP, CONTEXT> capability, ICapabilityProvider<? super BE, CONTEXT, CAP> provider) {
             return with(capability, provider, ConstantPredicates.ALWAYS_TRUE);
         }
 
@@ -124,14 +122,14 @@ public class TileEntityTypeDeferredRegister extends MekanismDeferredRegister<Blo
          * @param shouldApply Determines whether the provider actually be attached to this block entity type. Useful for cases when we want to conditionally apply it
          *                    based on loaded mods or a block's attributes.
          */
-        public <CAP, CONTEXT> BlockEntityTypeBuilder<BE> with(BlockCapability<CAP, CONTEXT> capability, ICapabilityProvider<? super BE, CONTEXT, CAP> provider,
+        public <CAP, CONTEXT> BlockEntityTypeBuilder<BE> with(BlockApiLookup<CAP, CONTEXT> capability, ICapabilityProvider<? super BE, CONTEXT, CAP> provider,
               BooleanSupplier shouldApply) {
             capabilityProviders.add(new CapabilityData<>(capability, provider, shouldApply));
             return this;
         }
 
-        public BlockEntityTypeBuilder<BE> without(BlockCapability<?, ?>... capabilities) {
-            for (BlockCapability<?, ?> capability : capabilities) {
+        public BlockEntityTypeBuilder<BE> without(BlockApiLookup<?, ?>... capabilities) {
+            for (BlockApiLookup<?, ?> capability : capabilities) {
                 //noinspection Java8CollectionRemoveIf - We can't replace it with removeIf as it has a capturing lambda
                 for (Iterator<CapabilityData<BE, ?, ?>> iterator = capabilityProviders.iterator(); iterator.hasNext(); ) {
                     if (iterator.next().capability() == capability) {
@@ -142,7 +140,7 @@ public class TileEntityTypeDeferredRegister extends MekanismDeferredRegister<Blo
             return this;
         }
 
-        public BlockEntityTypeBuilder<BE> without(Collection<? extends BlockCapability<?, ?>> capabilities) {
+        public BlockEntityTypeBuilder<BE> without(Collection<? extends BlockApiLookup<?, ?>> capabilities) {
             //noinspection Java8CollectionRemoveIf - We can't replace it with removeIf as it has a capturing lambda
             for (Iterator<CapabilityData<BE, ?, ?>> iterator = capabilityProviders.iterator(); iterator.hasNext(); ) {
                 if (capabilities.contains(iterator.next().capability())) {

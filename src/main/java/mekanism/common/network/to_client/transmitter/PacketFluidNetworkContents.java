@@ -6,12 +6,12 @@ import mekanism.common.content.network.FluidNetwork;
 import mekanism.common.lib.transmitter.DynamicNetwork;
 import mekanism.common.lib.transmitter.TransmitterNetworkRegistry;
 import mekanism.common.network.IMekanismPacket;
+import mekanism.common.network.fabric.IPayloadContext;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
 public record PacketFluidNetworkContents(UUID networkID, FluidStack fluid) implements IMekanismPacket {
@@ -54,7 +54,7 @@ public record PacketFluidNetworkContents(UUID networkID, FluidStack fluid) imple
     public int hashCode() {
         int hash = networkID.hashCode();
         hash = 31 * hash + FluidStack.hashFluidAndComponents(fluid);
-        hash = 31 * hash + fluid.getAmount();
+        hash = 31 * hash + Long.hashCode(fluid.getAmount());
         return hash;
     }
 }

@@ -5,14 +5,14 @@ import java.util.UUID;
 import java.util.function.IntFunction;
 import mekanism.common.Mekanism;
 import mekanism.common.network.IMekanismPacket;
+import mekanism.common.network.fabric.IPayloadContext;
+import mekanism.common.network.fabric.PacketDistributor;
 import mekanism.common.network.to_client.player_data.PacketPlayerData;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.util.ByIdMap;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
 public record PacketGearStateUpdate(GearType gearType, UUID uuid, boolean state) implements IMekanismPacket {

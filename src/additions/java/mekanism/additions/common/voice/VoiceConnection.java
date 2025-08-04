@@ -16,7 +16,7 @@ import mekanism.common.Mekanism;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.server.ServerLifecycleHooks;
+import io.github.fabricators_of_create.porting_lib.core.util.ServerLifecycleHooks;
 
 public class VoiceConnection extends Thread {
 

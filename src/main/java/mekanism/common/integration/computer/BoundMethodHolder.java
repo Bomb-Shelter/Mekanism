@@ -2,6 +2,7 @@ package mekanism.common.integration.computer;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+import io.github.fabricators_of_create.porting_lib.common.util.Lazy;
 import it.unimi.dsi.fastutil.objects.ObjectIntImmutablePair;
 import it.unimi.dsi.fastutil.objects.ObjectIntPair;
 import java.lang.ref.WeakReference;
@@ -15,7 +16,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import mekanism.common.integration.computer.ComputerMethodFactory.ComputerFunctionCaller;
-import net.neoforged.neoforge.common.util.Lazy;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class BoundMethodHolder {

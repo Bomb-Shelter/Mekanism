@@ -1,6 +1,10 @@
 package mekanism.common.tile.component;
 
 import com.mojang.logging.LogUtils;
+import io.github.fabricators_of_create.porting_lib.chunk.loading.LoadingValidationCallback;
+import io.github.fabricators_of_create.porting_lib.chunk.loading.TicketController;
+import io.github.fabricators_of_create.porting_lib.chunk.loading.TicketHelper;
+import io.github.fabricators_of_create.porting_lib.chunk.loading.TicketSet;
 import it.unimi.dsi.fastutil.longs.LongIterator;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
@@ -23,10 +27,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.neoforge.common.world.chunk.LoadingValidationCallback;
-import net.neoforged.neoforge.common.world.chunk.TicketController;
-import net.neoforged.neoforge.common.world.chunk.TicketHelper;
-import net.neoforged.neoforge.common.world.chunk.TicketSet;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;

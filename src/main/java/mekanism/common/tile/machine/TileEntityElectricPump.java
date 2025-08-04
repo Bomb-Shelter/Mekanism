@@ -13,6 +13,7 @@ import mekanism.api.IContentsListener;
 import mekanism.api.RelativeSide;
 import mekanism.api.SerializationConstants;
 import mekanism.api.Upgrade;
+import mekanism.api.fabric.transfer.fluids.IFluidHandler;
 import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
 import mekanism.common.attachments.containers.ContainerType;
@@ -46,6 +47,8 @@ import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.NBTUtils;
 import mekanism.common.util.UpgradeUtils;
 import mekanism.common.util.WorldUtils;
+import net.fabricmc.fabric.api.lookup.v1.block.BlockApiCache;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -65,10 +68,7 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
-import net.neoforged.neoforge.capabilities.BlockCapabilityCache;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.FluidType;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -103,7 +103,7 @@ public class TileEntityElectricPump extends TileEntityMekanism implements IConfi
      * The nodes that have full sources near them or in them
      */
     private final Set<BlockPos> recurringNodes = new ObjectOpenHashSet<>();
-    private List<BlockCapabilityCache<IFluidHandler, @Nullable Direction>> fluidHandlerAbove = Collections.emptyList();
+    private List<BlockApiCache<IFluidHandler, @Nullable Direction>> fluidHandlerAbove = Collections.emptyList();
 
     private MachineEnergyContainer<TileEntityElectricPump> energyContainer;
     @WrappingComputerMethod(wrapper = ComputerIInventorySlotWrapper.class, methodNames = "getInputItem", docPlaceholder = "input slot")
@@ -182,7 +182,7 @@ public class TileEntityElectricPump extends TileEntityMekanism implements IConfi
         return sendUpdatePacket;
     }
 
-    public int estimateIncrementAmount() {
+    public long estimateIncrementAmount() {
         return fluidTank.getFluid().is(MekanismFluids.HEAVY_WATER) ? MekanismConfig.general.pumpHeavyWaterAmount.get() : FluidType.BUCKET_VOLUME;
     }
 
@@ -278,7 +278,7 @@ public class TileEntityElectricPump extends TileEntityMekanism implements IConfi
         if (hasFilter && sourceFluid == Fluids.WATER) {
             return MekanismFluids.HEAVY_WATER.asStack(MekanismConfig.general.pumpHeavyWaterAmount.get());
         }
-        return new FluidStack(sourceFluid, FluidType.BUCKET_VOLUME);
+        return new FluidStack(sourceFluid, FluidConstants.BUCKET);
     }
 
     private void suck(@NotNull FluidStack fluidStack, BlockPos pos, boolean addRecurring) {
@@ -288,7 +288,7 @@ public class TileEntityElectricPump extends TileEntityMekanism implements IConfi
             pos = pos.immutable();
             recurringNodes.add(pos);
         }
-        int amountOffered = fluidStack.getAmount();
+        long amountOffered = fluidStack.getAmount();
         if (fluidTank.insert(fluidStack, Action.EXECUTE, AutomationType.INTERNAL).getAmount() != amountOffered) {
             level.gameEvent(null, GameEvent.FLUID_PICKUP, pos);
         }

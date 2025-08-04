@@ -1,6 +1,8 @@
 package mekanism.common.content.gear.mekasuit;
 
+import io.github.fabricators_of_create.porting_lib.attributes.PortingLibAttributes;
 import mekanism.api.annotations.ParametersAreNotNullByDefault;
+import mekanism.api.fabric.ItemAttributeModifierEvent;
 import mekanism.api.gear.ICustomModule;
 import mekanism.api.gear.IModule;
 import mekanism.api.gear.IModuleContainer;
@@ -12,8 +14,6 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.common.NeoForgeMod;
-import net.neoforged.neoforge.event.ItemAttributeModifierEvent;
 
 @ParametersAreNotNullByDefault
 public record ModuleHydrostaticRepulsorUnit(boolean swimBoost) implements ICustomModule<ModuleHydrostaticRepulsorUnit> {
@@ -34,7 +34,7 @@ public record ModuleHydrostaticRepulsorUnit(boolean swimBoost) implements ICusto
         AttributeModifier modifier = new AttributeModifier(WATER_MOVEMENT, Math.min(1, 0.33333334F * module.getInstalledCount()), AttributeModifier.Operation.ADD_VALUE);
         event.addModifier(Attributes.WATER_MOVEMENT_EFFICIENCY, modifier, EquipmentSlotGroup.LEGS);
         if (isSwimBoost(module, event.getItemStack())) {
-            event.addModifier(NeoForgeMod.SWIM_SPEED, SWIM_BOOST_MODIFIER, EquipmentSlotGroup.LEGS);
+            event.addModifier(PortingLibAttributes.SWIM_SPEED, SWIM_BOOST_MODIFIER, EquipmentSlotGroup.LEGS);
         }
     }
 

@@ -20,12 +20,13 @@ import mekanism.common.lib.transmitter.DynamicBufferedNetwork;
 import mekanism.common.util.EmitUtils;
 import mekanism.common.util.FluidUtils;
 import mekanism.common.util.MekanismUtils;
+import net.fabricmc.fabric.api.event.Event;
+import net.fabricmc.fabric.api.event.EventFactory;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
-import net.neoforged.neoforge.common.NeoForge;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.FluidType;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import mekanism.api.fabric.transfer.fluids.IFluidHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -35,7 +36,7 @@ public class FluidNetwork extends DynamicBufferedNetwork<IFluidHandler, FluidNet
     public final VariableCapacityFluidTank fluidTank;
     @NotNull
     public FluidStack lastFluid = FluidStack.EMPTY;
-    private int prevTransferAmount;
+    private long prevTransferAmount;
 
     //TODO: Make fluid storage support storing as longs?
     private int intCapacity;
@@ -78,7 +79,7 @@ public class FluidNetwork extends DynamicBufferedNetwork<IFluidHandler, FluidNet
                 if (fluidTank.isEmpty()) {
                     fluidTank.setStack(net.getBuffer());
                 } else if (fluidTank.isFluidEqual(net.fluidTank.getFluid())) {
-                    int amount = net.fluidTank.getFluidAmount();
+                    long amount = net.fluidTank.getFluidAmount();
                     MekanismUtils.logMismatchedStackSize(fluidTank.growStack(amount, Action.EXECUTE), amount);
                 } else {
                     Mekanism.logger.error("Incompatible fluid networks merged.");
@@ -106,7 +107,7 @@ public class FluidNetwork extends DynamicBufferedNetwork<IFluidHandler, FluidNet
             if (fluidTank.isEmpty()) {
                 fluidTank.setStack(fluid.copy());
             } else if (fluidTank.isFluidEqual(fluid)) {
-                int amount = fluid.getAmount();
+                long amount = fluid.getAmount();
                 MekanismUtils.logMismatchedStackSize(fluidTank.growStack(amount, Action.EXECUTE), amount);
             }
         }
@@ -149,7 +150,7 @@ public class FluidNetwork extends DynamicBufferedNetwork<IFluidHandler, FluidNet
         }
     }
 
-    private int tickEmit(@NotNull FluidStack fluidToSend) {
+    private long tickEmit(@NotNull FluidStack fluidToSend) {
         Collection<Map<Direction, IFluidHandler>> acceptorValues = acceptorCache.getAcceptorValues();
         FluidHandlerTarget target = null;
         for (Map<Direction, IFluidHandler> acceptors : acceptorValues) {
@@ -170,7 +171,7 @@ public class FluidNetwork extends DynamicBufferedNetwork<IFluidHandler, FluidNet
     public void onUpdate() {
         super.onUpdate();
         if (needsUpdate) {
-            NeoForge.EVENT_BUS.post(new FluidTransferEvent(this, lastFluid));
+            new FluidTransferEvent(this, lastFluid).sendEvent();
             needsUpdate = false;
         }
         if (fluidTank.isEmpty()) {
@@ -193,7 +194,7 @@ public class FluidNetwork extends DynamicBufferedNetwork<IFluidHandler, FluidNet
         return ret;
     }
 
-    public int getPrevTransferAmount() {
+    public long getPrevTransferAmount() {
         return prevTransferAmount;
     }
 
@@ -204,7 +205,7 @@ public class FluidNetwork extends DynamicBufferedNetwork<IFluidHandler, FluidNet
 
     @Override
     public Component getNeededInfo() {
-        return MekanismLang.FLUID_NETWORK_NEEDED.translate(fluidTank.getNeeded() / (float) FluidType.BUCKET_VOLUME);
+        return MekanismLang.FLUID_NETWORK_NEEDED.translate(fluidTank.getNeeded() / (float) FluidConstants.BUCKET);
     }
 
     @Override
@@ -261,11 +262,26 @@ public class FluidNetwork extends DynamicBufferedNetwork<IFluidHandler, FluidNet
 
     public static class FluidTransferEvent extends TransferEvent<FluidNetwork> {
 
+        public static final Event<Callback> EVENT = EventFactory.createArrayBacked(Callback.class, callbacks -> event -> {
+            for (Callback callback : callbacks) {
+                callback.onFluidTransfer(event);
+            }
+        });
+
         public final FluidStack fluidType;
 
         public FluidTransferEvent(FluidNetwork network, @NotNull FluidStack type) {
             super(network);
             fluidType = type;
+        }
+
+        @Override
+        public void sendEvent() {
+            EVENT.invoker().onFluidTransfer(this);
+        }
+
+        public interface Callback {
+            void onFluidTransfer(FluidTransferEvent event);
         }
     }
 }

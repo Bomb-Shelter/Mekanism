@@ -12,10 +12,10 @@ import mekanism.common.tile.interfaces.IFluidContainerManager.ContainerEditMode;
 import mekanism.common.util.MekanismUtils;
 import net.minecraft.world.item.ItemStack;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.FluidStackLinkedSet;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
-import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
+import io.github.fabricators_of_create.porting_lib.resources.fluids.FluidStackLinkedSet;
+import mekanism.api.fabric.transfer.fluids.IFluidHandler;
+import mekanism.api.fabric.transfer.fluids.IFluidHandler.FluidAction;
+import mekanism.api.fabric.transfer.fluids.IFluidHandlerItem;
 
 public interface IFluidHandlerSlot extends IInventorySlot {
 
@@ -127,7 +127,7 @@ public interface IFluidHandlerSlot extends IInventorySlot {
                 if (fluidHandlerItem != null) {
                     //Fill the stack, note our stack is a copy so this is how we simulate to get the proper "container" item,
                     // and it does not actually matter that we are directly executing on the item
-                    int toDrain = fluidHandlerItem.fill(fluidInTank.copy(), FluidAction.EXECUTE);
+                    long toDrain = fluidHandlerItem.fill(fluidInTank.copy(), FluidAction.EXECUTE);
                     if (toDrain == 0) {
                         //If we cannot actually fill the item then just exit early
                         return;
@@ -169,8 +169,8 @@ public interface IFluidHandlerSlot extends IInventorySlot {
      */
     private boolean drainItemAndMove(IInventorySlot outputSlot, FluidStack fluidToTransfer) {
         FluidStack simulatedRemainder = getFluidTank().insert(fluidToTransfer, Action.SIMULATE, AutomationType.INTERNAL);
-        int remainder = simulatedRemainder.getAmount();
-        int toTransfer = fluidToTransfer.getAmount();
+        long remainder = simulatedRemainder.getAmount();
+        long toTransfer = fluidToTransfer.getAmount();
         if (remainder == toTransfer) {
             //If we cannot actually fill our fluid handler then just exit early
             return false;

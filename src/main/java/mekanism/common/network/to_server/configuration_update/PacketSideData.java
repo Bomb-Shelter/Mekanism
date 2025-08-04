@@ -7,13 +7,13 @@ import mekanism.common.lib.transmitter.TransmissionType;
 import mekanism.common.network.IMekanismPacket;
 import mekanism.common.network.MekClickType;
 import mekanism.common.network.PacketUtils;
+import mekanism.common.network.fabric.IPayloadContext;
 import mekanism.common.tile.component.TileComponentConfig;
 import mekanism.common.tile.component.config.ConfigInfo;
 import mekanism.common.tile.component.config.DataType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
 public record PacketSideData(BlockPos pos, MekClickType clickType, RelativeSide inputSide, TransmissionType transmission) implements IMekanismPacket {

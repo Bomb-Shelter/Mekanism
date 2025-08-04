@@ -12,6 +12,7 @@ import mekanism.common.tile.interfaces.IBoundingBlock;
 import mekanism.common.tile.interfaces.IUpgradeTile;
 import mekanism.common.util.NBTUtils;
 import mekanism.common.util.WorldUtils;
+import net.fabricmc.fabric.api.lookup.v1.block.BlockApiLookup;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -22,8 +23,6 @@ import net.minecraft.world.Nameable;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.capabilities.BlockCapability;
-import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -192,8 +191,8 @@ public class TileEntityBoundingBlock extends TileEntityUpdateable implements IUp
         return getMainTile() instanceof Nameable mainTile ? mainTile.getCustomName() : null;
     }
 
-    public static <CAP> void proxyCapability(RegisterCapabilitiesEvent event, BlockCapability<CAP, @Nullable Direction> capability) {
-        event.registerBlock(capability, (level, pos, state, blockEntity, context) -> {
+    public static <CAP> void proxyCapability(BlockApiLookup<CAP, @Nullable Direction> capability) {
+        capability.registerForBlocks((level, pos, state, blockEntity, context) -> {
             if (blockEntity instanceof TileEntityBoundingBlock bounding) {
                 IBoundingBlock main = bounding.getMain();
                 if (main != null) {
@@ -204,8 +203,8 @@ public class TileEntityBoundingBlock extends TileEntityUpdateable implements IUp
         }, MekanismBlocks.BOUNDING_BLOCK.value());
     }
 
-    public static <CAP, CONTEXT> void alwaysProxyCapability(RegisterCapabilitiesEvent event, BlockCapability<CAP, CONTEXT> capability) {
-        event.registerBlock(capability, (level, pos, state, blockEntity, context) -> {
+    public static <CAP, CONTEXT> void alwaysProxyCapability(BlockApiLookup<CAP, CONTEXT> capability) {
+        capability.registerForBlocks((level, pos, state, blockEntity, context) -> {
             BlockPos mainPos = BlockBounding.getMainBlockPos(level, pos);
             return mainPos == null ? null : WorldUtils.getCapability(level, capability, mainPos, context);
         }, MekanismBlocks.BOUNDING_BLOCK.value());

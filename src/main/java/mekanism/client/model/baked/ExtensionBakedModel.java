@@ -4,6 +4,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.mojang.blaze3d.vertex.PoseStack;
+import io.github.fabricators_of_create.porting_lib.models.TransformTypeDependentItemBakedModel;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,27 +12,33 @@ import java.util.Objects;
 import java.util.function.BiPredicate;
 import java.util.function.Supplier;
 import mekanism.api.annotations.NothingNullByDefault;
+import mekanism.client.render.lib.Quad;
 import mekanism.client.render.lib.QuadTransformation;
 import mekanism.client.render.lib.QuadUtils;
+import net.fabricmc.fabric.api.renderer.v1.material.BlendMode;
+import net.fabricmc.fabric.api.renderer.v1.mesh.Mesh;
+import net.fabricmc.fabric.api.renderer.v1.model.ForwardingBakedModel;
+import net.fabricmc.fabric.api.renderer.v1.model.ModelHelper;
+import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.client.model.BakedModelWrapper;
-import net.neoforged.neoforge.client.model.data.ModelData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @NothingNullByDefault
-public class ExtensionBakedModel<T> extends BakedModelWrapper<BakedModel> {
+public class ExtensionBakedModel<T> extends ForwardingBakedModel {
 
-    private final LoadingCache<QuadsKey<T>, List<BakedQuad>> cache = CacheBuilder.newBuilder().build(new CacheLoader<>() {
+    private final LoadingCache<QuadsKey<T>, Mesh> cache = CacheBuilder.newBuilder().build(new CacheLoader<>() {
         @Override
-        public List<BakedQuad> load(QuadsKey<T> key) {
+        public Mesh load(QuadsKey<T> key) {
             return createQuads(key);
         }
     });
@@ -43,20 +50,49 @@ public class ExtensionBakedModel<T> extends BakedModelWrapper<BakedModel> {
     private final Map<List<BakedModel>, List<BakedModel>> cachedRenderPasses = new Object2ObjectOpenHashMap<>();
 
     public ExtensionBakedModel(BakedModel original) {
-        super(original);
+        this.wrapped = original;
     }
 
     @Nullable
-    protected QuadsKey<T> createKey(QuadsKey<T> key, ModelData data) {
+    protected QuadsKey<T> createKey(QuadsKey<T> key, @Nullable T data) {
         return key;
     }
 
-    protected List<BakedQuad> createQuads(QuadsKey<T> key) {
-        List<BakedQuad> ret = key.getQuads();
-        if (key.getTransformation() != null) {
-            ret = QuadUtils.transformBakedQuads(ret, key.getTransformation());
+    protected Mesh createQuads(QuadsKey<T> key) {
+        return consumer -> {};
+    }
+
+    @Override
+    public boolean isVanillaAdapter() {
+        return false;
+    }
+
+    @Override
+    public void emitBlockQuads(BlockAndTintGetter blockView, BlockState state, BlockPos pos, Supplier<RandomSource> randomSupplier, RenderContext context) {
+        T data = (T) blockView.getBlockEntityRenderData(pos);
+        RandomSource random = randomSupplier.get();
+        QuadsKey<T> key = createKey(new QuadsKey<>(state, null, random, null, super.getQuads(state, null, random)), data);
+        if (key == null) {
+            super.emitBlockQuads(blockView, state, pos, randomSupplier, context);
+            return;
         }
-        return ret;
+
+        cache.getUnchecked(key).outputTo(context.getEmitter());
+
+        boolean hasTransform = key.getTransformation() != null;
+
+        if (hasTransform) {
+            context.pushTransform(quad -> {
+                Quad newQuad = new Quad(quad);
+                if (key.getTransformation().transform(newQuad))
+                    newQuad.bake(quad, null);
+                return true;
+            });
+        }
+        super.emitBlockQuads(blockView, state, pos, randomSupplier, context);
+        if (hasTransform) {
+            context.popTransform();
+        }
     }
 
     @NotNull
@@ -98,7 +134,7 @@ public class ExtensionBakedModel<T> extends BakedModelWrapper<BakedModel> {
         }
     }
 
-    public static class TransformedBakedModel<T> extends ExtensionBakedModel<T> {
+    public static class TransformedBakedModel<T> extends ExtensionBakedModel<T> implements TransformTypeDependentItemBakedModel {
 
         private final QuadTransformation transform;
 
@@ -108,22 +144,42 @@ public class ExtensionBakedModel<T> extends BakedModelWrapper<BakedModel> {
         }
 
         @Override
+        public void emitBlockQuads(BlockAndTintGetter blockView, BlockState state, BlockPos pos, Supplier<RandomSource> randomSupplier, RenderContext context) {
+            context.pushTransform(quad -> {
+                transform.transform(quad);
+                return true;
+            });
+            super.emitBlockQuads(blockView, state, pos, randomSupplier, context);
+            context.popTransform();
+        }
+
+        @Override
+        public void emitItemQuads(ItemStack stack, Supplier<RandomSource> randomSupplier, RenderContext context) {
+            context.pushTransform(quad -> {
+                transform.transform(quad);
+                return true;
+            });
+            super.emitItemQuads(stack, randomSupplier, context);
+            context.popTransform();
+        }
+
+        @Override
         @Deprecated
         public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand) {
             return QuadUtils.transformBakedQuads(super.getQuads(state, side, rand), transform);
         }
 
         @Override
-        public BakedModel applyTransform(ItemDisplayContext displayContext, PoseStack mat, boolean applyLeftHandTransform) {
+        public BakedModel applyTransform(ItemDisplayContext displayContext, PoseStack mat, boolean applyLeftHandTransform, DefaultTransform defaultTransform) {
             // have the original model apply any perspective transforms onto the MatrixStack
-            super.applyTransform(displayContext, mat, applyLeftHandTransform);
+            TransformTypeDependentItemBakedModel.maybeApplyTransform(this, displayContext, mat, applyLeftHandTransform, defaultTransform);
             // return this model, as we want to draw the item variant quads ourselves
             return this;
         }
 
         @Nullable
         @Override
-        protected QuadsKey<T> createKey(QuadsKey<T> key, ModelData data) {
+        protected QuadsKey<T> createKey(QuadsKey<T> key, T data) {
             return key.transform(transform);
         }
 
@@ -141,7 +197,7 @@ public class ExtensionBakedModel<T> extends BakedModelWrapper<BakedModel> {
         private final Direction side;
         private final RandomSource random;
         @Nullable
-        private final RenderType layer;
+        private final BlendMode blendMode;
         private final List<BakedQuad> quads;
         @Nullable
         private QuadTransformation transformation;
@@ -152,11 +208,11 @@ public class ExtensionBakedModel<T> extends BakedModelWrapper<BakedModel> {
         @Nullable
         private BiPredicate<T, T> equality;
 
-        public QuadsKey(@Nullable BlockState state, @Nullable Direction side, RandomSource random, @Nullable RenderType layer, List<BakedQuad> quads) {
+        public QuadsKey(@Nullable BlockState state, @Nullable Direction side, RandomSource random, @Nullable BlendMode blendMode, List<BakedQuad> quads) {
             this.state = state;
             this.side = side;
             this.random = random;
-            this.layer = layer;
+            this.blendMode = blendMode;
             this.quads = quads;
         }
 
@@ -191,8 +247,8 @@ public class ExtensionBakedModel<T> extends BakedModelWrapper<BakedModel> {
         }
 
         @Nullable
-        public RenderType getLayer() {
-            return layer;
+        public BlendMode getLayer() {
+            return blendMode;
         }
 
         public List<BakedQuad> getQuads() {
@@ -213,7 +269,7 @@ public class ExtensionBakedModel<T> extends BakedModelWrapper<BakedModel> {
         public int hashCode() {
             int result = Objects.hashCode(state);
             result = 31 * result + Objects.hashCode(side);
-            result = 31 * result + Objects.hashCode(layer);
+            result = 31 * result + Objects.hashCode(blendMode);
             result = 31 * result + Objects.hashCode(transformation);
             result = 31 * result + dataHash;
             return result;
@@ -226,7 +282,7 @@ public class ExtensionBakedModel<T> extends BakedModelWrapper<BakedModel> {
             }
             if (!(obj instanceof QuadsKey<?> other)) {
                 return false;
-            } else if (side != other.side || layer != other.layer || !Objects.equals(state, other.state)) {
+            } else if (side != other.side || blendMode != other.blendMode || !Objects.equals(state, other.state)) {
                 return false;
             } else if (transformation != null && !transformation.equals(other.transformation)) {
                 return false;

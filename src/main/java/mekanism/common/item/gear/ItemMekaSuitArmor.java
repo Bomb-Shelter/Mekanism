@@ -76,9 +76,6 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import net.neoforged.neoforge.common.Tags;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -96,7 +93,7 @@ public class ItemMekaSuitArmor extends ItemSpecialArmor implements IModuleContai
 
     public ItemMekaSuitArmor(ArmorItem.Type armorType, Properties properties) {
         super(MekanismArmorMaterials.MEKASUIT, armorType, IModuleHelper.INSTANCE.applyModuleContainerProperties(
-              properties.rarity(Rarity.EPIC).setNoRepair().stacksTo(1)
+              properties.rarity(Rarity.EPIC).port_lib$setNoRepair().stacksTo(1)
         ));
         switch (armorType) {
             case HELMET -> {
@@ -241,9 +238,9 @@ public class ItemMekaSuitArmor extends ItemSpecialArmor implements IModuleContai
     }
 
     @Override
-    public void attachAttachments(IEventBus eventBus) {
+    public void attachAttachments() {
         if (!chemicalTankSpecs.isEmpty()) {
-            ContainerType.CHEMICAL.addDefaultCreators(eventBus, this, () -> {
+            ContainerType.CHEMICAL.addDefaultCreators(true, this, () -> {
                 ChemicalTanksBuilder builder = ChemicalTanksBuilder.builder();
                 for (ChemicalTankSpec spec : chemicalTankSpecs) {
                     spec.addTank(builder, ComponentBackedChemicalTank::new);
@@ -252,7 +249,7 @@ public class ItemMekaSuitArmor extends ItemSpecialArmor implements IModuleContai
             }, MekanismConfig.gear);
         }
         if (!fluidTankSpecs.isEmpty()) {
-            ContainerType.FLUID.addDefaultCreators(eventBus, this, () -> {
+            ContainerType.FLUID.addDefaultCreators(true, this, () -> {
                 FluidTanksBuilder builder = FluidTanksBuilder.builder();
                 for (FluidTankSpec spec : fluidTankSpecs) {
                     spec.addTank(builder, ComponentBackedFluidTank::new);
@@ -263,16 +260,16 @@ public class ItemMekaSuitArmor extends ItemSpecialArmor implements IModuleContai
     }
 
     @Override
-    public void attachCapabilities(RegisterCapabilitiesEvent event) {
+    public void attachCapabilities() {
         //Note: The all our providers only expose the capabilities (both those via attachments and those here) if the required configs for initializing that capability are loaded
-        event.registerItem(Capabilities.RADIATION_SHIELDING, (stack, ctx) -> {
+        Capabilities.RADIATION_SHIELDING.registerForItems((stack, ctx) -> {
             if (!MekanismConfig.gear.isLoaded() || !isModuleEnabled(stack, MekanismModules.RADIATION_SHIELDING_UNIT)) {
                 return null;
             }
             return RadiationShieldingHandler.create(ItemHazmatSuitArmor.getShieldingByArmor(getType()));
         }, this);
 
-        event.registerItem(Capabilities.LASER_DISSIPATION, (stack, ctx) -> {
+        Capabilities.LASER_DISSIPATION.registerForItems((stack, ctx) -> {
             //Note: This doesn't rely on configs, so we can skip the gear loaded check
             return isModuleEnabled(stack, MekanismModules.LASER_DISSIPATION_UNIT) ? LaserDissipationHandler.create(laserDissipation, laserRefraction) : null;
         }, this);

@@ -1,15 +1,23 @@
 package mekanism.common.recipe.condition;
 
+import com.mojang.serialization.MapCodec;
 import mekanism.common.Mekanism;
-import mekanism.common.registration.DeferredMapCodecHolder;
-import mekanism.common.registration.DeferredMapCodecRegister;
-import net.neoforged.neoforge.common.conditions.ICondition;
-import net.neoforged.neoforge.registries.NeoForgeRegistries;
+import net.fabricmc.fabric.api.resource.conditions.v1.ResourceCondition;
+import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditionType;
+import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
+
+import java.util.function.Supplier;
 
 public class MekanismRecipeConditions {
 
-    public static final DeferredMapCodecRegister<ICondition> CONDITION_CODECS = new DeferredMapCodecRegister<>(NeoForgeRegistries.Keys.CONDITION_CODECS, Mekanism.MODID);
+    public static final ResourceConditionType<ConditionExistsCondition> CONDITION_EXISTS = register("condition_exists", ConditionExistsCondition::makeCodec);
+    public static final ResourceConditionType<ModVersionLoadedCondition> MOD_VERSION_LOADED = register("mod_version_loaded", ModVersionLoadedCondition::makeCodec);
 
-    public static final DeferredMapCodecHolder<ICondition, ConditionExistsCondition> CONDITION_EXISTS = CONDITION_CODECS.registerCodec("condition_exists", ConditionExistsCondition::makeCodec);
-    public static final DeferredMapCodecHolder<ICondition, ModVersionLoadedCondition> MOD_VERSION_LOADED = CONDITION_CODECS.registerCodec("mod_version_loaded", ModVersionLoadedCondition::makeCodec);
+    private static <T extends ResourceCondition> ResourceConditionType<T> register(String name, Supplier<MapCodec<T>> codec) {
+        return ResourceConditionType.create(Mekanism.rl(name), codec.get());
+    }
+
+    public static void register() {
+        ResourceConditions.register(CONDITION_EXISTS);
+    }
 }

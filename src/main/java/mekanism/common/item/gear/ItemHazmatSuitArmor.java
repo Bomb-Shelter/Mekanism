@@ -29,8 +29,8 @@ public class ItemHazmatSuitArmor extends ArmorItem implements ICapabilityAware {
     }
 
     @Override
-    public void attachCapabilities(RegisterCapabilitiesEvent event) {
-        event.registerItem(Capabilities.RADIATION_SHIELDING, (stack, ctx) -> RadiationShieldingHandler.create(getShieldingByArmor(getType())), this);
+    public void attachCapabilities() {
+        Capabilities.RADIATION_SHIELDING.registerForItems((stack, ctx) -> RadiationShieldingHandler.create(getShieldingByArmor(getType())), this);
     }
 
     @Override

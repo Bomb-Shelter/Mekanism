@@ -4,6 +4,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
+import io.github.fabricators_of_create.porting_lib.entity.EffectCures;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidType;
+import io.github.fabricators_of_create.porting_lib.level.LevelHooks;
+import io.github.fabricators_of_create.porting_lib.level.events.BlockEvent;
+import io.github.fabricators_of_create.porting_lib.util.UsernameCache;
 import it.unimi.dsi.fastutil.longs.Long2DoubleArrayMap;
 import it.unimi.dsi.fastutil.longs.Long2DoubleMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
@@ -45,6 +50,8 @@ import mekanism.common.tile.interfaces.IUpgradeTile;
 import mekanism.common.util.UnitDisplayUtils.EnergyUnit;
 import mekanism.common.util.UnitDisplayUtils.TemperatureUnit;
 import mekanism.common.util.text.OwnerDisplay;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.SharedConstants;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
@@ -81,18 +88,8 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.fml.loading.FMLEnvironment;
-import net.neoforged.fml.util.thread.EffectiveSide;
-import net.neoforged.neoforge.common.CommonHooks;
-import net.neoforged.neoforge.common.EffectCures;
-import net.neoforged.neoforge.common.Tags;
-import net.neoforged.neoforge.common.UsernameCache;
-import net.neoforged.neoforge.event.level.BlockEvent;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.FluidType;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
-import net.neoforged.neoforge.server.ServerLifecycleHooks;
+import io.github.fabricators_of_create.porting_lib.core.util.ServerLifecycleHooks;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -147,7 +144,7 @@ public final class MekanismUtils {
 
     @Nullable
     public static Player tryGetClientPlayer() {
-        if (FMLEnvironment.dist.isClient()) {
+        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
             return MekanismClient.tryGetClientPlayer();
         }
         //Note: Ideally we would have some way to get which player is in question on the server
@@ -834,7 +831,7 @@ public final class MekanismUtils {
                 // block hardness values in a modded context
                 continue;
             }
-            BlockEvent.BreakEvent event = CommonHooks.fireBlockBreak(world, player.gameMode.getGameModeForPlayer(), player, foundPos, targetState);
+            BlockEvent.BreakEvent event = LevelHooks.fireBlockBreak(world, player.gameMode.getGameModeForPlayer(), player, foundPos, targetState);
             if (event.isCanceled()) {
                 //If we can't actually break the block continue (this allows mods to stop us from vein mining into protected land)
                 continue;

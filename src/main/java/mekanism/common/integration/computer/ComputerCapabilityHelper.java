@@ -21,14 +21,14 @@ public class ComputerCapabilityHelper {
         }
     }
 
-    public static void addBoundingComputerCapabilities(RegisterCapabilitiesEvent event) {
+    public static void addBoundingComputerCapabilities() {
         if (Mekanism.hooks.computerCraft.isLoaded()) {
             //If ComputerCraft is loaded add the capability for it
-            CCCapabilityHelper.addBoundingComputerCapabilities(event);
+            CCCapabilityHelper.addBoundingComputerCapabilities();
         }
         if (Mekanism.hooks.oc2.isLoaded()) {
             //If OpenComputers2 is loaded add the capability for it
-            OC2CapabilityHelper.addBoundingComputerCapabilities(event);
+            OC2CapabilityHelper.addBoundingComputerCapabilities();
         }
     }
 }

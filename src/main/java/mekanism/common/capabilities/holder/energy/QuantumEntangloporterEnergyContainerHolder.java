@@ -9,7 +9,7 @@ import mekanism.common.config.MekanismConfig;
 import mekanism.common.lib.transmitter.TransmissionType;
 import mekanism.common.tile.TileEntityQuantumEntangloporter;
 import net.minecraft.core.Direction;
-import net.neoforged.neoforge.common.util.Lazy;
+import io.github.fabricators_of_create.porting_lib.common.util.Lazy;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

@@ -4,8 +4,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.BiFunction;
+
 @FunctionalInterface
-public interface ICapabilityProvider<O, C extends @Nullable Object, T> {
+public interface ICapabilityProvider<O, C extends @Nullable Object, T> extends BiFunction<@Nullable O, C, T> {
     /**
      * Returns the capability, or {@code null} if not available.
      *
@@ -17,4 +19,9 @@ public interface ICapabilityProvider<O, C extends @Nullable Object, T> {
      */
     @Nullable
     T getCapability(O object, C context);
+
+    @Override
+    default T apply(@Nullable O o, C c) {
+        return getCapability(o, c);
+    }
 }

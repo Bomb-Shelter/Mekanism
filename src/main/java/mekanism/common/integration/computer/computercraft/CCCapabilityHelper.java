@@ -4,6 +4,8 @@ import dan200.computercraft.api.ComputerCraftAPI;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.peripheral.PeripheralCapability;
 import java.util.function.BooleanSupplier;
+
+import dan200.computercraft.api.peripheral.PeripheralLookup;
 import mekanism.common.capabilities.resolver.BasicCapabilityResolver;
 import mekanism.common.integration.computer.ComputerEnergyHelper;
 import mekanism.common.integration.computer.ComputerFilterHelper;
@@ -34,8 +36,8 @@ public class CCCapabilityHelper {
         builder.with(PeripheralCapability.get(), (ICapabilityProvider<? super TILE, @Nullable Direction, IPeripheral>) PROVIDER, supportsComputer);
     }
 
-    public static void addBoundingComputerCapabilities(RegisterCapabilitiesEvent event) {
-        TileEntityBoundingBlock.proxyCapability(event, PeripheralCapability.get());
+    public static void addBoundingComputerCapabilities() {
+        TileEntityBoundingBlock.proxyCapability(PeripheralLookup.get());
     }
 
     public static void registerApis() {

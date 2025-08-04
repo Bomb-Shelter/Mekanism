@@ -102,6 +102,9 @@ import mekanism.common.registries.MekanismTileEntityTypes;
 import mekanism.common.tile.component.TileComponentChunkLoader;
 import mekanism.common.tile.machine.TileEntityOredictionificator.ODConfigValueInvalidationListener;
 import mekanism.common.world.GenHandler;
+import net.fabricmc.api.ModInitializer;
+import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.cauldron.CauldronInteraction;
@@ -111,29 +114,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DispenserBlock;
-import net.neoforged.bus.api.EventPriority;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.neoforged.fml.event.lifecycle.InterModEnqueueEvent;
-import net.neoforged.fml.event.lifecycle.InterModProcessEvent;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.common.NeoForgeMod;
-import net.neoforged.neoforge.common.world.chunk.RegisterTicketControllersEvent;
-import net.neoforged.neoforge.event.AddReloadListenerEvent;
-import net.neoforged.neoforge.event.ItemAttributeModifierEvent;
-import net.neoforged.neoforge.event.RegisterCommandsEvent;
-import net.neoforged.neoforge.event.TagsUpdatedEvent;
-import net.neoforged.neoforge.event.level.LevelEvent;
-import net.neoforged.neoforge.event.server.ServerStoppedEvent;
-import net.neoforged.neoforge.registries.NewRegistryEvent;
-import net.neoforged.neoforge.registries.RegisterEvent;
-import net.neoforged.neoforge.registries.datamaps.DataMapsUpdatedEvent;
 import org.slf4j.Logger;
 
-@Mod(Mekanism.MODID)
-public class Mekanism {
+public class Mekanism implements ModInitializer {
 
     public static final String MODID = MekanismAPI.MEKANISM_MODID;
     public static final String MOD_NAME = "Mekanism";
@@ -185,16 +168,18 @@ public class Mekanism {
 
     private ReloadListener recipeCacheManager;
 
-    public Mekanism(ModContainer modContainer, IEventBus modEventBus) {
+    @Override
+    public void onInitialize() {
         instance = this;
+        ModContainer modContainer = FabricLoader.getInstance().getModContainer(MODID).orElseThrow();
         //Set our version number to match the neoforge.mods.toml file, which matches the one in our build.gradle
         versionNumber = new Version(modContainer);
         MekanismConfig.registerConfigs(modContainer);
 
         NeoForgeMod.enableMilkFluid();
-        NeoForge.EVENT_BUS.addListener(this::onEnergyTransferred);
-        NeoForge.EVENT_BUS.addListener(this::onChemicalTransferred);
-        NeoForge.EVENT_BUS.addListener(this::onLiquidTransferred);
+        EnergyTransferEvent.EVENT.register(this::onEnergyTransferred);
+        ChemicalTransferEvent.EVENT.register(this::onChemicalTransferred);
+        FluidTransferEvent.EVENT.register(this::onLiquidTransferred);
         NeoForge.EVENT_BUS.addListener(this::onModifyItemAttributes);
         NeoForge.EVENT_BUS.addListener(this::onWorldLoad);
         NeoForge.EVENT_BUS.addListener(this::onWorldUnload);
@@ -205,8 +190,8 @@ public class Mekanism {
         NeoForge.EVENT_BUS.addListener(this::onDataMapsUpdated);
         NeoForge.EVENT_BUS.addListener(MekanismPermissions::registerPermissionNodes);
         NeoForge.EVENT_BUS.register(IncompleteRecipeScanner.class);
-        modEventBus.addListener(EventPriority.HIGH, Capabilities::registerProxyableCapabilities);
-        modEventBus.addListener(Capabilities::registerCapabilities);
+//        modEventBus.addListener(EventPriority.HIGH, Capabilities::registerProxyableCapabilities);
+        Capabilities.registerCapabilities();
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(this::registerChunkTicketControllers);
         modEventBus.addListener(MekanismConfig::onConfigLoad);
@@ -216,6 +201,9 @@ public class Mekanism {
         packetHandler = new PacketHandler(modEventBus, versionNumber);
         //Super early hooks, only reliable thing is for checking dependencies that we declare we are after
         hooks.hookConstructor(modEventBus);
+
+        // Fabric
+        CommonWorldTickHandler.init();
     }
 
     public static synchronized void addModule(IModModule modModule) {
@@ -230,35 +218,35 @@ public class Mekanism {
         modEventBus.addListener(this::registerEventListener);
         modEventBus.addListener(this::registerRegistries);
 
-        MekanismItems.ITEMS.register(modEventBus);
-        MekanismBlocks.BLOCKS.register(modEventBus);
-        MekanismFluids.FLUIDS.register(modEventBus);
-        MekanismArmorMaterials.ARMOR_MATERIALS.register(modEventBus);
-        MekanismAttachmentTypes.ATTACHMENT_TYPES.register(modEventBus);
-        MekanismContainerTypes.CONTAINER_TYPES.register(modEventBus);
-        MekanismCreativeTabs.CREATIVE_TABS.register(modEventBus);
-        MekanismCriteriaTriggers.CRITERIA_TRIGGERS.register(modEventBus);
-        MekanismDataComponents.DATA_COMPONENTS.register(modEventBus);
-        MekanismEntityTypes.ENTITY_TYPES.register(modEventBus);
-        MekanismTileEntityTypes.TILE_ENTITY_TYPES.register(modEventBus);
-        MekanismGameEvents.GAME_EVENTS.register(modEventBus);
-        MekanismSounds.SOUND_EVENTS.register(modEventBus);
-        MekanismParticleTypes.PARTICLE_TYPES.register(modEventBus);
-        MekanismHeightProviderTypes.HEIGHT_PROVIDER_TYPES.register(modEventBus);
-        MekanismIntProviderTypes.INT_PROVIDER_TYPES.register(modEventBus);
-        MekanismPlacementModifiers.PLACEMENT_MODIFIERS.register(modEventBus);
-        MekanismFeatures.FEATURES.register(modEventBus);
-        MekanismRecipeType.RECIPE_TYPES.register(modEventBus);
-        MekanismRecipeSerializersInternal.RECIPE_SERIALIZERS.register(modEventBus);
-        MekanismDataSerializers.DATA_SERIALIZERS.register(modEventBus);
-        MekanismLootFunctions.REGISTER.register(modEventBus);
-        MekanismChemicals.CHEMICALS.register(modEventBus);
-        MekanismChemicalIngredientTypes.INGREDIENT_TYPES.register(modEventBus);
+        MekanismItems.ITEMS.register();
+        MekanismBlocks.BLOCKS.register();
+        MekanismFluids.FLUIDS.register();
+        MekanismArmorMaterials.ARMOR_MATERIALS.register();
+        MekanismAttachmentTypes.ATTACHMENT_TYPES.register();
+        MekanismContainerTypes.CONTAINER_TYPES.register();
+        MekanismCreativeTabs.CREATIVE_TABS.register();
+        MekanismCriteriaTriggers.CRITERIA_TRIGGERS.register();
+        MekanismDataComponents.DATA_COMPONENTS.register();
+        MekanismEntityTypes.ENTITY_TYPES.register();
+        MekanismTileEntityTypes.TILE_ENTITY_TYPES.register();
+        MekanismGameEvents.GAME_EVENTS.register();
+        MekanismSounds.SOUND_EVENTS.register();
+        MekanismParticleTypes.PARTICLE_TYPES.register();
+        MekanismHeightProviderTypes.HEIGHT_PROVIDER_TYPES.register();
+        MekanismIntProviderTypes.INT_PROVIDER_TYPES.register();
+        MekanismPlacementModifiers.PLACEMENT_MODIFIERS.register();
+        MekanismFeatures.FEATURES.register();
+        MekanismRecipeType.RECIPE_TYPES.register();
+        MekanismRecipeSerializersInternal.RECIPE_SERIALIZERS.register();
+        MekanismDataSerializers.DATA_SERIALIZERS.register();
+        MekanismLootFunctions.REGISTER.register();
+        MekanismChemicals.CHEMICALS.register();
+        MekanismChemicalIngredientTypes.INGREDIENT_TYPES.register();
         MekanismRobitSkins.createAndRegisterDatapack(modEventBus);
-        MekanismModules.MODULES.register(modEventBus);
-        MekanismRecipeConditions.CONDITION_CODECS.register(modEventBus);
-        MekanismItemPredicates.PREDICATES.register(modEventBus);
-        MekanismDataMapTypes.REGISTER.register(modEventBus);
+        MekanismModules.MODULES.register();
+        MekanismRecipeConditions.register();
+        MekanismItemPredicates.PREDICATES.register();
+        MekanismDataMapTypes.REGISTER.register();
     }
 
     private void registerRegistries(NewRegistryEvent event) {

@@ -23,6 +23,9 @@ import mekanism.client.recipe_viewer.type.IRecipeViewerRecipeType;
 import mekanism.common.MekanismLang;
 import mekanism.common.util.text.TextUtils;
 import mezz.jei.api.constants.VanillaTypes;
+import mezz.jei.api.fabric.constants.FabricTypes;
+import mezz.jei.api.fabric.ingredients.fluids.IJeiFluidIngredient;
+import mezz.jei.api.fabric.ingredients.fluids.JeiFluidIngredient;
 import mezz.jei.api.gui.ITickTimer;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
@@ -33,12 +36,12 @@ import mezz.jei.api.gui.widgets.IRecipeExtrasBuilder;
 import mezz.jei.api.helpers.ICodecHelper;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.ingredients.IIngredientType;
-import mezz.jei.api.neoforge.NeoForgeTypes;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.IRecipeManager;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
@@ -47,7 +50,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.FluidType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -295,8 +297,8 @@ public abstract class BaseRecipeCategory<RECIPE> extends AbstractContainerEventH
         int height = gauge.getHeight() - 2;
         //If we have no max (no fluids or just an empty fluid) we want to ensure the fluid renderer doesn't throw errors,
         // so we just return a capacity for the render of a bucket
-        int max = stacks.stream().mapToInt(FluidStack::getAmount).filter(stackSize -> stackSize > 0).max().orElse(FluidType.BUCKET_VOLUME);
-        return init(builder, NeoForgeTypes.FLUID_STACK, role, gauge, stacks)
+        long max = stacks.stream().mapToLong(FluidStack::getAmount).filter(stackSize -> stackSize > 0).max().orElse(FluidConstants.BUCKET);
+        return init(builder, FabricTypes.FLUID_STACK, role, gauge, stacks.stream().map(fluidStack -> new JeiFluidIngredient(fluidStack.getVariant(), fluidStack.getAmount())).map(IJeiFluidIngredient.class::cast).toList())
               .setFluidRenderer(max, false, width, height);
     }
 
@@ -304,7 +306,7 @@ public abstract class BaseRecipeCategory<RECIPE> extends AbstractContainerEventH
         int width = element.getWidth() - 2;
         int height = element.getHeight() - 2;
         //If we have no max (no chemicals or just an empty chemical) we mirror how we handle fluids and just return a capacity for the render of a bucket
-        long max = stacks.stream().mapToLong(ChemicalStack::getAmount).filter(stackSize -> stackSize > 0).max().orElse(FluidType.BUCKET_VOLUME);
+        long max = stacks.stream().mapToLong(ChemicalStack::getAmount).filter(stackSize -> stackSize > 0).max().orElse(FluidConstants.BUCKET);
         return init(builder, MekanismJEI.TYPE_CHEMICAL, role, element, stacks)
               .setCustomRenderer(MekanismJEI.TYPE_CHEMICAL, new ChemicalStackRenderer(max, width, height));
     }

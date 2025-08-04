@@ -10,6 +10,7 @@ import mekanism.api.chemical.IChemicalTank;
 import mekanism.api.energy.IEnergyContainer;
 import mekanism.api.energy.IMekanismStrictEnergyHandler;
 import mekanism.api.energy.IStrictEnergyHandler;
+import mekanism.api.fabric.transfer.fluids.IFluidHandlerItem;
 import mekanism.api.fluid.IExtendedFluidTank;
 import mekanism.api.heat.IHeatCapacitor;
 import mekanism.api.math.MathUtils;
@@ -22,13 +23,12 @@ import mekanism.common.capabilities.Capabilities;
 import mekanism.common.capabilities.heat.BasicHeatCapacitor;
 import mekanism.common.util.text.EnergyDisplay;
 import mekanism.common.util.text.TextUtils;
+import net.fabricmc.fabric.api.lookup.v1.item.ItemApiLookup;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.capabilities.ItemCapability;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -358,7 +358,7 @@ public class StorageUtils {
 
     private static double getDurabilityForDisplay(ItemStack stack) {
         double bestRatio = 0;
-        IChemicalHandler handler = stack.getCapability((ItemCapability<? extends IChemicalHandler, Void>) Capabilities.CHEMICAL.item());
+        IChemicalHandler handler = Capabilities.CHEMICAL.item().find(stack, null);
         if (handler != null) {
             for (int chemTack = 0, chemTanks = handler.getChemicalTanks(); chemTack < chemTanks; chemTack++) {
                 bestRatio = Math.max(bestRatio, getRatio(handler.getChemicalInTank(chemTack).getAmount(), handler.getChemicalTankCapacity(chemTack)));
@@ -406,19 +406,19 @@ public class StorageUtils {
                 IExtendedFluidTank tank = tanks.get(i);
                 FluidStack mergeStack = mergeTank.getFluid();
                 if (tank.isEmpty()) {
-                    int capacity = tank.getCapacity();
+                    long capacity = tank.getCapacity();
                     if (mergeStack.getAmount() <= capacity) {
                         tank.setStack(mergeStack);
                     } else {
                         tank.setStack(mergeStack.copyWithAmount(capacity));
-                        int remaining = mergeStack.getAmount() - capacity;
+                        long remaining = mergeStack.getAmount() - capacity;
                         if (remaining > 0) {
                             rejects.add(mergeStack.copyWithAmount(remaining));
                         }
                     }
                 } else if (tank.isFluidEqual(mergeStack)) {
-                    int amount = tank.growStack(mergeStack.getAmount(), Action.EXECUTE);
-                    int remaining = mergeStack.getAmount() - amount;
+                    long amount = tank.growStack(mergeStack.getAmount(), Action.EXECUTE);
+                    long remaining = mergeStack.getAmount() - amount;
                     if (remaining > 0) {
                         rejects.add(mergeStack.copyWithAmount(remaining));
                     }

@@ -1,5 +1,6 @@
 package mekanism.common.content.sps;
 
+import io.github.fabricators_of_create.porting_lib.entity.EntityHooks;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +48,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
-import net.neoforged.neoforge.event.EventHooks;
 
 public class SPSMultiblockData extends MultiblockData implements IValveHandler {
 
@@ -103,7 +103,7 @@ public class SPSMultiblockData extends MultiblockData implements IValveHandler {
         couldOperate = canOperate();
         if (couldOperate && receivedEnergy > 0L) {
             double lastProgress = progress;
-            final int inputPerAntimatter = MekanismConfig.general.spsInputPerAntimatter.get();
+            final long inputPerAntimatter = MekanismConfig.general.spsInputPerAntimatter.get();
             long inputNeeded = (inputPerAntimatter - inputProcessed) + inputPerAntimatter * (outputTank.getNeeded() - 1);
             double processable = (double) receivedEnergy / MekanismConfig.general.spsEnergyPerInput.get();
             if (processable + progress >= inputNeeded) {
@@ -183,7 +183,7 @@ public class SPSMultiblockData extends MultiblockData implements IValveHandler {
         int lastInputProcessed = inputProcessed;
         //Limit how much input we actually increase the input processed by to how much we were actually able to remove from the input tank
         inputProcessed += MathUtils.clampToInt(processed);
-        final int inputPerAntimatter = MekanismConfig.general.spsInputPerAntimatter.get();
+        final long inputPerAntimatter = MekanismConfig.general.spsInputPerAntimatter.get();
         if (inputProcessed >= inputPerAntimatter) {
             ChemicalStack toAdd = MekanismChemicals.ANTIMATTER.asStack(inputProcessed / inputPerAntimatter);
             outputTank.insert(toAdd, Action.EXECUTE, AutomationType.INTERNAL);
@@ -213,7 +213,7 @@ public class SPSMultiblockData extends MultiblockData implements IValveHandler {
                                 lightningBolt.setDamage(0);
                                 lightningBolt.setVisualOnly(true);
                             }
-                            if (!EventHooks.onEntityStruckByLightning(entity, lightningBolt) && world instanceof ServerLevel serverLevel) {//This should always be a server level
+                            if (!EntityHooks.onEntityStruckByLightning(entity, lightningBolt) && world instanceof ServerLevel serverLevel) {//This should always be a server level
                                 //Keep track of the remaining fire ticks so that we can skip lighting it on fire as we are not actual lightning
                                 int remainingFireTicks = entity.getRemainingFireTicks();
                                 entity.thunderHit(serverLevel, lightningBolt);

@@ -35,8 +35,8 @@ public class CreativeTabDeferredRegister extends MekanismDeferredRegister<Creati
     }
 
     @Override
-    public void register(@NotNull IEventBus bus) {
-        super.register(bus);
+    public void register() {
+        super.register();
         bus.addListener(addToExistingTabs);
     }
 

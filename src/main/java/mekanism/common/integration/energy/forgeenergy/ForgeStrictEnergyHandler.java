@@ -4,8 +4,8 @@ import mekanism.api.Action;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.energy.IEnergyConversion;
 import mekanism.api.energy.IStrictEnergyHandler;
+import mekanism.api.fabric.transfer.energy.IEnergyStorage;
 import mekanism.common.util.UnitDisplayUtils.EnergyUnit;
-import net.neoforged.neoforge.energy.IEnergyStorage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 

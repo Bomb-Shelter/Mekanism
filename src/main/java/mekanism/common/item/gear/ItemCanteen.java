@@ -24,14 +24,14 @@ import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
-import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
+import mekanism.api.fabric.transfer.fluids.IFluidHandler.FluidAction;
+import mekanism.api.fabric.transfer.fluids.IFluidHandlerItem;
 import org.jetbrains.annotations.NotNull;
 
 public class ItemCanteen extends Item implements ICustomCreativeTabContents {
 
     public ItemCanteen(Properties properties) {
-        super(properties.rarity(Rarity.UNCOMMON).stacksTo(1).setNoRepair());
+        super(properties.rarity(Rarity.UNCOMMON).stacksTo(1).port_lib$setNoRepair());
     }
 
     @Override
@@ -63,12 +63,12 @@ public class ItemCanteen extends Item implements ICustomCreativeTabContents {
     @Override
     public ItemStack finishUsingItem(@NotNull ItemStack stack, @NotNull Level world, @NotNull LivingEntity entityLiving) {
         if (!world.isClientSide && entityLiving instanceof Player player) {
-            int needed = Math.min(20 - player.getFoodData().getFoodLevel(), getFluid(stack).getAmount() / MekanismConfig.general.nutritionalPasteMBPerFood.get());
+            int needed = (int) Math.min(20 - player.getFoodData().getFoodLevel(), getFluid(stack).getAmount() / MekanismConfig.general.nutritionalPasteDropletPerFood.get());
             if (needed > 0) {
                 player.getFoodData().eat(needed, MekanismConfig.general.nutritionalPasteSaturation.get());
                 IFluidHandlerItem handler = Capabilities.FLUID.getCapability(stack);
                 if (handler != null) {
-                    handler.drain(needed * MekanismConfig.general.nutritionalPasteMBPerFood.get(), FluidAction.EXECUTE);
+                    handler.drain(needed * MekanismConfig.general.nutritionalPasteDropletPerFood.get(), FluidAction.EXECUTE);
                 }
                 entityLiving.gameEvent(GameEvent.DRINK);
             }

@@ -6,7 +6,7 @@ import java.util.Set;
 import java.util.function.BiPredicate;
 import mekanism.common.Mekanism;
 import mekanism.common.config.IMekanismConfig;
-import net.neoforged.neoforge.common.ModConfigSpec.ConfigValue;
+import io.github.fabricators_of_create.porting_lib.config.ModConfigSpec.ConfigValue;
 
 public abstract class CachedValue<T> {
 

@@ -7,6 +7,7 @@ import mekanism.api.math.MathUtils;
 import mekanism.api.radiation.capability.IRadiationEntity;
 import mekanism.common.Mekanism;
 import mekanism.common.capabilities.Capabilities;
+import mekanism.common.network.fabric.PacketDistributor;
 import mekanism.common.network.to_client.radiation.PacketEnvironmentalRadiationData;
 import mekanism.common.network.to_client.radiation.PacketPlayerRadiationData;
 import mekanism.common.util.MekanismUtils;
@@ -17,11 +18,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.tick.EntityTickEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.server.ServerLifecycleHooks;
+import io.github.fabricators_of_create.porting_lib.core.util.ServerLifecycleHooks;
 import org.jetbrains.annotations.Nullable;
 
 @EventBusSubscriber(modid = Mekanism.MODID)
@@ -55,7 +52,7 @@ public class PlayerExposure {
         if (!RadiationManager.isGlobalRadiationEnabled()) {
             return;
         }
-        IRadiationEntity radiationCap = entity.getCapability(Capabilities.RADIATION_ENTITY);
+        IRadiationEntity radiationCap = Capabilities.RADIATION_ENTITY.find(entity, null);
         // each tick, there is a 1/20 chance we will apply radiation to each player
         // this helps distribute the CPU load across ticks, and makes exposure slightly inconsistent
         if (entity.level().getRandom().nextInt(SharedConstants.TICKS_PER_SECOND) == 0) {

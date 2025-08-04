@@ -10,7 +10,7 @@ import mekanism.common.content.network.transmitter.PressurizedTube;
 import mekanism.common.content.network.transmitter.Transmitter;
 import net.minecraft.core.Holder;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import mekanism.api.fabric.transfer.fluids.IFluidHandler;
 
 public class CompatibleTransmitterValidator<ACCEPTOR, NETWORK extends DynamicNetwork<ACCEPTOR, NETWORK, TRANSMITTER>,
       TRANSMITTER extends Transmitter<ACCEPTOR, NETWORK, TRANSMITTER>> {

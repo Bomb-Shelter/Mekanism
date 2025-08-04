@@ -26,7 +26,7 @@ public class OC2CapabilityHelper {
         //builder.with(CAPABILITY, (ICapabilityProvider<? super TILE, @Nullable Direction, Device>) PROVIDER, supportsComputer);
     }
 
-    public static void addBoundingComputerCapabilities(RegisterCapabilitiesEvent event) {
+    public static void addBoundingComputerCapabilities() {
         //TileEntityBoundingBlock.proxyCapability(event, CAPABILITY);
     }
 }

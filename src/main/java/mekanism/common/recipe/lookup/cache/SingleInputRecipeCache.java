@@ -12,7 +12,7 @@ import mekanism.common.recipe.MekanismRecipeType;
 import mekanism.common.recipe.lookup.cache.type.IInputCache;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.common.util.TriPredicate;
+import io.github.fabricators_of_create.porting_lib.common.util.TriPredicate;
 import org.jetbrains.annotations.Nullable;
 
 /**

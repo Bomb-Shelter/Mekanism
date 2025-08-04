@@ -3,21 +3,18 @@ package mekanism.common.base.holiday;
 import java.util.Collections;
 import java.util.Map;
 import java.util.function.Predicate;
+
+import io.github.fabricators_of_create.porting_lib.event.client.TextureAtlasStitchedEvent;
 import mekanism.client.render.lib.QuadTransformation;
 import mekanism.client.render.lib.QuadTransformation.TextureFilteredTransformation;
 import mekanism.common.Mekanism;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.TextureAtlasStitchedEvent;
 import org.jetbrains.annotations.Nullable;
 
 /**
  * @apiNote Only reference this class from the client side. It is in the common package to allow for keeping holidays package private
  */
-@EventBusSubscriber(modid = Mekanism.MODID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
 public final class ClientHolidayInfo {
 
     private ClientHolidayInfo() {
@@ -29,7 +26,10 @@ public final class ClientHolidayInfo {
     private static final Predicate<ResourceLocation> IS_BLANK_SCREEN = s -> s.getPath().contains("screen_blank");
     private static Map<Holiday, QuadTransformation> HOLIDAY_MINER_TRANSFORMS = Collections.emptyMap();
 
-    @SubscribeEvent
+    public static void init() {
+        TextureAtlasStitchedEvent.EVENT.register(ClientHolidayInfo::onStitch);
+    }
+
     public static void onStitch(TextureAtlasStitchedEvent event) {
         TextureAtlas atlas = event.getAtlas();
         if (!atlas.location().equals(TextureAtlas.LOCATION_BLOCKS)) {

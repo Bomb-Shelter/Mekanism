@@ -3,6 +3,8 @@ package mekanism.common.registration.impl;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
+import io.github.fabricators_of_create.porting_lib.util.DeferredSpawnEggItem;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.text.EnumColor;
 import mekanism.api.text.TextComponentUtil;
@@ -11,6 +13,7 @@ import mekanism.common.content.gear.ModuleHelper;
 import mekanism.common.item.ItemModule;
 import mekanism.common.registration.MekanismDeferredHolder;
 import mekanism.common.registration.MekanismDeferredRegister;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
@@ -20,13 +23,6 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
-import net.neoforged.bus.api.EventPriority;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.loading.FMLEnvironment;
-import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import net.neoforged.neoforge.common.DeferredSpawnEggItem;
-import net.neoforged.neoforge.event.ModifyDefaultComponentsEvent;
-import net.neoforged.neoforge.registries.RegisterEvent;
 import org.jetbrains.annotations.NotNull;
 
 @NothingNullByDefault
@@ -37,16 +33,12 @@ public class ItemDeferredRegister extends MekanismDeferredRegister<Item> {
     }
 
     @Override
-    public void register(@NotNull IEventBus bus) {
-        super.register(bus);
-        bus.addListener(RegisterCapabilitiesEvent.class, event -> forEntries(registryObject -> registryObject.registerCapabilities(event)));
+    public void register() {
+        super.register();
+        forEntries(ItemRegistryObject::registerCapabilities);
         //Listen at the lowest priority so that it happens after our elements have been registered
         // and then see if any need to apply attachments
-        bus.addListener(EventPriority.LOWEST, RegisterEvent.class, event -> {
-            if (event.getRegistryKey().equals(Registries.ITEM)) {
-                forEntries(registryObject -> registryObject.attachDefaultContainers(bus));
-            }
-        });
+        forEntries(ItemRegistryObject::attachDefaultContainers);
 
         bus.addListener(EventPriority.LOWEST, ModifyDefaultComponentsEvent.class, event -> forEntries(registryObject -> {
             if (ContainerType.anySupports(registryObject)) {
@@ -64,7 +56,7 @@ public class ItemDeferredRegister extends MekanismDeferredRegister<Item> {
             //Note: All entries should be of this type
             if (entry instanceof ItemRegistryObject<?> registryObject) {
                 consumer.accept(registryObject);
-            } else if (!FMLEnvironment.production) {
+            } else if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
                 throw new IllegalStateException("Expected entry to be an ItemRegistryObject");
             }
         }

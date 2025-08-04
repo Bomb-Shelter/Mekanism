@@ -3,6 +3,8 @@ package mekanism.common.registries;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import io.github.fabricators_of_create.porting_lib.registry.DeferredRegister;
 import mekanism.common.Mekanism;
 import mekanism.common.config.MekanismConfig;
 import net.minecraft.core.registries.Registries;
@@ -11,7 +13,6 @@ import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.crafting.Ingredient;
 import io.github.fabricators_of_create.porting_lib.registry.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
 
 public class MekanismArmorMaterials {
 

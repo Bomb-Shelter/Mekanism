@@ -1,6 +1,7 @@
 package mekanism.common.item;
 
 import com.mojang.serialization.Codec;
+import io.github.fabricators_of_create.porting_lib.tool.ItemAbility;
 import io.netty.buffer.ByteBuf;
 import java.util.List;
 import java.util.Locale;
@@ -62,8 +63,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.neoforge.common.ItemAbility;
-import net.neoforged.neoforge.common.util.Lazy;
+import io.github.fabricators_of_create.porting_lib.common.util.Lazy;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

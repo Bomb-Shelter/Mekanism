@@ -15,6 +15,7 @@ import mekanism.common.content.qio.QIOCraftingTransferHelper.SingularHashedItemS
 import mekanism.common.content.qio.QIOServerCraftingTransferHandler;
 import mekanism.common.inventory.container.QIOItemViewerContainer;
 import mekanism.common.network.IMekanismPacket;
+import mekanism.common.network.fabric.IPayloadContext;
 import mekanism.common.recipe.MekanismRecipeType;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -25,7 +26,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
 //Note: While our logic is not dependent on knowing about transferMultiple, we make use of it for encoding and decoding

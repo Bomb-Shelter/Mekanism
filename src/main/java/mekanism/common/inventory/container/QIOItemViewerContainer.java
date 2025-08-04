@@ -59,7 +59,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.common.TranslatableEnum;
+import io.github.fabricators_of_create.porting_lib.core.util.TranslatableEnum;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
@@ -815,8 +815,8 @@ public abstract class QIOItemViewerContainer extends MekanismContainer implement
               Comparator.comparing(IScrollableSlot::getModID).thenComparing(IScrollableSlot::getDisplayName),
               Comparator.comparing(IScrollableSlot::getModID).reversed().thenComparing(IScrollableSlot::getDisplayName)),
         REGISTRY_NAME(MekanismLang.LIST_SORT_REGISTRY_NAME, MekanismLang.LIST_SORT_REGISTRY_NAME_DESC, true,
-              Comparator.comparing(IScrollableSlot::getRegistryName, ResourceLocation::compareNamespaced).thenComparingLong(IScrollableSlot::count),
-              Comparator.comparing(IScrollableSlot::getRegistryName, ResourceLocation::compareNamespaced).reversed().thenComparingLong(IScrollableSlot::count));
+              Comparator.comparing(IScrollableSlot::getRegistryName, ResourceLocation::port_lib$compareNamespaced).thenComparingLong(IScrollableSlot::count),
+              Comparator.comparing(IScrollableSlot::getRegistryName, ResourceLocation::port_lib$compareNamespaced).reversed().thenComparingLong(IScrollableSlot::count));
 
         private final ILangEntry name;
         private final ILangEntry tooltip;

@@ -65,6 +65,7 @@ import mekanism.common.tile.interfaces.IHasGasMode;
 import mekanism.common.tile.prefab.TileEntityRecipeMachine;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.NBTUtils;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentMap;
@@ -72,7 +73,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.FluidType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -92,7 +92,7 @@ public class TileEntityElectrolyticSeparator extends TileEntityRecipeMachine<Ele
      * The maximum amount of gas this block can store.
      */
     public static final long MAX_GAS = 2_400;
-    public static final int MAX_FLUID = 24 * FluidType.BUCKET_VOLUME;
+    public static final long MAX_FLUID = 24 * FluidConstants.BUCKET;
     private static final int BASE_DUMP_RATE = 8;
     private static final LongObjectToLongFunction<TileEntityElectrolyticSeparator> BASE_ENERGY_CALCULATOR = (base, tile) -> base * tile.getRecipeEnergyMultiplier();
 
@@ -346,15 +346,15 @@ public class TileEntityElectrolyticSeparator extends TileEntityRecipeMachine<Ele
     @Override
     protected void collectImplicitComponents(@NotNull DataComponentMap.Builder builder) {
         super.collectImplicitComponents(builder);
-        builder.set(MekanismDataComponents.DUMP_MODE, dumpLeft);
-        builder.set(MekanismDataComponents.SECONDARY_DUMP_MODE, dumpRight);
+        builder.set(MekanismDataComponents.DUMP_MODE.get(), dumpLeft);
+        builder.set(MekanismDataComponents.SECONDARY_DUMP_MODE.get(), dumpRight);
     }
 
     @Override
     protected void applyImplicitComponents(@NotNull BlockEntity.DataComponentInput input) {
         super.applyImplicitComponents(input);
-        dumpLeft = input.getOrDefault(MekanismDataComponents.DUMP_MODE, dumpLeft);
-        dumpRight = input.getOrDefault(MekanismDataComponents.SECONDARY_DUMP_MODE, dumpRight);
+        dumpLeft = input.getOrDefault(MekanismDataComponents.DUMP_MODE.get(), dumpLeft);
+        dumpRight = input.getOrDefault(MekanismDataComponents.SECONDARY_DUMP_MODE.get(), dumpRight);
     }
 
     @Override

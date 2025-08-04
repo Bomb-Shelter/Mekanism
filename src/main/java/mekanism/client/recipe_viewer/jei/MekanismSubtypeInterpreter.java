@@ -11,7 +11,7 @@ import mezz.jei.api.ingredients.subtypes.ISubtypeInterpreter;
 import mezz.jei.api.ingredients.subtypes.UidContext;
 import net.minecraft.world.item.ItemStack;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import mekanism.api.fabric.transfer.fluids.IFluidHandler;
 import org.jetbrains.annotations.Nullable;
 
 public class MekanismSubtypeInterpreter implements ISubtypeInterpreter<ItemStack> {

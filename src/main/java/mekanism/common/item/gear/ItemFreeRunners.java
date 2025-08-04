@@ -1,6 +1,7 @@
 package mekanism.common.item.gear;
 
 import com.mojang.serialization.Codec;
+import io.github.fabricators_of_create.porting_lib.item.extensions.WalkOnSnowItem;
 import io.netty.buffer.ByteBuf;
 import java.util.List;
 import java.util.Locale;
@@ -8,6 +9,7 @@ import java.util.function.Consumer;
 import java.util.function.IntFunction;
 import mekanism.api.IIncrementalEnum;
 import mekanism.api.annotations.NothingNullByDefault;
+import mekanism.api.fabric.ItemAttributeModifierEvent;
 import mekanism.api.text.EnumColor;
 import mekanism.api.text.IHasTextComponent.IHasEnumNameTextComponent;
 import mekanism.api.text.ILangEntry;
@@ -42,11 +44,10 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
-import net.neoforged.neoforge.event.ItemAttributeModifierEvent;
 import org.jetbrains.annotations.NotNull;
 
 public class ItemFreeRunners extends ItemSpecialArmor implements IItemHUDProvider, ICustomCreativeTabContents, IAttachmentBasedModeItem<FreeRunnerMode>,
-      IHasConditionalAttributes {
+      IHasConditionalAttributes, WalkOnSnowItem {
 
     private static final AttributeModifier MOVEMENT_EFFICIENCY = new AttributeModifier(Mekanism.rl("free_runners"), 1, Operation.ADD_VALUE);
 

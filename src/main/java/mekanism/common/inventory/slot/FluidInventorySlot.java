@@ -16,9 +16,9 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.FluidType;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
-import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
+import mekanism.api.fabric.transfer.fluids.IFluidHandler.FluidAction;
+import mekanism.api.fabric.transfer.fluids.IFluidHandlerItem;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -56,9 +56,9 @@ public class FluidInventorySlot extends BasicInventorySlot implements IFluidHand
                     return hasEmpty;
                 }
                 FluidStack fluid = fluidTank.getFluid();
-                if (fluid.getAmount() < FluidType.BUCKET_VOLUME) {
+                if (fluid.getAmount() < FluidConstants.BUCKET) {
                     //Workaround for buckets not being able to be filled until we have enough of our volume
-                    fluid = fluid.copyWithAmount(FluidType.BUCKET_VOLUME);
+                    fluid = fluid.copyWithAmount(FluidConstants.BUCKET);
                 } else {
                     fluid = fluid.copy();//avoid handler modifying
                 }

@@ -1,5 +1,8 @@
 package mekanism.common;
 
+import io.github.fabricators_of_create.porting_lib.entity.events.EntityJoinLevelEvent;
+import io.github.fabricators_of_create.porting_lib.level.events.BlockEvent;
+import io.github.fabricators_of_create.porting_lib.level.events.LevelEvent;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMaps;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
@@ -19,8 +22,12 @@ import mekanism.common.lib.multiblock.MultiblockManager;
 import mekanism.common.lib.radiation.RadiationManager;
 import mekanism.common.util.WorldUtils;
 import mekanism.common.world.GenHandler;
+import net.fabricmc.fabric.api.event.Event;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -31,15 +38,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.bus.api.EventPriority;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
-import net.neoforged.neoforge.event.level.BlockEvent;
-import net.neoforged.neoforge.event.level.ChunkDataEvent;
-import net.neoforged.neoforge.event.level.ChunkEvent;
-import net.neoforged.neoforge.event.level.LevelEvent;
-import net.neoforged.neoforge.event.tick.LevelTickEvent;
-import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import net.minecraft.world.level.chunk.LevelChunk;
 import org.jetbrains.annotations.Nullable;
 
 public class CommonWorldTickHandler {
@@ -77,7 +76,22 @@ public class CommonWorldTickHandler {
         chunkVersions = null;
     }
 
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public CommonWorldTickHandler() {
+        ResourceLocation HIGH = ResourceLocation.fromNamespaceAndPath("fabric", "high");
+        EntityJoinLevelEvent.EVENT.addPhaseOrdering(HIGH, Event.DEFAULT_PHASE);
+        ChunkDataEvent.Save.EVENT.addPhaseOrdering(HIGH, Event.DEFAULT_PHASE);
+        ChunkDataEvent.Load.EVENT.addPhaseOrdering(HIGH, Event.DEFAULT_PHASE);
+        EntityJoinLevelEvent.EVENT.register(this::onEntitySpawn);
+        BlockEvent.BreakEvent.EVENT.register(this::onBlockBreak);
+        ChunkDataEvent.Save.EVENT.register(this::chunkSave);
+        ChunkDataEvent.Load.EVENT.register(this::onChunkDataLoad);
+        ServerChunkEvents.CHUNK_UNLOAD.register(this::chunkUnloadEvent);
+        LevelEvent.Unload.EVENT.register(this::worldUnloadEvent);
+        LevelEvent.Load.EVENT.register(this::worldLoadEvent);
+        ServerTickEvents.END_SERVER_TICK.register(this::onTick);
+        ServerTickEvents.END_WORLD_TICK.register(this::onTick);
+    }
+
     public void onEntitySpawn(EntityJoinLevelEvent event) {
         //If we are in the middle of breaking a block using a cardboard box, cancel any items
         // that are dropped, we do this at highest priority to ensure we cancel it the same tick
@@ -98,7 +112,6 @@ public class CommonWorldTickHandler {
         }
     }
 
-    @SubscribeEvent
     public void onBlockBreak(BlockEvent.BreakEvent event) {
         BlockState state = event.getState();
         //Skip empty block, shouldn't be a null state but the BreakEvent still handles that as the empty block,
@@ -112,7 +125,6 @@ public class CommonWorldTickHandler {
         }
     }
 
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
     public synchronized void chunkSave(ChunkDataEvent.Save event) {
         LevelAccessor world = event.getLevel();
         if (!world.isClientSide() && world instanceof Level level) {
@@ -125,7 +137,6 @@ public class CommonWorldTickHandler {
         }
     }
 
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
     public synchronized void onChunkDataLoad(ChunkDataEvent.Load event) {
         if (event.getLevel() instanceof Level level && !level.isClientSide()) {
             int version = event.getData().getInt(SerializationConstants.WORLD_GEN_VERSION);
@@ -148,16 +159,14 @@ public class CommonWorldTickHandler {
         }
     }
 
-    @SubscribeEvent
-    public void chunkUnloadEvent(ChunkEvent.Unload event) {
-        if (event.getLevel() instanceof Level level && !level.isClientSide() && chunkVersions != null) {
+    public void chunkUnloadEvent(ServerLevel level, LevelChunk chunk) {
+        if (!level.isClientSide() && chunkVersions != null) {
             //When a chunk unloads, free up the memory tracking what version it has
             chunkVersions.getOrDefault(level.dimension().location(), Object2IntMaps.emptyMap())
-                  .removeInt(event.getChunk().getPos());
+                  .removeInt(chunk.getPos());
         }
     }
 
-    @SubscribeEvent
     public void worldUnloadEvent(LevelEvent.Unload event) {
         LevelAccessor world = event.getLevel();
         if (!world.isClientSide() && world instanceof Level level && chunkVersions != null) {
@@ -166,7 +175,6 @@ public class CommonWorldTickHandler {
         }
     }
 
-    @SubscribeEvent
     public void worldLoadEvent(LevelEvent.Load event) {
         if (!event.getLevel().isClientSide()) {
             FrequencyManager.load();
@@ -175,61 +183,57 @@ public class CommonWorldTickHandler {
         }
     }
 
-    @SubscribeEvent
-    public void onTick(ServerTickEvent.Post event) {
-        boolean tickingNormally = event.getServer().tickRateManager().runsNormally();
+    public void onTick(MinecraftServer server) {
+        boolean tickingNormally = server.tickRateManager().runsNormally();
         FrequencyManager.tick(tickingNormally);
     }
 
-    @SubscribeEvent
-    public void onTick(LevelTickEvent.Post event) {
-        if (event.getLevel() instanceof ServerLevel world) {
-            RadiationManager.get().tickServerWorld(world);
-            //Note: We flush the tag and recipe cache, and also perform retrogen, regardless of if the ticks are frozen or not
-            if (flushTagAndRecipeCaches) {
-                //Loop all open containers and if it is a portable qio dashboard force refresh the window's recipes
-                for (ServerPlayer player : world.players()) {
-                    if (player.containerMenu instanceof PortableQIODashboardContainer qioDashboard) {
-                        for (byte index = 0; index < IQIOCraftingWindowHolder.MAX_CRAFTING_WINDOWS; index++) {
-                            qioDashboard.getCraftingWindow(index).invalidateRecipe();
-                        }
+    public void onTick(ServerLevel world) {
+        RadiationManager.get().tickServerWorld(world);
+        //Note: We flush the tag and recipe cache, and also perform retrogen, regardless of if the ticks are frozen or not
+        if (flushTagAndRecipeCaches) {
+            //Loop all open containers and if it is a portable qio dashboard force refresh the window's recipes
+            for (ServerPlayer player : world.players()) {
+                if (player.containerMenu instanceof PortableQIODashboardContainer qioDashboard) {
+                    for (byte index = 0; index < IQIOCraftingWindowHolder.MAX_CRAFTING_WINDOWS; index++) {
+                        qioDashboard.getCraftingWindow(index).invalidateRecipe();
                     }
                 }
-                flushTagAndRecipeCaches = false;
             }
+            flushTagAndRecipeCaches = false;
+        }
 
-            if (chunkRegenMap == null || !MekanismConfig.world.enableRegeneration.get()) {
-                return;
+        if (chunkRegenMap == null || !MekanismConfig.world.enableRegeneration.get()) {
+            return;
+        }
+        ResourceLocation dimensionName = world.dimension().location();
+        //Credit to E. Beef
+        if (chunkRegenMap.containsKey(dimensionName)) {
+            Queue<ChunkPos> chunksToGen = chunkRegenMap.get(dimensionName);
+            //Chunk versions may be null if retrogen is forced by command
+            Object2IntMap<ChunkPos> dimensionChunkVersions = chunkVersions == null ? Object2IntMaps.emptyMap() : chunkVersions.getOrDefault(dimensionName, Object2IntMaps.emptyMap());
+            long startTime = System.nanoTime();
+            while (System.nanoTime() - startTime < maximumDeltaTimeNanoSecs && !chunksToGen.isEmpty()) {
+                ChunkPos nextChunk = chunksToGen.poll();
+                if (nextChunk == null) {
+                    break;
+                }
+                //Ensure the chunk actually exists and is still loaded before trying to retrogen it
+                if (WorldUtils.isChunkLoaded(world, nextChunk)) {
+                    if (GenHandler.generate(world, nextChunk)) {
+                        Mekanism.logger.info("Regenerating ores and salt at chunk {}", nextChunk);
+                    }
+                    //Regardless of whether we were able to generate anything in the chunk, now that we have
+                    // handled it, update the chunk version. We do this by removing tracking the chunk's
+                    // version so that we can just default it to the latest version when saved and free up the
+                    // memory as early as possible
+                    if (chunkVersions != null) {
+                        dimensionChunkVersions.removeInt(nextChunk);
+                    }
+                }
             }
-            ResourceLocation dimensionName = world.dimension().location();
-            //Credit to E. Beef
-            if (chunkRegenMap.containsKey(dimensionName)) {
-                Queue<ChunkPos> chunksToGen = chunkRegenMap.get(dimensionName);
-                //Chunk versions may be null if retrogen is forced by command
-                Object2IntMap<ChunkPos> dimensionChunkVersions = chunkVersions == null ? Object2IntMaps.emptyMap() : chunkVersions.getOrDefault(dimensionName, Object2IntMaps.emptyMap());
-                long startTime = System.nanoTime();
-                while (System.nanoTime() - startTime < maximumDeltaTimeNanoSecs && !chunksToGen.isEmpty()) {
-                    ChunkPos nextChunk = chunksToGen.poll();
-                    if (nextChunk == null) {
-                        break;
-                    }
-                    //Ensure the chunk actually exists and is still loaded before trying to retrogen it
-                    if (WorldUtils.isChunkLoaded(world, nextChunk)) {
-                        if (GenHandler.generate(world, nextChunk)) {
-                            Mekanism.logger.info("Regenerating ores and salt at chunk {}", nextChunk);
-                        }
-                        //Regardless of whether we were able to generate anything in the chunk, now that we have
-                        // handled it, update the chunk version. We do this by removing tracking the chunk's
-                        // version so that we can just default it to the latest version when saved and free up the
-                        // memory as early as possible
-                        if (chunkVersions != null) {
-                            dimensionChunkVersions.removeInt(nextChunk);
-                        }
-                    }
-                }
-                if (chunksToGen.isEmpty()) {
-                    chunkRegenMap.remove(dimensionName);
-                }
+            if (chunksToGen.isEmpty()) {
+                chunkRegenMap.remove(dimensionName);
             }
         }
     }

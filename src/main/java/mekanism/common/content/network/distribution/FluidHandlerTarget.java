@@ -5,8 +5,8 @@ import mekanism.api.math.MathUtils;
 import mekanism.common.lib.distribution.SplitInfo;
 import mekanism.common.lib.distribution.Target;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
+import mekanism.api.fabric.transfer.fluids.IFluidHandler;
+import mekanism.api.fabric.transfer.fluids.IFluidHandler.FluidAction;
 import org.jetbrains.annotations.NotNull;
 
 public class FluidHandlerTarget extends Target<IFluidHandler, @NotNull FluidStack> {

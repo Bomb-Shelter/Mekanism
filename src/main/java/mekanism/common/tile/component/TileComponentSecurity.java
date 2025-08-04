@@ -98,9 +98,9 @@ public class TileComponentSecurity implements ITileComponent {
 
     @Override
     public void collectImplicitComponents(DataComponentMap.Builder builder) {
-        builder.set(MekanismDataComponents.SECURITY, securityMode);
+        builder.set(MekanismDataComponents.SECURITY.get(), securityMode);
         if (ownerUUID != null) {
-            builder.set(MekanismDataComponents.OWNER, ownerUUID);
+            builder.set(MekanismDataComponents.OWNER.get(), ownerUUID);
         }
     }
 

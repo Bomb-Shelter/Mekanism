@@ -4,6 +4,7 @@ import mekanism.client.render.hud.MekanismStatusOverlay;
 import mekanism.common.Mekanism;
 import mekanism.common.inventory.container.QIOItemViewerContainer;
 import mekanism.common.lib.Version;
+import mekanism.common.network.fabric.PacketDistributor;
 import mekanism.common.network.to_client.PacketHitBlockEffect;
 import mekanism.common.network.to_client.PacketLightningRender;
 import mekanism.common.network.to_client.PacketPortalFX;
@@ -58,11 +59,8 @@ import mekanism.common.network.to_server.qio.PacketQIOItemViewerSlotShiftTake;
 import mekanism.common.network.to_server.qio.PacketQIOItemViewerSlotTake;
 import mekanism.common.network.to_server.robit.PacketRobitName;
 import mekanism.common.network.to_server.robit.PacketRobitSkin;
-import net.minecraft.network.protocol.configuration.ServerConfigurationPacketListener;
+import net.fabricmc.fabric.api.networking.v1.ServerConfigurationConnectionEvents;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.event.RegisterConfigurationTasksEvent;
 
 public class PacketHandler extends BasePacketHandler {
 
@@ -72,11 +70,10 @@ public class PacketHandler extends BasePacketHandler {
     private SimplePacketPayLoad showModeChange;
     private SimplePacketPayLoad killItemViewer;
 
-    public PacketHandler(IEventBus modEventBus, Version version) {
-        super(modEventBus, version);
-        modEventBus.addListener(RegisterConfigurationTasksEvent.class, event -> {
-            ServerConfigurationPacketListener listener = event.getListener();
-            event.register(new SyncAllSecurityData(listener));
+    public PacketHandler(Version version) {
+        super(version);
+        ServerConfigurationConnectionEvents.CONFIGURE.register((listener, server) -> {
+            listener.addTask(new SyncAllSecurityData(listener));
         });
     }
 

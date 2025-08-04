@@ -1,6 +1,8 @@
 package mekanism.common.capabilities;
 
 import java.util.function.BooleanSupplier;
+
+import mekanism.api.fabric.lookup.BlockApiCacheWithContext;
 import mekanism.common.util.WorldUtils;
 import net.fabricmc.fabric.api.lookup.v1.block.BlockApiCache;
 import net.fabricmc.fabric.api.lookup.v1.block.BlockApiLookup;
@@ -58,16 +60,16 @@ public interface IMultiTypeCapability<HANDLER, ITEM_HANDLER extends HANDLER> {
         return WorldUtils.getCapability(level, block(), pos, state, blockEntity, side);
     }
 
-    default BlockApiCache<HANDLER, @Nullable Direction> createCache(ServerLevel level, BlockPos pos, @Nullable Direction context) {
-        return BlockCapabilityCache.create(block(), level, pos, context);
+    default BlockApiCacheWithContext<HANDLER, @Nullable Direction> createCache(ServerLevel level, BlockPos pos, @Nullable Direction context) {
+        return BlockApiCacheWithContext.create(block(), level, pos, context);
     }
 
-    default BlockApiCache<HANDLER, @Nullable Direction> createCache(ServerLevel level, BlockPos pos, @Nullable Direction context, BooleanSupplier isValid,
+    default BlockApiCacheWithContext<HANDLER, @Nullable Direction> createCache(ServerLevel level, BlockPos pos, @Nullable Direction context, BooleanSupplier isValid,
           Runnable invalidationListener) {
-        return BlockApiCache.create(block(), level, pos, context, isValid, invalidationListener);
+        return BlockApiCacheWithContext.create(block(), level, pos, context, isValid, invalidationListener);
     }
 
-    default BlockApiCache<HANDLER, @Nullable Direction> createCache(ServerLevel level, BlockPos pos, @Nullable Direction context, BooleanSupplier isValid) {
-        return BlockApiCache.create(block(), level, pos, context, isValid, () -> {});
+    default BlockApiCacheWithContext<HANDLER, @Nullable Direction> createCache(ServerLevel level, BlockPos pos, @Nullable Direction context, BooleanSupplier isValid) {
+        return BlockApiCacheWithContext.create(block(), level, pos, context, isValid, () -> {});
     }
 }

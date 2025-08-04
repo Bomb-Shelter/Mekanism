@@ -6,10 +6,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+
 import mekanism.common.config.IMekanismConfig;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.common.ModConfigSpec;
-import net.neoforged.neoforge.common.ModConfigSpec.ConfigValue;
+import io.github.fabricators_of_create.porting_lib.config.ModConfigSpec;
+import io.github.fabricators_of_create.porting_lib.config.ModConfigSpec.ConfigValue;
 
 public class CachedOredictionificatorConfigValue extends CachedMapConfigValue<String, List<String>> {
 
@@ -18,7 +19,7 @@ public class CachedOredictionificatorConfigValue extends CachedMapConfigValue<St
     }
 
     public static CachedOredictionificatorConfigValue define(IMekanismConfig config, ModConfigSpec.Builder builder, String path,
-          Supplier<Map<String, List<String>>> defaults) {
+                                                             Supplier<Map<String, List<String>>> defaults) {
         return new CachedOredictionificatorConfigValue(config, builder.defineListAllowEmpty(path,
               () -> encodeStatic(defaults.get(), CachedOredictionificatorConfigValue::encodeStatic),
               () -> "c:ingots/",

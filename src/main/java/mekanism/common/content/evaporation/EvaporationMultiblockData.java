@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.function.BooleanSupplier;
 import mekanism.api.IEvaporationSolar;
 import mekanism.api.SerializationConstants;
+import mekanism.api.fabric.lookup.BlockApiCacheWithContext;
 import mekanism.api.functions.ConstantPredicates;
 import mekanism.api.heat.HeatAPI;
 import mekanism.api.recipes.FluidToFluidRecipe;
@@ -53,7 +54,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.capabilities.BlockCapabilityCache;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -82,7 +82,7 @@ public class EvaporationMultiblockData extends MultiblockData implements IValveH
     private double biomeAmbientTemp;
     private double tempMultiplier;
 
-    private int inputTankCapacity;
+    private long inputTankCapacity;
     public float prevScale;
     @ContainerSync
     @SyntheticComputerMethod(getter = "getProductionAmount")
@@ -96,7 +96,7 @@ public class EvaporationMultiblockData extends MultiblockData implements IValveH
     @ContainerSync
     private final boolean[] trackedErrors = new boolean[TRACKED_ERROR_TYPES.size()];
 
-    private final Int2ObjectMap<BlockCapabilityCache<IEvaporationSolar, Void>> cachedSolar = new Int2ObjectArrayMap<>(4);
+    private final Int2ObjectMap<BlockApiCacheWithContext<IEvaporationSolar, Void>> cachedSolar = new Int2ObjectArrayMap<>(4);
 
     private final IOutputHandler<@NotNull FluidStack> outputHandler;
     private final IInputHandler<@NotNull FluidStack> inputHandler;
@@ -223,7 +223,7 @@ public class EvaporationMultiblockData extends MultiblockData implements IValveH
         }
     }
 
-    public int getMaxFluid() {
+    public long getMaxFluid() {
         return inputTankCapacity;
     }
 
@@ -288,8 +288,8 @@ public class EvaporationMultiblockData extends MultiblockData implements IValveH
     @ComputerMethod
     int getActiveSolars() {
         int ret = 0;
-        for (BlockCapabilityCache<IEvaporationSolar, Void> capability : cachedSolar.values()) {
-            IEvaporationSolar solar = capability.getCapability();
+        for (BlockApiCacheWithContext<IEvaporationSolar, Void> capability : cachedSolar.values()) {
+            IEvaporationSolar solar = capability.find();
             if (solar != null && solar.canSeeSun()) {
                 ret++;
             }
@@ -300,7 +300,7 @@ public class EvaporationMultiblockData extends MultiblockData implements IValveH
     private void updateSolarSpot(Level world, BlockPos pos, int corner) {
         //Create a capability cache for the given corner. When we are unformed we will clear references to our caches
         // which allow them to be garbage collected
-        cachedSolar.put(corner, BlockCapabilityCache.create(Capabilities.EVAPORATION_SOLAR, (ServerLevel) world, pos, null));
+        cachedSolar.put(corner, BlockApiCacheWithContext.create(Capabilities.EVAPORATION_SOLAR, (ServerLevel) world, pos, null));
     }
 
     private void updateSolars(Level world) {

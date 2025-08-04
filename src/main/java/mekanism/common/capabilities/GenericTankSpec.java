@@ -2,9 +2,10 @@ package mekanism.common.capabilities;
 
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
+
 import mekanism.api.AutomationType;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.common.util.TriPredicate;
+import io.github.fabricators_of_create.porting_lib.common.util.TriPredicate;
 import org.jetbrains.annotations.NotNull;
 
 public abstract class GenericTankSpec<TYPE> {

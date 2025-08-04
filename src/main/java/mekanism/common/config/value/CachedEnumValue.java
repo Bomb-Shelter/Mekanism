@@ -1,8 +1,8 @@
 package mekanism.common.config.value;
 
 import mekanism.common.config.IMekanismConfig;
-import net.neoforged.neoforge.common.ModConfigSpec.EnumValue;
-import net.neoforged.neoforge.common.TranslatableEnum;
+import io.github.fabricators_of_create.porting_lib.config.ModConfigSpec.EnumValue;
+import io.github.fabricators_of_create.porting_lib.core.util.TranslatableEnum;
 
 public class CachedEnumValue<T extends Enum<T>> extends CachedConfigValue<T> {
 

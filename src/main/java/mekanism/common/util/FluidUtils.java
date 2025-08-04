@@ -3,6 +3,7 @@ package mekanism.common.util;
 import java.util.Collection;
 import mekanism.api.Action;
 import mekanism.api.AutomationType;
+import mekanism.api.fabric.lookup.BlockApiCacheWithContext;
 import mekanism.api.fluid.IExtendedFluidTank;
 import mekanism.api.fluid.IMekanismFluidHandler;
 import mekanism.common.attachments.containers.ContainerType;
@@ -16,13 +17,10 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-import net.neoforged.fml.loading.FMLEnvironment;
-import net.neoforged.neoforge.capabilities.BlockCapabilityCache;
-import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
-import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
+import mekanism.api.fabric.transfer.fluids.IFluidHandler;
+import mekanism.api.fabric.transfer.fluids.IFluidHandler.FluidAction;
+import mekanism.api.fabric.transfer.fluids.IFluidHandlerItem;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -67,11 +65,11 @@ public final class FluidUtils {
         return 0xFFFFFFFF;
     }
 
-    public static void emit(Collection<BlockCapabilityCache<IFluidHandler, @Nullable Direction>> targets, IExtendedFluidTank tank) {
+    public static void emit(Collection<BlockApiCacheWithContext<IFluidHandler, @Nullable Direction>> targets, IExtendedFluidTank tank) {
         emit(targets, tank, tank.getCapacity());
     }
 
-    public static void emit(Collection<BlockCapabilityCache<IFluidHandler, @Nullable Direction>> targets, IExtendedFluidTank tank, int maxOutput) {
+    public static void emit(Collection<BlockApiCacheWithContext<IFluidHandler, @Nullable Direction>> targets, IExtendedFluidTank tank, long maxOutput) {
         if (!tank.isEmpty() && maxOutput > 0 && !targets.isEmpty()) {
             tank.extract(emit(targets, FluidStack.EMPTY, tank, maxOutput), Action.EXECUTE, AutomationType.INTERNAL);
         }
@@ -85,12 +83,12 @@ public final class FluidUtils {
      *
      * @return the amount of fluid emitted
      */
-    public static int emit(Collection<BlockCapabilityCache<IFluidHandler, @Nullable Direction>> targets, @NotNull FluidStack stack) {
-        return emit(targets, stack, null, Integer.MAX_VALUE);
+    public static long emit(Collection<BlockApiCacheWithContext<IFluidHandler, @Nullable Direction>> targets, @NotNull FluidStack stack) {
+        return emit(targets, stack, null, Long.MAX_VALUE);
     }
 
-    private static int emit(Collection<BlockCapabilityCache<IFluidHandler, @Nullable Direction>> targets, @NotNull FluidStack stack, IExtendedFluidTank tank,
-          int maxOutput) {
+    private static long emit(Collection<BlockApiCacheWithContext<IFluidHandler, @Nullable Direction>> targets, @NotNull FluidStack stack, IExtendedFluidTank tank,
+          long maxOutput) {
         if (stack.isEmpty() && tank == null) {
             //Something went wrong in calling this method
             return 0;
@@ -99,9 +97,9 @@ public final class FluidUtils {
         }
         FluidStack toSend = stack.copy();
         FluidHandlerTarget target = null;
-        for (BlockCapabilityCache<IFluidHandler, Direction> capability : targets) {
+        for (BlockApiCacheWithContext<IFluidHandler, Direction> capability : targets) {
             //Insert to access side and collect the cap if it is present, and we can insert the type of the stack into it
-            IFluidHandler handler = capability.getCapability();
+            IFluidHandler handler = capability.find();
             if (handler != null) {
                 //If we weren't given a stack by the caller, then we want to lazily try to extract from the tank to see how much we are trying to emit
                 // so that we don't have to attempt an extraction if all our targets are actually not currently fluid handlers
@@ -151,7 +149,7 @@ public final class FluidUtils {
             }
             if (fluidInItem.isEmpty()) {
                 if (!fluidTank.isEmpty()) {
-                    int filled = handler.fill(fluidTank.getFluid().copy(), player.isCreative() ? FluidAction.SIMULATE : FluidAction.EXECUTE);
+                    long filled = handler.fill(fluidTank.getFluid().copy(), player.isCreative() ? FluidAction.SIMULATE : FluidAction.EXECUTE);
                     ItemStack container = handler.getContainer();
                     if (filled > 0) {
                         if (itemStack.getCount() == 1) {
@@ -168,8 +166,8 @@ public final class FluidUtils {
                 }
             } else {
                 FluidStack simulatedRemainder = fluidTank.insert(fluidInItem, Action.SIMULATE, AutomationType.MANUAL);
-                int remainder = simulatedRemainder.getAmount();
-                int storedAmount = fluidInItem.getAmount();
+                long remainder = simulatedRemainder.getAmount();
+                long storedAmount = fluidInItem.getAmount();
                 if (remainder < storedAmount) {
                     boolean filled = false;
                     FluidStack drained = handler.drain(fluidInItem.copyWithAmount(storedAmount - remainder), player.isCreative() ? FluidAction.SIMULATE : FluidAction.EXECUTE);

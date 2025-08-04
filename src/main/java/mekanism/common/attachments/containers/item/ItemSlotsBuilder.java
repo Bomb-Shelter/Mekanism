@@ -40,9 +40,9 @@ import mekanism.common.tile.machine.TileEntityOredictionificator;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeInput;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.FluidType;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
-import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
+import mekanism.api.fabric.transfer.fluids.IFluidHandler.FluidAction;
+import mekanism.api.fabric.transfer.fluids.IFluidHandlerItem;
 import org.jetbrains.annotations.NotNull;
 
 public class ItemSlotsBuilder {
@@ -186,7 +186,7 @@ public class ItemSlotsBuilder {
 
     public ItemSlotsBuilder addFormulaCraftingSlot(int count) {
         return addSlots(count, (type, attachedTo, containerIndex) -> new ComponentBackedInventorySlot(attachedTo, containerIndex, ConstantPredicates.alwaysTrueBi(),
-              (stack, automationType) -> automationType == AutomationType.INTERNAL || !attachedTo.getOrDefault(MekanismDataComponents.AUTO, false), ConstantPredicates.alwaysFalse()));
+              (stack, automationType) -> automationType == AutomationType.INTERNAL || !attachedTo.getOrDefault(MekanismDataComponents.AUTO.get(), false), ConstantPredicates.alwaysFalse()));
     }
 
     public ItemSlotsBuilder addLockSlot() {
@@ -211,7 +211,7 @@ public class ItemSlotsBuilder {
 
     public ItemSlotsBuilder addOredictionificatorInput() {
         return addSlot((type, attachedTo, containerIndex) -> new ComponentBackedInventorySlot(attachedTo, containerIndex, ConstantPredicates.notExternal(), ConstantPredicates.alwaysTrueBi(),
-              stack -> TileEntityOredictionificator.hasResult(attachedTo.getOrDefault(MekanismDataComponents.FILTER_AWARE, FilterAware.EMPTY).getEnabled(OredictionificatorItemFilter.class), stack)));
+              stack -> TileEntityOredictionificator.hasResult(attachedTo.getOrDefault(MekanismDataComponents.FILTER_AWARE.get(), FilterAware.EMPTY).getEnabled(OredictionificatorItemFilter.class), stack)));
     }
 
     public ItemSlotsBuilder addOutput() {
@@ -276,7 +276,7 @@ public class ItemSlotsBuilder {
             IFluidHandlerItem itemFluidHandler = FluidInventorySlot.tryGetFluidHandlerUnstacked(stack);
             if (itemFluidHandler != null) {
                 //Note: We don't need to create a fake tank using the container type, as we only care about the stored type
-                AttachedFluids attachedFluids = attachedTo.getOrDefault(MekanismDataComponents.ATTACHED_FLUIDS, AttachedFluids.EMPTY);
+                AttachedFluids attachedFluids = attachedTo.getOrDefault(MekanismDataComponents.ATTACHED_FLUIDS.get(), AttachedFluids.EMPTY);
                 FluidStack fluidInTank = attachedFluids.getOrDefault(tankIndex);
                 //True if the tanks contents are valid, and we can fill the item with any of the contents
                 if (fluidInTank.isEmpty()) {
@@ -310,9 +310,9 @@ public class ItemSlotsBuilder {
                     return hasEmpty;
                 }
                 FluidStack fluid = fluidTank.getFluid();
-                if (fluid.getAmount() < FluidType.BUCKET_VOLUME) {
+                if (fluid.getAmount() < FluidConstants.BUCKET) {
                     //Workaround for buckets not being able to be filled until we have enough of our volume
-                    fluid = fluid.copyWithAmount(FluidType.BUCKET_VOLUME);
+                    fluid = fluid.copyWithAmount(FluidConstants.BUCKET);
                 } else {
                     fluid = fluid.copy();//avoid handler modifying
                 }
@@ -327,7 +327,7 @@ public class ItemSlotsBuilder {
             //Copy of FluidInventorySlot's rotary insert predicate
             IFluidHandlerItem fluidHandlerItem = Capabilities.FLUID.getCapability(stack);
             if (fluidHandlerItem != null) {
-                boolean mode = attachedTo.getOrDefault(MekanismDataComponents.ROTARY_MODE, false);
+                boolean mode = attachedTo.getOrDefault(MekanismDataComponents.ROTARY_MODE.get(), false);
                 //Mode == true if fluid to chemical
                 boolean allEmpty = true;
                 IExtendedFluidTank fluidTank = null;
@@ -536,10 +536,10 @@ public class ItemSlotsBuilder {
                       return true;
                   }
                   //Copy of the insert check but inverted
-                  return !attachedTo.getOrDefault(MekanismDataComponents.ROTARY_MODE, false) ||
+                  return !attachedTo.getOrDefault(MekanismDataComponents.ROTARY_MODE.get(), false) ||
                          !canChemicalDrainInsert(attachedTo, tankIndex, stack);
               },
-              (stack, automationType) -> attachedTo.getOrDefault(MekanismDataComponents.ROTARY_MODE, false) &&
+              (stack, automationType) -> attachedTo.getOrDefault(MekanismDataComponents.ROTARY_MODE.get(), false) &&
                                          canChemicalDrainInsert(attachedTo, tankIndex, stack),
               ConstantPredicates.alwaysTrue())));
     }
@@ -548,7 +548,7 @@ public class ItemSlotsBuilder {
         //Copy of logic from ChemicalInventorySlot#rotaryFill
         return addSlot(((type, attachedTo, containerIndex) -> new ComponentBackedInventorySlot(attachedTo, containerIndex,
               (stack, automationType) -> automationType == AutomationType.MANUAL || canChemicalFillExtract(attachedTo, tankIndex, stack),
-              (stack, automationType) -> !attachedTo.getOrDefault(MekanismDataComponents.ROTARY_MODE, false) &&
+              (stack, automationType) -> !attachedTo.getOrDefault(MekanismDataComponents.ROTARY_MODE.get(), false) &&
                                          canChemicalFillInsert(attachedTo, tankIndex, stack),
               ConstantPredicates.alwaysTrue())));
     }

@@ -5,7 +5,7 @@ import mekanism.common.resource.ore.OreType;
 import mekanism.common.tags.MekanismTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
-import net.neoforged.neoforge.common.Tags;
+import io.github.fabricators_of_create.porting_lib.tags.Tags;
 import org.jetbrains.annotations.Nullable;
 
 public enum PrimaryResource implements IResource {

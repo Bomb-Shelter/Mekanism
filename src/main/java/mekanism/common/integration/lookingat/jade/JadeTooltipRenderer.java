@@ -6,6 +6,8 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import java.util.Optional;
 import java.util.function.Function;
+
+import io.github.fabricators_of_create.porting_lib.core.util.PortingLibExtraCodecs;
 import mekanism.api.SerializationConstants;
 import mekanism.client.render.IFancyFontRenderer.TextAlignment;
 import mekanism.common.integration.lookingat.ChemicalElement;
@@ -24,7 +26,6 @@ import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec2;
-import net.neoforged.neoforge.common.util.NeoForgeExtraCodecs;
 import org.jetbrains.annotations.Nullable;
 import snownee.jade.api.Accessor;
 import snownee.jade.api.IComponentProvider;
@@ -60,7 +61,7 @@ public class JadeTooltipRenderer<ACCESSOR extends Accessor<?>> implements ICompo
               default -> DataResult.error(() -> "Unknown Element Type, expected either energy or text");
           }
     );
-    static final Codec<ILookingAtElement> ELEMENT_CODEC = NeoForgeExtraCodecs.withAlternative(FLUID_OR_CHEMICAL_CODEC, ENERGY_OR_TEXT_CODEC).codec();
+    static final Codec<ILookingAtElement> ELEMENT_CODEC = PortingLibExtraCodecs.withAlternative(FLUID_OR_CHEMICAL_CODEC, ENERGY_OR_TEXT_CODEC).codec();
 
     @Override
     public ResourceLocation getUid() {

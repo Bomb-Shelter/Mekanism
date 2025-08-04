@@ -1,5 +1,6 @@
 package mekanism.common.registration.impl;
 
+import io.github.fabricators_of_create.porting_lib.fluids.FluidType;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.text.IHasTextComponent;
 import mekanism.api.text.IHasTranslationKey;
@@ -10,7 +11,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.material.Fluid;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.FluidType;
 import io.github.fabricators_of_create.porting_lib.registry.DeferredHolder;
 
 @NothingNullByDefault
@@ -48,7 +48,7 @@ public class FluidRegistryObject<TYPE extends FluidType, STILL extends Fluid, FL
         return bucket;
     }
 
-    public FluidStack asStack(int amount) {
+    public FluidStack asStack(long amount) {
         return new FluidStack(get(), amount);
     }
 

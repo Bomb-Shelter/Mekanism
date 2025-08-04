@@ -118,6 +118,7 @@ import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.NBTUtils;
 import mekanism.common.util.RegistryUtils;
 import mekanism.common.util.WorldUtils;
+import net.fabricmc.fabric.api.lookup.v1.block.BlockApiCache;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -144,7 +145,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.neoforged.neoforge.capabilities.BlockCapabilityCache;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -241,7 +241,7 @@ public abstract class TileEntityMekanism extends CapabilityTileEntity implements
     //End variables IMekanismStrictEnergyHandler
 
     //Variables for handling IMekanismHeatHandler
-    protected final Map<Direction, BlockCapabilityCache<IHeatHandler, @Nullable Direction>> adjacentHeatCaps;
+    protected final Map<Direction, BlockApiCache<IHeatHandler, @Nullable Direction>> adjacentHeatCaps;
     protected final CachedAmbientTemperature ambientTemperature;
     @Nullable
     protected final HeatHandlerManager heatHandlerManager;
@@ -822,14 +822,14 @@ public abstract class TileEntityMekanism extends CapabilityTileEntity implements
             }
         }
         if (this instanceof ITileFilterHolder<?> filterHolder) {
-            FilterAware filterAware = input.get(MekanismDataComponents.FILTER_AWARE);
+            FilterAware filterAware = input.get(MekanismDataComponents.FILTER_AWARE.get());
             if (filterAware != null) {
                 //TODO - 1.20.4: Do we need to copy these or can we just pass the raw instance?
                 filterHolder.getFilterManager().trySetFilters(filterAware.filters());
             }
         }
         if (supportsRedstone()) {
-            setControlType(input.getOrDefault(MekanismDataComponents.REDSTONE_CONTROL, getControlType()));
+            setControlType(input.getOrDefault(MekanismDataComponents.REDSTONE_CONTROL.get(), getControlType()));
         }
     }
 
@@ -887,11 +887,11 @@ public abstract class TileEntityMekanism extends CapabilityTileEntity implements
         if (this instanceof ITileFilterHolder<?> filterHolder) {
             FilterManager<?> filterManager = filterHolder.getFilterManager();
             if (!filterManager.getFilters().isEmpty()) {
-                builder.set(MekanismDataComponents.FILTER_AWARE, new FilterAware(List.copyOf(filterManager.getFilters())));
+                builder.set(MekanismDataComponents.FILTER_AWARE.get(), new FilterAware(List.copyOf(filterManager.getFilters())));
             }
         }
         if (supportsRedstone()) {
-            builder.set(MekanismDataComponents.REDSTONE_CONTROL, controlType);
+            builder.set(MekanismDataComponents.REDSTONE_CONTROL.get(), controlType);
         }
     }
 
@@ -1433,12 +1433,12 @@ public abstract class TileEntityMekanism extends CapabilityTileEntity implements
 
     @Nullable
     protected IHeatHandler getAdjacentUnchecked(@NotNull Direction side) {
-        BlockCapabilityCache<IHeatHandler, @Nullable Direction> cache = adjacentHeatCaps.get(side);
+        BlockApiCache<IHeatHandler, @Nullable Direction> cache = adjacentHeatCaps.get(side);
         if (cache == null) {
-            cache = BlockCapabilityCache.create(Capabilities.HEAT, (ServerLevel) level, worldPosition.relative(side), side.getOpposite());
+            cache = BlockApiCache.create(Capabilities.HEAT, (ServerLevel) level, worldPosition.relative(side));
             adjacentHeatCaps.put(side, cache);
         }
-        return cache.getCapability();
+        return cache.find(side.getOpposite());
     }
 
     @NotNull

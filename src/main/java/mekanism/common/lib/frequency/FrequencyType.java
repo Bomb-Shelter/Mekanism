@@ -2,6 +2,7 @@ package mekanism.common.lib.frequency;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import io.github.fabricators_of_create.porting_lib.core.util.PortingLibStreamCodecs;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.DecoderException;
 import java.util.HashMap;
@@ -23,7 +24,6 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.neoforged.neoforge.network.codec.NeoForgeStreamCodecs;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
@@ -34,7 +34,7 @@ public class FrequencyType<FREQ extends Frequency> {
 
     public static final Codec<FrequencyType<?>> CODEC = Codec.stringResolver(FrequencyType::getName, registryMap::get);
     //Note: This is lazy so that we ensure we don't call it until after maxNameLength has been set
-    public static final StreamCodec<ByteBuf, FrequencyType<?>> STREAM_CODEC = NeoForgeStreamCodecs.lazy(() -> ByteBufCodecs.stringUtf8(maxNameLength).map(
+    public static final StreamCodec<ByteBuf, FrequencyType<?>> STREAM_CODEC = PortingLibStreamCodecs.lazy(() -> ByteBufCodecs.stringUtf8(maxNameLength).map(
           name -> {
               FrequencyType<?> type = registryMap.get(name);
               if (type == null) {

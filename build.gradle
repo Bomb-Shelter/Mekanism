@@ -468,6 +468,7 @@ repositories { RepositoryHandler handler ->
     exclusiveRepo(handler, 'https://jitpack.io', 'com.github.Chocohead')
     exclusiveRepo(handler, 'https://mvn.devos.one/snapshots', 'io.github.fabricators_of_create.Porting-Lib')
     exclusiveRepo(handler, 'https://maven.ladysnake.org/releases', 'org.ladysnake.cardinal-components-api')
+    exclusiveRepo(handler, 'https://maven.terraformersmc.com/releases/', 'com.terraformersmc')
     handler.exclusiveContent {
         it.forRepositories(handler.mavenCentral())
         it.filter {
@@ -507,9 +508,9 @@ dependencies {
     //We use https://github.com/jqwik-team/jqwik to allow for implementing property based testing
     testImplementation("net.jqwik:jqwik:${jqwik_version}")
 
-    compileOnly("mezz.jei:jei-${minecraft_version}-neoforge-api:${jei_version}")
+    modCompileOnly("mezz.jei:jei-${minecraft_version}-fabric-api:${jei_version}")
     if (recipe_viewer == 'jei' || recipe_viewer == 'hybrid') {
-        localRuntime("mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}")
+        modLocalRuntime("mezz.jei:jei-${minecraft_version}-fabric:${jei_version}")
     }
 
     modCompileOnly("dev.emi:emi-fabric:${emi_version}+${minecraft_version}:api")

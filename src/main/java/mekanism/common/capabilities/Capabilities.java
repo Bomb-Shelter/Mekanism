@@ -7,7 +7,12 @@ import mekanism.api.IEvaporationSolar;
 import mekanism.api.chemical.IChemicalHandler;
 import mekanism.api.energy.IStrictEnergyHandler;
 import mekanism.api.fabric.lookup.ICapabilityProvider;
+import mekanism.api.fabric.lookup.Capabilities.EnergyStorage;
+import mekanism.api.fabric.lookup.Capabilities.FluidHandler;
+import mekanism.api.fabric.lookup.Capabilities.ItemHandler;
+import mekanism.api.fabric.transfer.energy.IEnergyStorage;
 import mekanism.api.fabric.transfer.fluids.IFluidHandler;
+import mekanism.api.fabric.transfer.fluids.IFluidHandlerItem;
 import mekanism.api.fabric.transfer.items.IItemHandler;
 import mekanism.api.heat.IHeatHandler;
 import mekanism.api.lasers.ILaserDissipation;
@@ -75,37 +80,37 @@ public class Capabilities {
     public static final ResourceLocation OWNER_OBJECT_NAME = Mekanism.rl("owner_object");
     public static final ResourceLocation SECURITY_OBJECT_NAME = Mekanism.rl("security_object");
 
-    public static void registerProxyableCapabilities(RegisterCapabilitiesEvent event) {
-        event.setProxyable(CHEMICAL.block());
-        event.setProxyable(STRICT_ENERGY.block());
+    public static void registerProxyableCapabilities() {
+//        event.setProxyable(CHEMICAL.block()); // Fabric: what??
+//        event.setProxyable(STRICT_ENERGY.block());
     }
 
-    public static void registerCapabilities(RegisterCapabilitiesEvent event) {
-        Mekanism.hooks.hookCapabilityRegistration(event);
+    public static void registerCapabilities() {
+        Mekanism.hooks.hookCapabilityRegistration();
 
         EntityType<EntityRobit> robitEntityType = MekanismEntityTypes.ROBIT.get();
-        event.registerEntity(IEntitySecurityUtils.INSTANCE.ownerCapability(), robitEntityType, (robit, ctx) -> robit);
-        event.registerEntity(IEntitySecurityUtils.INSTANCE.securityCapability(), robitEntityType, (robit, ctx) -> robit);
-        EnergyCompatUtils.registerEntityCapabilities(event, robitEntityType, (robit, ctx) -> robit);
+        IEntitySecurityUtils.INSTANCE.ownerCapability().registerForType((robit, ctx) -> robit, robitEntityType);
+        IEntitySecurityUtils.INSTANCE.securityCapability().registerForType((robit, ctx) -> robit, robitEntityType);
+        EnergyCompatUtils.registerEntityCapabilities(robitEntityType, (robit, ctx) -> robit);
 
         for (EntityType<?> entityType : BuiltInRegistries.ENTITY_TYPE) {
             //Note: The jvm will reuse the lambda between types
-            event.registerEntity(RADIATION_ENTITY, entityType, (entity, ctx) -> entity instanceof LivingEntity living ? new RadiationEntity(living) : null);
+            RADIATION_ENTITY.registerForType((entity, ctx) -> entity instanceof LivingEntity living ? new RadiationEntity(living) : null, entityType);
         }
 
         //Register bounding block proxies
-        TileEntityBoundingBlock.alwaysProxyCapability(event, CONFIG_CARD);
-        TileEntityBoundingBlock.alwaysProxyCapability(event, IBlockSecurityUtils.INSTANCE.ownerCapability());
-        TileEntityBoundingBlock.alwaysProxyCapability(event, IBlockSecurityUtils.INSTANCE.securityCapability());
+        TileEntityBoundingBlock.alwaysProxyCapability(CONFIG_CARD);
+        TileEntityBoundingBlock.alwaysProxyCapability(IBlockSecurityUtils.INSTANCE.ownerCapability());
+        TileEntityBoundingBlock.alwaysProxyCapability(IBlockSecurityUtils.INSTANCE.securityCapability());
         //Capabilities we need to proxy because some sub implementations use them
-        ComputerCapabilityHelper.addBoundingComputerCapabilities(event);
-        TileEntityBoundingBlock.proxyCapability(event, ITEM.block());
-        for (BlockCapability<?, @Nullable Direction> capability : EnergyCompatUtils.getLoadedEnergyCapabilities()) {
-            TileEntityBoundingBlock.proxyCapability(event, capability);
+        ComputerCapabilityHelper.addBoundingComputerCapabilities();
+        TileEntityBoundingBlock.proxyCapability(ITEM.block());
+        for (BlockApiLookup<?, @Nullable Direction> capability : EnergyCompatUtils.getLoadedEnergyCapabilities()) {
+            TileEntityBoundingBlock.proxyCapability(capability);
         }
         //Note: Common caps we may eventually want to proxy but currently have no use for doing so
-        TileEntityBoundingBlock.proxyCapability(event, FluidHandler.BLOCK);
-        TileEntityBoundingBlock.proxyCapability(event, CHEMICAL.block());
-        TileEntityBoundingBlock.proxyCapability(event, HEAT);
+        TileEntityBoundingBlock.proxyCapability(FluidHandler.BLOCK);
+        TileEntityBoundingBlock.proxyCapability(CHEMICAL.block());
+        TileEntityBoundingBlock.proxyCapability(HEAT);
     }
 }

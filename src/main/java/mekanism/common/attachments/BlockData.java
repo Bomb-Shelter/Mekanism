@@ -2,6 +2,7 @@ package mekanism.common.attachments;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidType;
 import io.netty.buffer.ByteBuf;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -13,6 +14,7 @@ import mekanism.common.MekanismLang;
 import mekanism.common.config.MekanismConfig;
 import mekanism.common.util.RegistryUtils;
 import mekanism.common.util.WorldUtils;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -33,7 +35,6 @@ import net.minecraft.world.level.block.entity.PotDecorations;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.FluidType;
 import org.jetbrains.annotations.Nullable;
 
 @NothingNullByDefault
@@ -67,7 +68,7 @@ public record BlockData(BlockState blockState, @Nullable CompoundTag blockEntity
         FluidState fluidState = adjustedState.getFluidState();
         FluidType fluidType = fluidState.getFluidType();
         //Note: Doesn't support nbt
-        FluidStack fluid = new FluidStack(fluidState.getType(), FluidType.BUCKET_VOLUME);
+        FluidStack fluid = new FluidStack(fluidState.getType(), FluidConstants.BUCKET);
         BucketPickup tryPickup = null;
         //Do our best effort to support to not allow water to be placed into the nether
         if (fluidType.isVaporizedOnPlacement(level, pos, fluid)) {

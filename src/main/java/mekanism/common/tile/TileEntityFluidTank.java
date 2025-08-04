@@ -8,6 +8,7 @@ import mekanism.api.Action;
 import mekanism.api.IConfigurable;
 import mekanism.api.IContentsListener;
 import mekanism.api.SerializationConstants;
+import mekanism.api.fabric.lookup.BlockApiCacheWithContext;
 import mekanism.api.fluid.IExtendedFluidTank;
 import mekanism.api.functions.ConstantPredicates;
 import mekanism.common.Mekanism;
@@ -65,9 +66,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
-import net.neoforged.neoforge.capabilities.BlockCapabilityCache;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import mekanism.api.fabric.transfer.fluids.IFluidHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -88,7 +88,7 @@ public class TileEntityFluidTank extends TileEntityMekanism implements IConfigur
     private int valve;
     @NotNull
     public FluidStack valveFluid = FluidStack.EMPTY;
-    private List<BlockCapabilityCache<IFluidHandler, @Nullable Direction>> fluidHandlerBelow = Collections.emptyList();
+    private List<BlockApiCacheWithContext<IFluidHandler, @Nullable Direction>> fluidHandlerBelow = Collections.emptyList();
 
     public float prevScale;
 
@@ -207,7 +207,7 @@ public class TileEntityFluidTank extends TileEntityMekanism implements IConfigur
     private IExtendedFluidTank getBelowTank() {
         if (!resolvedBelowTank) {
             resolvedBelowTank = true;
-            IFluidHandler belowHandler = fluidHandlerBelow.getFirst().getCapability();
+            IFluidHandler belowHandler = fluidHandlerBelow.getFirst().find();
             if (belowHandler instanceof ProxyFluidHandler fluidHandler && fluidHandler.getInternalHandler() instanceof TileEntityFluidTank tank) {
                 //Note: We don't need to bother with weak references as these are vertical so will always be in the same chunk
                 belowTank = tank.fluidTank;
@@ -231,13 +231,13 @@ public class TileEntityFluidTank extends TileEntityMekanism implements IConfigur
     @Override
     protected void collectImplicitComponents(@NotNull DataComponentMap.Builder builder) {
         super.collectImplicitComponents(builder);
-        builder.set(MekanismDataComponents.EDIT_MODE, editMode);
+        builder.set(MekanismDataComponents.EDIT_MODE.get(), editMode);
     }
 
     @Override
     protected void applyImplicitComponents(@NotNull BlockEntity.DataComponentInput input) {
         super.applyImplicitComponents(input);
-        editMode = input.getOrDefault(MekanismDataComponents.EDIT_MODE, editMode);
+        editMode = input.getOrDefault(MekanismDataComponents.EDIT_MODE.get(), editMode);
     }
 
     @Override
@@ -362,7 +362,7 @@ public class TileEntityFluidTank extends TileEntityMekanism implements IConfigur
         if (fluid.isEmpty()) {
             fluid = valveFluid;
         } else {
-            fluidData.putInt(SerializationConstants.AMOUNT, fluid.getAmount());
+            fluidData.putLong(SerializationConstants.AMOUNT, fluid.getAmount());
         }
         if (!fluid.isEmpty()) {
             ResourceLocation key = RegistryUtils.getName(fluid.getFluidHolder());
@@ -417,7 +417,7 @@ public class TileEntityFluidTank extends TileEntityMekanism implements IConfigur
                 } else {
                     Reference<Fluid> fluidType = holder.get();
                     DataComponentPatch patch = DataComponentPatch.EMPTY;
-                    int amount = fluidData.getInt(SerializationConstants.AMOUNT);
+                    long amount = fluidData.getLong(SerializationConstants.AMOUNT);
                     if (fluidData.contains(SerializationConstants.DATA)) {
                         DataResult<DataComponentPatch> componentPatch = DataComponentPatch.CODEC.parse(
                               provider.createSerializationContext(NbtOps.INSTANCE),

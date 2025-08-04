@@ -2,12 +2,12 @@ package mekanism.common.integration.energy.forgeenergy;
 
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.energy.IStrictEnergyHandler;
+import mekanism.api.fabric.lookup.ICapabilityProvider;
+import mekanism.api.fabric.transfer.energy.IEnergyStorage;
 import mekanism.common.capabilities.Capabilities;
 import mekanism.common.capabilities.MultiTypeCapability;
 import mekanism.common.integration.energy.IEnergyCompat;
 import mekanism.common.util.UnitDisplayUtils.EnergyUnit;
-import net.neoforged.neoforge.capabilities.ICapabilityProvider;
-import net.neoforged.neoforge.energy.IEnergyStorage;
 
 @NothingNullByDefault
 public class ForgeEnergyCompat implements IEnergyCompat {

@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.PrimitiveIterator.OfInt;
 import java.util.UUID;
 import mekanism.api.SerializationConstants;
+import mekanism.api.fabric.transfer.items.IItemHandler;
 import mekanism.api.text.EnumColor;
 import mekanism.common.capabilities.Capabilities;
 import mekanism.common.content.network.InventoryNetwork;
@@ -37,6 +38,7 @@ import mekanism.common.util.EnumUtils;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.TransporterUtils;
 import mekanism.common.util.WorldUtils;
+import net.fabricmc.fabric.api.lookup.v1.block.BlockApiCache;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -47,8 +49,6 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.neoforge.capabilities.BlockCapabilityCache;
-import net.neoforged.neoforge.items.IItemHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -60,8 +60,8 @@ public abstract class LogisticalTransporterBase extends Transmitter<IItemHandler
     protected int nextId = 0;
     protected int delay = 0;
     protected int delayCount = 0;
-    private final Map<Direction, BlockCapabilityCache<IItemHandler, Direction>> capabilityCache = new EnumMap<>(Direction.class);
-    private final Long2ReferenceMap<EnumMap<Direction, BlockCapabilityCache<IItemHandler, Direction>>> fallbackHandlerCache = new Long2ReferenceRBTreeMap<>();
+    private final Map<Direction, BlockApiCache<IItemHandler, Direction>> capabilityCache = new EnumMap<>(Direction.class);
+    private final Long2ReferenceMap<EnumMap<Direction, BlockApiCache<IItemHandler, Direction>>> fallbackHandlerCache = new Long2ReferenceRBTreeMap<>();
 
     protected LogisticalTransporterBase(TileEntityTransmitter tile, TransporterTier tier) {
         super(tile, TransmissionType.ITEM);
@@ -70,23 +70,23 @@ public abstract class LogisticalTransporterBase extends Transmitter<IItemHandler
 
     @Nullable
     private IItemHandler getCapForSide(Direction logisticalSide) {
-        BlockCapabilityCache<IItemHandler, Direction> cache = capabilityCache.get(logisticalSide);
+        BlockApiCache<IItemHandler, Direction> cache = capabilityCache.get(logisticalSide);
         if (cache == null) {
             cache = Capabilities.ITEM.createCache((ServerLevel) getLevel(), getBlockPos().relative(logisticalSide), logisticalSide.getOpposite(), this::isValid);
             capabilityCache.put(logisticalSide, cache);
         }
-        return cache.getCapability();
+        return cache.find(logisticalSide.getOpposite());
     }
 
     @Nullable
     private IItemHandler getFallbackCapForSide(long pos, Direction handlerSide) {
-        EnumMap<Direction, BlockCapabilityCache<IItemHandler, Direction>> sideCache = fallbackHandlerCache.computeIfAbsent(pos, k -> new EnumMap<>(Direction.class));
-        BlockCapabilityCache<IItemHandler, Direction> cache = sideCache.get(handlerSide);
+        EnumMap<Direction, BlockApiCache<IItemHandler, Direction>> sideCache = fallbackHandlerCache.computeIfAbsent(pos, k -> new EnumMap<>(Direction.class));
+        BlockApiCache<IItemHandler, Direction> cache = sideCache.get(handlerSide);
         if (cache == null) {
             cache = Capabilities.ITEM.createCache((ServerLevel) getLevel(), BlockPos.of(pos), handlerSide, this::isValid);
             sideCache.put(handlerSide, cache);
         }
-        return cache.getCapability();
+        return cache.find(handlerSide);
     }
 
 

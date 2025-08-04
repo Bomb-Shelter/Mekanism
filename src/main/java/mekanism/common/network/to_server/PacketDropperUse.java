@@ -8,6 +8,7 @@ import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.IChemicalHandler;
 import mekanism.api.chemical.IChemicalTank;
 import mekanism.api.chemical.IMekanismChemicalHandler;
+import mekanism.api.fabric.transfer.fluids.IFluidHandlerItem;
 import mekanism.api.fluid.IExtendedFluidTank;
 import mekanism.api.fluid.IMekanismFluidHandler;
 import mekanism.api.radiation.IRadiationManager;
@@ -20,6 +21,7 @@ import mekanism.common.capabilities.Capabilities;
 import mekanism.common.item.ItemGaugeDropper;
 import mekanism.common.lib.multiblock.MultiblockData;
 import mekanism.common.network.IMekanismPacket;
+import mekanism.common.network.fabric.IPayloadContext;
 import mekanism.common.tile.base.TileEntityMekanism;
 import mekanism.common.tile.prefab.TileEntityMultiblock;
 import mekanism.common.util.MekanismUtils;
@@ -34,8 +36,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
 public record PacketDropperUse(BlockPos pos, DropperAction action, TankType tankType, int tankId) implements IMekanismPacket {
@@ -173,8 +173,8 @@ public record PacketDropperUse(BlockPos pos, DropperAction action, TankType tank
         if (!drainTank.isEmpty() && fillTank.getNeeded() > 0) {
             FluidStack fluidInDrainTank = drainTank.getFluid();
             FluidStack simulatedRemainder = fillTank.insert(fluidInDrainTank, Action.SIMULATE, AutomationType.MANUAL);
-            int remainder = simulatedRemainder.getAmount();
-            int amount = fluidInDrainTank.getAmount();
+            long remainder = simulatedRemainder.getAmount();
+            long amount = fluidInDrainTank.getAmount();
             if (remainder < amount) {
                 //We are able to fit at least some of the fluid from our drain tank into the fill tank
                 FluidStack extractedFluid = drainTank.extract(amount - remainder, Action.EXECUTE, AutomationType.MANUAL);

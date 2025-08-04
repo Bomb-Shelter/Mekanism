@@ -13,6 +13,7 @@ import mekanism.api.chemical.IChemicalTank;
 import mekanism.api.chemical.IMekanismChemicalHandler;
 import mekanism.api.datamaps.IMekanismDataMapTypes;
 import mekanism.api.datamaps.chemical.attribute.ChemicalFuel;
+import mekanism.api.fabric.lookup.BlockApiCacheWithContext;
 import mekanism.api.functions.ConstantPredicates;
 import mekanism.common.attachments.containers.ContainerType;
 import mekanism.common.capabilities.Capabilities;
@@ -24,7 +25,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.capabilities.BlockCapabilityCache;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
@@ -94,7 +94,7 @@ public class ChemicalUtil {
     }
 
     public static boolean hasChemical(ItemStack stack, Predicate<ChemicalStack> validityCheck) {
-        IChemicalHandler handler = stack.getCapability(Capabilities.CHEMICAL.item());
+        IChemicalHandler handler = Capabilities.CHEMICAL.item().find(stack, null);
         if (handler != null) {
             for (int tank = 0; tank < handler.getChemicalTanks(); tank++) {
                 ChemicalStack chemicalStack = handler.getChemicalInTank(tank);
@@ -106,11 +106,11 @@ public class ChemicalUtil {
         return false;
     }
 
-    public static void emit(Collection<BlockCapabilityCache<IChemicalHandler, @Nullable Direction>> targets, IChemicalTank tank) {
+    public static void emit(Collection<BlockApiCacheWithContext<IChemicalHandler, @Nullable Direction>> targets, IChemicalTank tank) {
         emit(targets, tank, tank.getCapacity());
     }
 
-    public static void emit(Collection<BlockCapabilityCache<IChemicalHandler, @Nullable Direction>> targets, IChemicalTank tank, long maxOutput) {
+    public static void emit(Collection<BlockApiCacheWithContext<IChemicalHandler, @Nullable Direction>> targets, IChemicalTank tank, long maxOutput) {
         if (!tank.isEmpty() && maxOutput > 0) {
             tank.extract(emit(targets, ChemicalStack.EMPTY, tank, maxOutput), Action.EXECUTE, AutomationType.INTERNAL);
         }
@@ -124,11 +124,11 @@ public class ChemicalUtil {
      *
      * @return the amount of chemical emitted
      */
-    public static long emit(Collection<BlockCapabilityCache<IChemicalHandler, @Nullable Direction>> targets, @NotNull ChemicalStack stack) {
+    public static long emit(Collection<BlockApiCacheWithContext<IChemicalHandler, @Nullable Direction>> targets, @NotNull ChemicalStack stack) {
         return emit(targets, stack, null, Long.MAX_VALUE);
     }
 
-    private static long emit(Collection<BlockCapabilityCache<IChemicalHandler, @Nullable Direction>> targets, @NotNull ChemicalStack stack,
+    private static long emit(Collection<BlockApiCacheWithContext<IChemicalHandler, @Nullable Direction>> targets, @NotNull ChemicalStack stack,
           @UnknownNullability IChemicalTank tank, long maxOutput) {
         if (stack.isEmpty() && tank == null) {
             //Something went wrong in calling this method
@@ -137,9 +137,9 @@ public class ChemicalUtil {
             return 0;
         }
         ChemicalHandlerTarget target = null;
-        for (BlockCapabilityCache<IChemicalHandler, Direction> capability : targets) {
+        for (BlockApiCacheWithContext<IChemicalHandler, Direction> capability : targets) {
             //Insert to access side and collect the cap if it is present, and we can insert the type of the stack into it
-            IChemicalHandler handler = capability.getCapability();
+            IChemicalHandler handler = capability.find();
             if (handler != null) {
                 //If we weren't given a stack by the caller, then we want to lazily try to extract from the tank to see how much we are trying to emit
                 // so that we don't have to attempt an extraction if all our targets are actually not currently fluid handlers

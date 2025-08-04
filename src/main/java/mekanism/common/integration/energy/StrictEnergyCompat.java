@@ -2,9 +2,9 @@ package mekanism.common.integration.energy;
 
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.energy.IStrictEnergyHandler;
+import mekanism.api.fabric.lookup.ICapabilityProvider;
 import mekanism.common.capabilities.Capabilities;
 import mekanism.common.capabilities.MultiTypeCapability;
-import net.neoforged.neoforge.capabilities.ICapabilityProvider;
 
 @NothingNullByDefault
 public class StrictEnergyCompat implements IEnergyCompat {

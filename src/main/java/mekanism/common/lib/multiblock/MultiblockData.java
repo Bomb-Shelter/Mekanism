@@ -20,6 +20,7 @@ import mekanism.api.chemical.IChemicalTank;
 import mekanism.api.chemical.IMekanismChemicalHandler;
 import mekanism.api.energy.IEnergyContainer;
 import mekanism.api.energy.IMekanismStrictEnergyHandler;
+import mekanism.api.fabric.lookup.BlockApiCacheWithContext;
 import mekanism.api.fluid.IExtendedFluidTank;
 import mekanism.api.fluid.IMekanismFluidHandler;
 import mekanism.api.heat.HeatAPI;
@@ -48,7 +49,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.neoforge.capabilities.BlockCapabilityCache;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -508,7 +508,7 @@ public class MultiblockData implements IMekanismInventory, IMekanismFluidHandler
         }
     }
 
-    public record CapabilityOutputTarget<TYPE>(BlockCapabilityCache<TYPE, @Nullable Direction> cache, BooleanSupplier isActive) implements OutputTarget<BlockCapabilityCache<TYPE, @Nullable Direction>, Void> {
+    public record CapabilityOutputTarget<TYPE>(BlockApiCacheWithContext<TYPE, @Nullable Direction> cache, BooleanSupplier isActive) implements OutputTarget<BlockApiCacheWithContext<TYPE, @Nullable Direction>, Void> {
 
         @Override
         public boolean canOutput(Void unused) {
@@ -516,7 +516,7 @@ public class MultiblockData implements IMekanismInventory, IMekanismFluidHandler
         }
     }
 
-    public record AdvancedCapabilityOutputTarget<TYPE, DATA>(BlockCapabilityCache<TYPE, @Nullable Direction> cache, Predicate<DATA> isActive) implements OutputTarget<BlockCapabilityCache<TYPE, @Nullable Direction>, DATA> {
+    public record AdvancedCapabilityOutputTarget<TYPE, DATA>(BlockApiCacheWithContext<TYPE, @Nullable Direction> cache, Predicate<DATA> isActive) implements OutputTarget<BlockApiCacheWithContext<TYPE, @Nullable Direction>, DATA> {
 
         @Override
         public boolean canOutput(DATA data) {

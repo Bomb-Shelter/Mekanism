@@ -1,6 +1,7 @@
 package mekanism.common.content.gear.mekasuit;
 
 import mekanism.api.annotations.ParametersAreNotNullByDefault;
+import mekanism.api.fabric.ItemAttributeModifierEvent;
 import mekanism.api.gear.EnchantmentAwareModule;
 import mekanism.api.gear.IModule;
 import mekanism.common.Mekanism;
@@ -11,7 +12,6 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
-import net.neoforged.neoforge.event.ItemAttributeModifierEvent;
 import org.jetbrains.annotations.NotNull;
 
 @ParametersAreNotNullByDefault

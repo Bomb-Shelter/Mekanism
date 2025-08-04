@@ -3,8 +3,18 @@ package mekanism.client.render.lib;
 import java.util.ArrayList;
 import java.util.List;
 import mekanism.api.functions.ToFloatFunction;
+import net.fabricmc.fabric.api.renderer.v1.Renderer;
+import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
+import net.fabricmc.fabric.api.renderer.v1.mesh.Mesh;
+import net.fabricmc.fabric.api.renderer.v1.mesh.MeshBuilder;
+import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
+import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
+import net.fabricmc.fabric.api.renderer.v1.model.ModelHelper;
+import net.fabricmc.fabric.api.renderer.v1.model.SpriteFinder;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.world.inventory.InventoryMenu;
 
 public class QuadUtils {
 
@@ -35,18 +45,15 @@ public class QuadUtils {
     }
 
     public static List<BakedQuad> transformBakedQuads(List<BakedQuad> orig, QuadTransformation transformation) {
-        List<BakedQuad> list = new ArrayList<>(orig.size());
+        Renderer renderer = RendererAccess.INSTANCE.getRenderer();
+        MeshBuilder meshBuilder = renderer.meshBuilder();
+        QuadEmitter emitter = meshBuilder.getEmitter();
         for (BakedQuad bakedQuad : orig) {
             Quad quad = new Quad(bakedQuad);
-            if (transformation.transform(quad)) {
-                //If the transformation actually changed the quad bake it again
-                list.add(quad.bake());
-            } else {
-                // otherwise, just add the original quad so that we can have a lower memory impact
-                list.add(bakedQuad);
-            }
+            transformation.transform(quad.bake(emitter, null));
+            emitter.emit();
         }
-        return list;
+        return ModelHelper.toQuadLists(meshBuilder.build())[ModelHelper.NULL_FACE_ID];
     }
 
     public static List<BakedQuad> transformAndBake(List<Quad> orig, QuadTransformation transformation) {
@@ -58,14 +65,18 @@ public class QuadUtils {
         return list;
     }
 
-    public static void remapUVs(Quad quad, TextureAtlasSprite newTexture) {
-        TextureAtlasSprite texture = quad.getTexture();
+    public static boolean isSameSprite(MutableQuadView quad, TextureAtlasSprite sprite) {
+        SpriteFinder.get(Minecraft.getInstance().getModelManager().getAtlas(InventoryMenu.BLOCK_ATLAS)).find(quad);
+    }
+
+    public static void remapUVs(MutableQuadView quad, TextureAtlasSprite newTexture) {
+        TextureAtlasSprite texture = SpriteFinder.get(Minecraft.getInstance().getModelManager().getAtlas(InventoryMenu.BLOCK_ATLAS)).find(quad);
         float uMin = texture.getU0(), uMax = texture.getU1();
         float vMin = texture.getV0(), vMax = texture.getV1();
-        for (Vertex v : quad.getVertices()) {
-            float newU = (v.getTexU() - uMin) / (uMax - uMin);
-            float newV = (v.getTexV() - vMin) / (vMax - vMin);
-            v.texRaw(newTexture.getU(newU), newTexture.getV(newV));
+        for (int i = 0; i < 4; i++) {
+            float newU = (quad.u(i) - uMin) / (uMax - uMin);
+            float newV = (quad.v(i) - vMin) / (vMax - vMin);
+            quad.uv(i, newTexture.getU(newU), newTexture.getV(newV));
         }
     }
 

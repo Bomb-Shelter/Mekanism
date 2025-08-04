@@ -15,6 +15,7 @@ import mekanism.common.lib.multiblock.MultiblockData;
 import mekanism.common.lib.radiation.Meltdown.MeltdownExplosion;
 import mekanism.common.lib.radiation.RadiationManager;
 import mekanism.common.lib.security.ISecurityTile;
+import mekanism.common.network.fabric.PacketDistributor;
 import mekanism.common.network.to_client.security.PacketSyncSecurity;
 import mekanism.common.registries.MekanismParticleTypes;
 import mekanism.common.tile.base.TileEntityUpdateable;
@@ -46,7 +47,6 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.phys.HitResult;
-import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

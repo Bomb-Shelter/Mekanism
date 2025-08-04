@@ -1,6 +1,7 @@
 package mekanism.client.render.item;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import io.github.fabricators_of_create.porting_lib.item.client.IItemDecorator;
 import mekanism.common.registration.impl.BlockRegistryObject;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.MekanismUtils.ResourceType;
@@ -8,8 +9,6 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.client.IItemDecorator;
-import net.neoforged.neoforge.client.event.RegisterItemDecorationsEvent;
 
 public class TransmitterTypeDecorator implements IItemDecorator {
 

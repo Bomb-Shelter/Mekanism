@@ -4,6 +4,7 @@ import java.util.List;
 import mekanism.api.Action;
 import mekanism.api.AutomationType;
 import mekanism.api.annotations.NothingNullByDefault;
+import mekanism.api.fabric.transfer.fluids.IFluidHandlerItem;
 import mekanism.api.fluid.ExtendedFluidHandlerUtils;
 import mekanism.api.fluid.IExtendedFluidTank;
 import mekanism.api.fluid.IMekanismFluidHandler;
@@ -12,7 +13,6 @@ import mekanism.common.attachments.containers.ContainerType;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
 import org.jetbrains.annotations.Nullable;
 
 @NothingNullByDefault

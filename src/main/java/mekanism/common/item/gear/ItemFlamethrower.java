@@ -53,8 +53,8 @@ import org.jetbrains.annotations.NotNull;
 public class ItemFlamethrower extends Item implements IItemHUDProvider, IChemicalItem, ICustomCreativeTabContents, IAttachmentBasedModeItem<FlamethrowerMode> {
 
     public ItemFlamethrower(Properties properties) {
-        super(properties.stacksTo(1).rarity(Rarity.RARE).setNoRepair()
-              .component(MekanismDataComponents.FLAMETHROWER_MODE, FlamethrowerMode.COMBAT)
+        super(properties.stacksTo(1).rarity(Rarity.RARE).port_lib$setNoRepair()
+              .component(MekanismDataComponents.FLAMETHROWER_MODE.get(), FlamethrowerMode.COMBAT)
         );
     }
 

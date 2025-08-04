@@ -8,6 +8,7 @@ import java.util.function.Predicate;
 import mekanism.api.Action;
 import mekanism.api.IContentsListener;
 import mekanism.api.chemical.IChemicalHandler;
+import mekanism.api.fabric.lookup.BlockApiCacheWithContext;
 import mekanism.api.text.EnumColor;
 import mekanism.common.MekanismLang;
 import mekanism.common.attachments.containers.ContainerType;
@@ -19,22 +20,21 @@ import mekanism.common.capabilities.holder.fluid.IFluidTankHolder;
 import mekanism.common.integration.computer.annotation.ComputerMethod;
 import mekanism.common.lib.multiblock.MultiblockData.AdvancedCapabilityOutputTarget;
 import mekanism.common.registries.MekanismBlocks;
+import net.fabricmc.fabric.api.lookup.v1.block.BlockApiLookup;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.capabilities.BlockCapability;
-import net.neoforged.neoforge.capabilities.BlockCapabilityCache;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class TileEntityBoilerValve extends TileEntityBoilerCasing {
 
-    private final Map<Direction, BlockCapabilityCache<IChemicalHandler, @Nullable Direction>> capabilityCaches = new EnumMap<>(Direction.class);
-    private final List<BlockCapability<?, @Nullable Direction>> portCapabilities = List.of(
+    private final Map<Direction, BlockApiCacheWithContext<IChemicalHandler, @Nullable Direction>> capabilityCaches = new EnumMap<>(Direction.class);
+    private final List<BlockApiLookup<?, @Nullable Direction>> portCapabilities = List.of(
           Capabilities.CHEMICAL.block(),
           Capabilities.FLUID.block()
     );
@@ -67,7 +67,7 @@ public class TileEntityBoilerValve extends TileEntityBoilerCasing {
     }
 
     public void addChemicalTargetCapability(List<AdvancedCapabilityOutputTarget<IChemicalHandler, BoilerValveMode>> outputTargets, Direction side) {
-        BlockCapabilityCache<IChemicalHandler, @Nullable Direction> cache = capabilityCaches.get(side);
+        BlockApiCacheWithContext<IChemicalHandler, @Nullable Direction> cache = capabilityCaches.get(side);
         if (cache == null) {
             cache = Capabilities.CHEMICAL.createCache((ServerLevel) level, worldPosition.relative(side), side.getOpposite());
             capabilityCaches.put(side, cache);

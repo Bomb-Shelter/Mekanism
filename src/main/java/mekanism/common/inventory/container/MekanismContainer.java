@@ -44,6 +44,7 @@ import mekanism.common.network.to_client.container.property.PropertyData;
 import mekanism.common.network.to_server.PacketWindowSelect;
 import mekanism.common.registration.impl.ContainerTypeRegistryObject;
 import mekanism.common.util.EnumUtils;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
@@ -58,7 +59,6 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
-import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -649,7 +649,7 @@ public abstract class MekanismContainer extends AbstractContainerMenu implements
                 }
             }
             if (!dirtyData.isEmpty()) {
-                PacketDistributor.sendToPlayer(player, new PacketUpdateContainer((short) containerId, dirtyData));
+                ServerPlayNetworking.send(player, new PacketUpdateContainer((short) containerId, dirtyData));
             }
         }
     }
@@ -674,7 +674,7 @@ public abstract class MekanismContainer extends AbstractContainerMenu implements
                 dirtyData.add(data.getPropertyData(registryAccess, propertyIndex.apply(i), DirtyType.DIRTY));
             }
             if (!dirtyData.isEmpty()) {
-                PacketDistributor.sendToPlayer(player, new PacketUpdateContainer((short) containerId, dirtyData));
+                ServerPlayNetworking.send(player, new PacketUpdateContainer((short) containerId, dirtyData));
             }
         }
     }

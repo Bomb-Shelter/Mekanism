@@ -2,7 +2,9 @@ package mekanism.common.attachments.containers;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import io.github.fabricators_of_create.porting_lib.common.util.Lazy;
 import io.github.fabricators_of_create.porting_lib.core.util.INBTSerializable;
+import io.github.fabricators_of_create.porting_lib.registry.DeferredHolder;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,6 +19,7 @@ import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.IChemicalTank;
 import mekanism.api.energy.IEnergyContainer;
 import mekanism.api.energy.IStrictEnergyHandler;
+import mekanism.api.fabric.lookup.ICapabilityProvider;
 import mekanism.api.fluid.IExtendedFluidTank;
 import mekanism.api.heat.IHeatCapacitor;
 import mekanism.api.inventory.IInventorySlot;
@@ -38,6 +41,7 @@ import mekanism.common.config.IMekanismConfig;
 import mekanism.common.integration.energy.EnergyCompatUtils;
 import mekanism.common.registries.MekanismDataComponents;
 import mekanism.common.tile.base.TileEntityMekanism;
+import net.fabricmc.fabric.api.lookup.v1.item.ItemApiLookup;
 import net.minecraft.Util;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
@@ -67,7 +71,7 @@ public class ContainerType<CONTAINER extends INBTSerializable<CompoundTag>, ATTA
           TileEntityMekanism::getEnergyContainers, TileEntityMekanism::collectEnergyContainers, TileEntityMekanism::applyEnergyContainers, TileEntityMekanism::canHandleEnergy) {
         @Override
         @SuppressWarnings("unchecked")
-        public void registerItemCapabilities(RegisterCapabilitiesEvent event, Item item, boolean exposeWhenStacked, IMekanismConfig... requiredConfigs) {
+        public void registerItemCapabilities(Item item, boolean exposeWhenStacked, IMekanismConfig... requiredConfigs) {
             EnergyCompatUtils.registerItemCapabilities(event, item, (ICapabilityProvider<ItemStack, Void, IStrictEnergyHandler>) getCapabilityProvider(exposeWhenStacked, requiredConfigs));
         }
     };
@@ -179,17 +183,17 @@ public class ContainerType<CONTAINER extends INBTSerializable<CompoundTag>, ATTA
     /**
      * Adds some containers as default and exposes it as a capability that requires the given configs if the specified bus is present.
      */
-    public void addDefaultCreators(@Nullable IEventBus eventBus, Item item, Supplier<? extends IContainerCreator<? extends CONTAINER, ATTACHED>> defaultCreator,
+    public void addDefaultCreators(boolean loadCaps, Item item, Supplier<? extends IContainerCreator<? extends CONTAINER, ATTACHED>> defaultCreator,
           IMekanismConfig... requiredConfigs) {
         knownDefaultCreators.put(item, Lazy.of(defaultCreator));
-        if (eventBus != null && capability != null) {
-            eventBus.addListener(RegisterCapabilitiesEvent.class, event -> registerItemCapabilities(event, item, false, requiredConfigs));
+        if (loadCaps && capability != null) {
+            registerItemCapabilities(item, false, requiredConfigs);
         }
     }
 
-    public void registerItemCapabilities(RegisterCapabilitiesEvent event, Item item, boolean exposeWhenStacked, IMekanismConfig... requiredConfigs) {
+    public void registerItemCapabilities(Item item, boolean exposeWhenStacked, IMekanismConfig... requiredConfigs) {
         if (capability != null) {
-            event.registerItem((ItemCapability) capability.item(), getCapabilityProvider(exposeWhenStacked, requiredConfigs), item);
+            ((ItemApiLookup) capability.item()).registerForItems(getCapabilityProvider(exposeWhenStacked, requiredConfigs), item);
         }
     }
 
@@ -255,7 +259,7 @@ public class ContainerType<CONTAINER extends INBTSerializable<CompoundTag>, ATTA
         throw new IllegalArgumentException("No known containers for item " + attachedTo.getItem());
     }
 
-    protected ICapabilityProvider<ItemStack, Void, ? super HANDLER> getCapabilityProvider(boolean exposeWhenStacked, IMekanismConfig... requiredConfigs) {
+    protected ItemApiLookup.ItemApiProvider<? super HANDLER, Void> getCapabilityProvider(boolean exposeWhenStacked, IMekanismConfig... requiredConfigs) {
         if (exposeWhenStacked) {
             return getCapabilityProvider(requiredConfigs);
         } else if (requiredConfigs.length == 0) {
@@ -265,7 +269,7 @@ public class ContainerType<CONTAINER extends INBTSerializable<CompoundTag>, ATTA
         return (stack, context) -> stack.getCount() == 1 && hasRequiredConfigs(requiredConfigs) ? createHandler(stack) : null;
     }
 
-    protected ICapabilityProvider<ItemStack, Void, ? super HANDLER> getCapabilityProvider(IMekanismConfig... requiredConfigs) {
+    protected ItemApiLookup.ItemApiProvider<? super HANDLER, Void> getCapabilityProvider(IMekanismConfig... requiredConfigs) {
         if (requiredConfigs.length == 0) {
             return (stack, context) -> createHandler(stack);
         }

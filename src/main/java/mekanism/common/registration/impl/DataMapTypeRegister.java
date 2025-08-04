@@ -4,13 +4,13 @@ import com.mojang.serialization.Codec;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.UnaryOperator;
+
+import io.github.fabricators_of_create.porting_lib.resources.data_maps.DataMapType;
+import io.github.fabricators_of_create.porting_lib.resources.data_maps.PortingLibDataMaps;
 import mekanism.api.annotations.NothingNullByDefault;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.registries.datamaps.DataMapType;
-import net.neoforged.neoforge.registries.datamaps.RegisterDataMapTypesEvent;
 
 @NothingNullByDefault
 public final class DataMapTypeRegister {
@@ -45,7 +45,7 @@ public final class DataMapTypeRegister {
         return register(name, registryKey, codec, UnaryOperator.identity());
     }
 
-    public void register(IEventBus bus) {
-        bus.addListener(RegisterDataMapTypesEvent.class, event -> types.forEach(event::register));
+    public void register() {
+        types.forEach(PortingLibDataMaps::registerDataMap);
     }
 }

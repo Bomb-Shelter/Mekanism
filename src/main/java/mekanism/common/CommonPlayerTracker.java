@@ -7,6 +7,7 @@ import mekanism.common.block.BlockCardboardBox;
 import mekanism.common.block.BlockMekanism;
 import mekanism.common.config.MekanismConfig;
 import mekanism.common.lib.radiation.PlayerExposure;
+import mekanism.common.network.fabric.PacketDistributor;
 import mekanism.common.network.to_client.player_data.PacketPlayerData;
 import mekanism.common.network.to_client.player_data.PacketResetPlayerClient;
 import mekanism.common.network.to_client.radiation.PacketPlayerRadiationData;
@@ -28,7 +29,6 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerChangedDimen
 import net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.RightClickBlock;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 public class CommonPlayerTracker {
 

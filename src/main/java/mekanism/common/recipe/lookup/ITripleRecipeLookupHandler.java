@@ -8,7 +8,7 @@ import mekanism.common.recipe.lookup.cache.InputRecipeCache.ItemFluidChemical;
 import mekanism.common.recipe.lookup.cache.TripleInputRecipeCache;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.common.util.TriPredicate;
+import io.github.fabricators_of_create.porting_lib.common.util.TriPredicate;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import org.jetbrains.annotations.Nullable;
 

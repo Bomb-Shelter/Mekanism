@@ -3,6 +3,8 @@ package mekanism.common.recipe.lookup.cache;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
+
+import io.github.fabricators_of_create.porting_lib.common.util.TriPredicate;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.recipes.MekanismRecipe;
 import mekanism.api.recipes.ChemicalChemicalToChemicalRecipe;
@@ -15,7 +17,6 @@ import mekanism.common.recipe.lookup.cache.type.ChemicalInputCache;
 import mekanism.common.recipe.lookup.cache.type.FluidInputCache;
 import mekanism.common.recipe.lookup.cache.type.ItemInputCache;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.common.util.TriPredicate;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 
 public class InputRecipeCache {

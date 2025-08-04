@@ -2,7 +2,7 @@ package mekanism.common.config.value;
 
 import mekanism.api.functions.FloatSupplier;
 import mekanism.common.config.IMekanismConfig;
-import net.neoforged.neoforge.common.ModConfigSpec.ConfigValue;
+import io.github.fabricators_of_create.porting_lib.config.ModConfigSpec.ConfigValue;
 
 //TODO: Once https://github.com/MinecraftForge/MinecraftForge/pull/6464 is merged make this extend CachedPrimitiveValue<Float>
 // and make it so that our get is cleaner

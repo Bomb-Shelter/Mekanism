@@ -1,6 +1,9 @@
 package mekanism.client.render.obj;
 
 import java.util.function.Function;
+
+import io.github.fabricators_of_create.porting_lib.models.geometry.IGeometryBakingContext;
+import io.github.fabricators_of_create.porting_lib.models.geometry.IUnbakedGeometry;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
@@ -9,9 +12,6 @@ import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.client.model.geometry.IGeometryBakingContext;
-import net.neoforged.neoforge.client.model.geometry.IUnbakedGeometry;
-import net.neoforged.neoforge.client.model.obj.ObjModel;
 import org.jetbrains.annotations.Nullable;
 
 public class TransmitterModel implements IUnbakedGeometry<TransmitterModel> {
@@ -27,7 +27,7 @@ public class TransmitterModel implements IUnbakedGeometry<TransmitterModel> {
 
     @Override
     public BakedModel bake(IGeometryBakingContext owner, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform,
-          ItemOverrides overrides) {
+                           ItemOverrides overrides) {
         return new TransmitterBakedModel(internal, glass, owner, baker, spriteGetter, modelTransform, overrides);
     }
 

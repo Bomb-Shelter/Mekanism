@@ -6,7 +6,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import mekanism.common.Mekanism;
 import mekanism.common.config.value.CachedValue;
-import net.neoforged.neoforge.common.ModConfigSpec;
+import io.github.fabricators_of_create.porting_lib.config.ModConfigSpec;
 
 public abstract class BaseMekanismConfig implements IMekanismConfig {
 

@@ -4,6 +4,7 @@ import mekanism.common.capabilities.Capabilities;
 import mekanism.common.capabilities.ICapabilityAware;
 import mekanism.common.config.MekanismConfig;
 import mekanism.common.util.MekanismUtils;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
@@ -44,7 +45,7 @@ public class ItemNutritionalPasteBucket extends BucketItem implements ICapabilit
     @Override
     public InteractionResultHolder<ItemStack> use(@NotNull Level level, @NotNull Player player, @NotNull InteractionHand hand) {
         if (MekanismUtils.isPlayingMode(player)) {
-            int needed = Math.min(20 - player.getFoodData().getFoodLevel(), FluidType.BUCKET_VOLUME / MekanismConfig.general.nutritionalPasteMBPerFood.get());
+            int needed = Math.min(20 - player.getFoodData().getFoodLevel(), FluidConstants.BUCKET / MekanismConfig.general.nutritionalPasteDropletPerFood.get());
             if (needed > 0) {
                 return ItemUtils.startUsingInstantly(level, player, hand);
             }
@@ -56,7 +57,7 @@ public class ItemNutritionalPasteBucket extends BucketItem implements ICapabilit
     @Override
     public ItemStack finishUsingItem(@NotNull ItemStack stack, @NotNull Level level, @NotNull LivingEntity entity) {
         if (entity instanceof Player player && MekanismUtils.isPlayingMode(player)) {
-            int needed = Math.min(20 - player.getFoodData().getFoodLevel(), FluidType.BUCKET_VOLUME / MekanismConfig.general.nutritionalPasteMBPerFood.get());
+            int needed = Math.min(20 - player.getFoodData().getFoodLevel(), FluidConstants.BUCKET / MekanismConfig.general.nutritionalPasteDropletPerFood.get());
             if (needed > 0) {
                 if (entity instanceof ServerPlayer serverPlayer) {
                     CriteriaTriggers.CONSUME_ITEM.trigger(serverPlayer, stack);
@@ -73,7 +74,7 @@ public class ItemNutritionalPasteBucket extends BucketItem implements ICapabilit
     }
 
     @Override
-    public void attachCapabilities(RegisterCapabilitiesEvent event) {
-        event.registerItem(Capabilities.FLUID.item(), (stack, ctx) -> new FluidBucketWrapper(stack), this);
+    public void attachCapabilities() {
+        Capabilities.FLUID.item().registerForItems((stack, ctx) -> new FluidBucketWrapper(stack), this);
     }
 }

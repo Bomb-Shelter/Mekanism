@@ -15,6 +15,7 @@ import mekanism.common.item.ItemRobit;
 import mekanism.common.registries.MekanismDataComponents;
 import mekanism.common.registries.MekanismRobitSkins;
 import mekanism.common.registries.MekanismRobitSkins.SkinLookup;
+import net.fabricmc.fabric.api.renderer.v1.mesh.Mesh;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -37,28 +38,21 @@ public class RobitBakedModel extends ExtensionOverrideBakedModel<ResourceLocatio
         super(original, RobitItemOverrideList::new);
     }
 
-    @Override
-    public List<BakedQuad> createQuads(QuadsKey<ResourceLocation> key) {
-        List<BakedQuad> quads = key.getQuads();
-        if (RobitSpriteUploader.UPLOADER != null) {
-            ResourceLocation selectedTexture = key.getData();
-            //Only replace missing textures (which should in general be #robit in the actual json without a mapping to it)
-            //TODO: This technically doesn't behave quite right for textures that are not replaced given the sprites on the
-            // model likely are on a different atlas than the robit textures, so the render type will be wrong
-            QuadTransformation transformation = QuadTransformation.texture(RobitSpriteUploader.UPLOADER.getSprite(selectedTexture));
-            transformation = TextureFilteredTransformation.of(transformation, rl -> rl.getPath().equals("missingno"));
-            quads = QuadUtils.transformBakedQuads(quads, transformation);
-        }
-        return quads;
-    }
-
     @Nullable
     @Override
-    public QuadsKey<ResourceLocation> createKey(QuadsKey<ResourceLocation> key, ModelData data) {
-        ResourceLocation skinTexture = data.get(EntityRobit.SKIN_TEXTURE_PROPERTY);
+    public QuadsKey<ResourceLocation> createKey(QuadsKey<ResourceLocation> key, @Nullable ResourceLocation skinTexture) {
         if (skinTexture == null) {
             return null;
         }
+
+        if (RobitSpriteUploader.UPLOADER != null) {
+            //Only replace missing textures (which should in general be #robit in the actual json without a mapping to it)
+            //TODO: This technically doesn't behave quite right for textures that are not replaced given the sprites on the
+            // model likely are on a different atlas than the robit textures, so the render type will be wrong
+            QuadTransformation transformation = QuadTransformation.texture(RobitSpriteUploader.UPLOADER.getSprite(skinTexture));
+            key.transform(TextureFilteredTransformation.of(transformation, rl -> rl.getPath().equals("missingno")));
+        }
+
         return key.data(skinTexture, skinTexture.hashCode(), DATA_EQUALITY_CHECK);
     }
 
@@ -90,7 +84,7 @@ public class RobitBakedModel extends ExtensionOverrideBakedModel<ResourceLocatio
                     }
                     registryAccess = level.registryAccess();
                 }
-                ResourceKey<RobitSkin> skinKey = stack.getOrDefault(MekanismDataComponents.ROBIT_SKIN, MekanismRobitSkins.BASE);
+                ResourceKey<RobitSkin> skinKey = stack.getOrDefault(MekanismDataComponents.ROBIT_SKIN.get(), MekanismRobitSkins.BASE);
                 SkinLookup skinLookup = MekanismRobitSkins.lookup(registryAccess, skinKey);
                 RobitSkin skin = skinLookup.skin();
                 if (skin.customModel() != null) {

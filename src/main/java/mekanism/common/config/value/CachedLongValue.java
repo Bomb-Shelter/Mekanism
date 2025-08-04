@@ -3,8 +3,8 @@ package mekanism.common.config.value;
 import java.util.function.LongSupplier;
 import mekanism.common.config.IConfigTranslation;
 import mekanism.common.config.IMekanismConfig;
-import net.neoforged.neoforge.common.ModConfigSpec.Builder;
-import net.neoforged.neoforge.common.ModConfigSpec.ConfigValue;
+import io.github.fabricators_of_create.porting_lib.config.ModConfigSpec.Builder;
+import io.github.fabricators_of_create.porting_lib.config.ModConfigSpec.ConfigValue;
 
 public class CachedLongValue extends CachedValue<Long> implements LongSupplier {
 

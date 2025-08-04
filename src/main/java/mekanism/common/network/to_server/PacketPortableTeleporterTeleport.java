@@ -28,8 +28,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.portal.DimensionTransition;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import mekanism.common.network.fabric.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
 public record PacketPortableTeleporterTeleport(InteractionHand currentHand, FrequencyIdentity identity) implements IMekanismPacket {
@@ -80,7 +79,7 @@ public record PacketPortableTeleporterTeleport(InteractionHand currentHand, Freq
                         teleporter.teleDelay = 5;
                         BlockPos teleporterTargetPos = teleporter.getTeleporterTargetPos();
                         MekanismTeleportEvent.PortableTeleporter event = new MekanismTeleportEvent.PortableTeleporter(player, teleporterTargetPos, coords.dimension(), stack, energyCost);
-                        if (NeoForge.EVENT_BUS.post(event).isCanceled()) {
+                        if (event.post()) {
                             //Fail if the event was cancelled
                             return;
                         }

@@ -2,6 +2,8 @@ package mekanism.client.render.item;
 
 import java.util.List;
 import java.util.function.Predicate;
+
+import io.github.fabricators_of_create.porting_lib.item.client.IItemDecorator;
 import mekanism.api.chemical.IChemicalTank;
 import mekanism.api.fluid.IExtendedFluidTank;
 import mekanism.api.math.MathUtils;
@@ -15,7 +17,6 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.client.IItemDecorator;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 
 public class ChemicalFluidBarDecorator implements IItemDecorator {

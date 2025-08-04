@@ -25,12 +25,12 @@ import org.jetbrains.annotations.Nullable;
 public abstract class CapabilityTileEntity extends TileEntityUpdateable {
 
     //Note: The below providers assume that the capability if supported has been added by either addCapabilityResolver or addCapabilityResolvers
-    public static final BlockApiProvider<CapabilityTileEntity, @Nullable Direction, IChemicalHandler> CHEMICAL_HANDLER_PROVIDER = basicCapabilityProvider(Capabilities.CHEMICAL.block());
-    public static final BlockApiProvider<CapabilityTileEntity, @Nullable Direction, IHeatHandler> HEAT_HANDLER_PROVIDER = basicCapabilityProvider(Capabilities.HEAT);
-    public static final BlockApiProvider<CapabilityTileEntity, @Nullable Direction, IItemHandler> ITEM_HANDLER_PROVIDER = basicCapabilityProvider(Capabilities.ITEM.block());
-    public static final BlockApiProvider<CapabilityTileEntity, @Nullable Direction, IFluidHandler> FLUID_HANDLER_PROVIDER = basicCapabilityProvider(Capabilities.FLUID.block());
+    public static final ICapabilityProvider<CapabilityTileEntity, @Nullable Direction, IChemicalHandler> CHEMICAL_HANDLER_PROVIDER = basicCapabilityProvider(Capabilities.CHEMICAL.block());
+    public static final ICapabilityProvider<CapabilityTileEntity, @Nullable Direction, IHeatHandler> HEAT_HANDLER_PROVIDER = basicCapabilityProvider(Capabilities.HEAT);
+    public static final ICapabilityProvider<CapabilityTileEntity, @Nullable Direction, IItemHandler> ITEM_HANDLER_PROVIDER = basicCapabilityProvider(Capabilities.ITEM.block());
+    public static final ICapabilityProvider<CapabilityTileEntity, @Nullable Direction, IFluidHandler> FLUID_HANDLER_PROVIDER = basicCapabilityProvider(Capabilities.FLUID.block());
 
-    public static <CAP> BlockApiProvider<CapabilityTileEntity, @Nullable Direction, CAP> basicCapabilityProvider(BlockApiLookup<CAP, @Nullable Direction> capability) {
+    public static <CAP> ICapabilityProvider<CapabilityTileEntity, @Nullable Direction, CAP> basicCapabilityProvider(BlockApiLookup<CAP, @Nullable Direction> capability) {
         return (tile, context) -> {
             if (tile.capabilityCache.isCapabilityDisabled(capability, context)) {
                 return null;

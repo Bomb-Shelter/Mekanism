@@ -14,6 +14,7 @@ import mekanism.common.Mekanism;
 import mekanism.common.entity.EntityRobit;
 import mekanism.common.entity.RobitPrideSkinData;
 import mekanism.common.network.IMekanismPacket;
+import mekanism.common.network.fabric.IPayloadContext;
 import mekanism.common.registries.MekanismRobitSkins;
 import net.minecraft.Util;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -22,7 +23,6 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
 public record PacketRobitName(int entityId, String name) implements IMekanismPacket {

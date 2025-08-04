@@ -47,7 +47,6 @@ import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.neoforge.capabilities.BlockCapability;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -257,7 +256,7 @@ public class TileComponentConfig implements ITileComponent, ISpecificContainerTr
 
     @Override
     public void applyImplicitComponents(@NotNull BlockEntity.DataComponentInput input) {
-        AttachedSideConfig sideConfig = input.get(MekanismDataComponents.SIDE_CONFIG);
+        AttachedSideConfig sideConfig = input.get(MekanismDataComponents.SIDE_CONFIG.get());
         if (sideConfig != null) {
             for (Entry<TransmissionType, LightConfigInfo> entry : sideConfig.configInfo().entrySet()) {
                 TransmissionType type = entry.getKey();
@@ -281,7 +280,7 @@ public class TileComponentConfig implements ITileComponent, ISpecificContainerTr
 
     @Override
     public void collectImplicitComponents(DataComponentMap.Builder builder) {
-        builder.set(MekanismDataComponents.SIDE_CONFIG, AttachedSideConfig.create(configInfo));
+        builder.set(MekanismDataComponents.SIDE_CONFIG.get(), AttachedSideConfig.create(configInfo));
     }
 
     @Override

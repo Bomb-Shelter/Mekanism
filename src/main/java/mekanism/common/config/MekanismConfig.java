@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 import mekanism.common.Mekanism;
 import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.config.IConfigSpec;
-import net.neoforged.fml.event.config.ModConfigEvent;
+import io.github.fabricators_of_create.porting_lib.config.IConfigSpec;
+import io.github.fabricators_of_create.porting_lib.config.ModConfigEvent;
 
 public class MekanismConfig {
 

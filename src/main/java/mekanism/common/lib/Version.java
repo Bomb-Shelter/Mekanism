@@ -1,7 +1,7 @@
 package mekanism.common.lib;
 
-import net.neoforged.fml.ModContainer;
-import org.apache.maven.artifact.versioning.ArtifactVersion;
+import net.fabricmc.loader.api.ModContainer;
+import net.fabricmc.loader.api.VersionParsingException;
 
 /**
  * Version v2.0.0. Simple version handling for Mekanism.
@@ -12,22 +12,18 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
  *
  * @author AidanBrady
  */
-public record Version(int major, int minor, int build) implements Comparable<Version> {
-
-    /**
-     * Builds a Version object from an Artifact Version
-     *
-     * @implNote We don't currently include the artifact version's build number as we classify our version by major, minor, build
-     */
-    public Version(ArtifactVersion artifactVersion) {
-        this(artifactVersion.getMajorVersion(), artifactVersion.getMinorVersion(), artifactVersion.getIncrementalVersion());
-    }
+@Deprecated
+public record Version(net.fabricmc.loader.api.Version version) implements Comparable<Version> {
 
     /**
      * Helper to make it so this is the only class with weird errors in IntelliJ (that don't actually exist), instead of having our main class also have "errors"
      */
     public Version(ModContainer container) {
-        this(container.getModInfo().getVersion());
+        this(container.getMetadata().getVersion());
+    }
+
+    public Version(int major, int minor, int build) throws VersionParsingException {
+        this(net.fabricmc.loader.api.Version.parse("%d.%d+%d".formatted(major, minor, build)));
     }
 
     /**
@@ -51,25 +47,20 @@ public record Version(int major, int minor, int build) implements Comparable<Ver
                 return null;
             }
         }
-        return new Version(digits[0], digits[1], digits[2]);
+        try {
+            return new Version(digits[0], digits[1], digits[2]);
+        } catch (VersionParsingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public int compareTo(Version version) {
-        if (version.major > major) {
-            return -1;
-        } else if (version.major == major) {
-            if (version.minor > minor) {
-                return -1;
-            } else if (version.minor == minor) {
-                return Integer.compare(build, version.build);
-            }
-        }
-        return 1;
+        return this.version.compareTo(version.version);
     }
 
     @Override
     public String toString() {
-        return major + "." + minor + "." + build;
+        return this.version.toString();
     }
 }

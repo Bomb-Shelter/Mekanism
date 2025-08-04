@@ -27,14 +27,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ByIdMap;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.client.model.data.ModelData;
-import net.neoforged.neoforge.client.model.data.ModelProperty;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class TileEntityQIODriveArray extends TileEntityQIOComponent implements IQIODriveHolder {
 
-    public static final ModelProperty<byte[]> DRIVE_STATUS_PROPERTY = new ModelProperty<>();
     public static final int DRIVE_SLOTS = 12;
 
     private List<QIODriveSlot> driveSlots;
@@ -109,8 +106,8 @@ public class TileEntityQIODriveArray extends TileEntityQIOComponent implements I
 
     @NotNull
     @Override
-    public ModelData getModelData() {
-        return ModelData.of(DRIVE_STATUS_PROPERTY, driveStatus);
+    public byte[] getRenderData() {
+        return driveStatus;
     }
 
     @NotNull

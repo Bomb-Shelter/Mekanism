@@ -1,6 +1,8 @@
 package mekanism.common.block;
 
 import java.util.Optional;
+
+import io.github.fabricators_of_create.porting_lib.level.events.BlockEvent;
 import mekanism.common.advancements.MekanismCriteriaTriggers;
 import mekanism.common.attachments.BlockData;
 import mekanism.common.block.interfaces.IHasTileEntity;
@@ -23,8 +25,6 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.phys.BlockHitResult;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.level.BlockEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -61,7 +61,7 @@ public class BlockCardboardBox extends BlockMekanism implements IStateStorage, I
         //Check if the player is allowed to use the cardboard box in the given position
         if (world.mayInteract(player, pos)) {
             //If they are then check if they can "break" the cardboard block that is in that spot
-            if (!NeoForge.EVENT_BUS.post(new BlockEvent.BreakEvent(world, pos, state, player)).isCanceled()) {
+            if (!new BlockEvent.BreakEvent(world, pos, state, player).post()) {
                 //If they can then we need to see if they are allowed to "place" the unboxed block in the given position
                 //TODO: Once forge fixes https://github.com/MinecraftForge/MinecraftForge/issues/7609 use block snapshots
                 // and fire a place event to see if the player is able to "place" the cardboard box
@@ -75,7 +75,7 @@ public class BlockCardboardBox extends BlockMekanism implements IStateStorage, I
     @Override
     public BlockState getStateForPlacement(@NotNull BlockPlaceContext context) {
         BlockState state = super.getStateForPlacement(context);
-        if (state != null && context.getItemInHand().has(MekanismDataComponents.BLOCK_DATA)) {
+        if (state != null && context.getItemInHand().has(MekanismDataComponents.BLOCK_DATA.get())) {
             return state.setValue(BlockStateHelper.storageProperty, true);
         }
         return state;

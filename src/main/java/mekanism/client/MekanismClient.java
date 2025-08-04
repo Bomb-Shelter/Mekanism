@@ -8,6 +8,7 @@ import mekanism.client.render.tileentity.RenderSPS;
 import mekanism.client.sound.SoundHandler;
 import mekanism.common.Mekanism;
 import mekanism.common.base.IModModule;
+import mekanism.common.base.holiday.ClientHolidayInfo;
 import mekanism.common.lib.radiation.ClientRadiation;
 import mekanism.common.lib.security.SecurityData;
 import mekanism.common.lib.transmitter.TransmitterNetworkRegistry;
@@ -33,6 +34,7 @@ public class MekanismClient {
 
     public MekanismClient(ModContainer container) {
         container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
+        ClientHolidayInfo.init();
     }
 
     public static final Map<UUID, SecurityData> clientSecurityMap = new Object2ObjectOpenHashMap<>();

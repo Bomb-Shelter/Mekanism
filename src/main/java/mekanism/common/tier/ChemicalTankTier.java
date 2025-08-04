@@ -4,15 +4,15 @@ import java.util.Locale;
 import mekanism.api.tier.BaseTier;
 import mekanism.api.tier.ITier;
 import mekanism.common.config.value.CachedLongValue;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.minecraft.util.StringRepresentable;
-import net.neoforged.neoforge.fluids.FluidType;
 import org.jetbrains.annotations.NotNull;
 
 public enum ChemicalTankTier implements ITier, StringRepresentable {
-    BASIC(BaseTier.BASIC, 64 * FluidType.BUCKET_VOLUME, FluidType.BUCKET_VOLUME),
-    ADVANCED(BaseTier.ADVANCED, 256 * FluidType.BUCKET_VOLUME, 16 * FluidType.BUCKET_VOLUME),
-    ELITE(BaseTier.ELITE, 1_024 * FluidType.BUCKET_VOLUME, 128 * FluidType.BUCKET_VOLUME),
-    ULTIMATE(BaseTier.ULTIMATE, 8_192 * FluidType.BUCKET_VOLUME, 512 * FluidType.BUCKET_VOLUME),
+    BASIC(BaseTier.BASIC, 64 * FluidConstants.BUCKET, FluidConstants.BUCKET),
+    ADVANCED(BaseTier.ADVANCED, 256 * FluidConstants.BUCKET, 16 * FluidConstants.BUCKET),
+    ELITE(BaseTier.ELITE, 1_024 * FluidConstants.BUCKET, 128 * FluidConstants.BUCKET),
+    ULTIMATE(BaseTier.ULTIMATE, 8_192 * FluidConstants.BUCKET, 512 * FluidConstants.BUCKET),
     CREATIVE(BaseTier.CREATIVE, Long.MAX_VALUE, Long.MAX_VALUE / 2);
 
     private final long baseStorage;

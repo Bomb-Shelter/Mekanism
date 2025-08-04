@@ -44,8 +44,8 @@ public class ItemPortableQIODashboard extends Item implements IFrequencyItem, IG
 
     public ItemPortableQIODashboard(Properties properties) {
         super(properties.stacksTo(1).rarity(Rarity.RARE)
-              .component(MekanismDataComponents.INSERT_INTO_FREQUENCY, true)
-              .component(MekanismDataComponents.QIO_DASHBOARD, PortableDashboardContents.EMPTY)
+              .component(MekanismDataComponents.INSERT_INTO_FREQUENCY.get(), true)
+              .component(MekanismDataComponents.QIO_DASHBOARD.get(), PortableDashboardContents.EMPTY)
         );
     }
 
@@ -98,8 +98,8 @@ public class ItemPortableQIODashboard extends Item implements IFrequencyItem, IG
     }
 
     @Override
-    public void attachCapabilities(RegisterCapabilitiesEvent event) {
-        event.registerItem(IItemSecurityUtils.INSTANCE.ownerCapability(), (stack, ctx) -> new OwnerObject(stack), this);
+    public void attachCapabilities() {
+        IItemSecurityUtils.INSTANCE.ownerCapability().registerForItems((stack, ctx) -> new OwnerObject(stack), this);
     }
 
     @NotNull

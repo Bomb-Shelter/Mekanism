@@ -115,12 +115,12 @@ public final class MekanismHooks {
         }
     }
 
-    public void hookCapabilityRegistration(RegisterCapabilitiesEvent event) {
+    public void hookCapabilityRegistration() {
         EnergyCompatUtils.initLoadedCache();
         if (genderMod.isLoaded()) {
-            MekanismGenderArmor.HAZMAT.register(event, MekanismItems.HAZMAT_GOWN);
-            MekanismGenderArmor.OPEN_FRONT.register(event, MekanismItems.JETPACK, MekanismItems.SCUBA_TANK);
-            MekanismGenderArmor.HIDES_BREASTS.register(event, MekanismItems.ARMORED_JETPACK, MekanismItems.MEKASUIT_BODYARMOR);
+            MekanismGenderArmor.HAZMAT.register(MekanismItems.HAZMAT_GOWN);
+            MekanismGenderArmor.OPEN_FRONT.register(MekanismItems.JETPACK, MekanismItems.SCUBA_TANK);
+            MekanismGenderArmor.HIDES_BREASTS.register(MekanismItems.ARMORED_JETPACK, MekanismItems.MEKASUIT_BODYARMOR);
         }
     }
 

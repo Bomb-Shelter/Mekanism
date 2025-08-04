@@ -456,15 +456,15 @@ public class EntityRobit extends PathfinderMob implements IRobit, IMekanismInven
         }
         ContainerType.ITEM.copyToStack(level().registryAccess(), getInventorySlots(null), stack);
         if (hasCustomName()) {
-            stack.set(MekanismDataComponents.ROBIT_NAME, getName());
+            stack.set(MekanismDataComponents.ROBIT_NAME.get(), getName());
         }
         ISecurityObject security = IItemSecurityUtils.INSTANCE.securityCapability(stack);
         if (security != null) {
             security.setOwnerUUID(getOwnerUUID());
             security.setSecurityMode(getSecurityMode());
         }
-        stack.set(MekanismDataComponents.DEFAULT_MANUALLY_SELECTED, isDefaultSkinManuallySelected());
-        stack.set(MekanismDataComponents.ROBIT_SKIN, getSkin());
+        stack.set(MekanismDataComponents.DEFAULT_MANUALLY_SELECTED.get(), isDefaultSkinManuallySelected());
+        stack.set(MekanismDataComponents.ROBIT_SKIN.get(), getSkin());
         return stack;
     }
 
@@ -780,9 +780,9 @@ public class EntityRobit extends PathfinderMob implements IRobit, IMekanismInven
     /**
      * @apiNote Only call on the client.
      */
-    public ModelData getModelData() {
+    public ResourceLocation getModelData() {
         //TODO: Eventually we might want to evaluate caching this model data object
-        return ModelData.of(SKIN_TEXTURE_PROPERTY, getModelTexture());
+        return getModelTexture();
     }
 
     /**

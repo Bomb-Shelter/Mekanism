@@ -2,6 +2,8 @@ package mekanism.common.content.gear;
 
 import java.util.Collection;
 import java.util.List;
+
+import mekanism.api.fabric.ItemAttributeModifierEvent;
 import mekanism.api.gear.ICustomModule;
 import mekanism.api.gear.IModule;
 import mekanism.api.gear.IModuleContainer;
@@ -18,7 +20,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.event.ItemAttributeModifierEvent;
 import io.github.fabricators_of_create.porting_lib.registry.DeferredHolder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

@@ -5,6 +5,8 @@ import java.util.List;
 import mekanism.api.IContentsListener;
 import mekanism.api.RelativeSide;
 import mekanism.api.SerializationConstants;
+import mekanism.api.fabric.lookup.BlockApiCacheWithContext;
+import mekanism.api.fabric.transfer.items.IItemHandler;
 import mekanism.api.text.EnumColor;
 import mekanism.client.sound.SoundHandler;
 import mekanism.common.attachments.containers.ContainerType;
@@ -51,8 +53,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.capabilities.BlockCapabilityCache;
-import net.neoforged.neoforge.items.IItemHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -70,9 +70,9 @@ public class TileEntityLogisticalSorter extends TileEntityMekanism implements IT
     };
 
     @Nullable
-    private BlockCapabilityCache<IItemHandler, @Nullable Direction> homeInventory;
+    private BlockApiCacheWithContext<IItemHandler, @Nullable Direction> homeInventory;
     @Nullable
-    private BlockCapabilityCache<IItemHandler, @Nullable Direction> targetInventory;
+    private BlockApiCacheWithContext<IItemHandler, @Nullable Direction> targetInventory;
 
     @SyntheticComputerMethod(getter = "getDefaultColor")
     public EnumColor color;
@@ -120,7 +120,7 @@ public class TileEntityLogisticalSorter extends TileEntityMekanism implements IT
                 if (targetInventory == null) {
                     targetInventory = Capabilities.ITEM.createCache((ServerLevel) level, worldPosition.relative(direction), direction.getOpposite());
                 }
-                IItemHandler frontCap = targetInventory.getCapability();
+                IItemHandler frontCap = targetInventory.find();
                 if (frontCap != null) {
                     boolean sentItems = false;
                     for (SorterFilter<?> filter : filterManager.getEnabledFilters()) {
@@ -248,7 +248,7 @@ public class TileEntityLogisticalSorter extends TileEntityMekanism implements IT
             BlockPos pos = worldPosition.relative(direction.getOpposite());
             homeInventory = Capabilities.ITEM.createCache((ServerLevel) level, pos, direction);
         }
-        return homeInventory.getCapability();
+        return homeInventory.find();
     }
 
     @Override
@@ -347,20 +347,20 @@ public class TileEntityLogisticalSorter extends TileEntityMekanism implements IT
     protected void collectImplicitComponents(@NotNull DataComponentMap.Builder builder) {
         super.collectImplicitComponents(builder);
         if (color != null) {
-            builder.set(MekanismDataComponents.COLOR, color);
+            builder.set(MekanismDataComponents.COLOR.get(), color);
         }
-        builder.set(MekanismDataComponents.EJECT, autoEject);
-        builder.set(MekanismDataComponents.ROUND_ROBIN, roundRobin);
-        builder.set(MekanismDataComponents.SINGLE_ITEM, singleItem);
+        builder.set(MekanismDataComponents.EJECT.get(), autoEject);
+        builder.set(MekanismDataComponents.ROUND_ROBIN.get(), roundRobin);
+        builder.set(MekanismDataComponents.SINGLE_ITEM.get(), singleItem);
     }
 
     @Override
     protected void applyImplicitComponents(@NotNull BlockEntity.DataComponentInput input) {
         super.applyImplicitComponents(input);
-        color = input.get(MekanismDataComponents.COLOR);
-        autoEject = input.getOrDefault(MekanismDataComponents.EJECT, autoEject);
-        roundRobin = input.getOrDefault(MekanismDataComponents.ROUND_ROBIN, roundRobin);
-        singleItem = input.getOrDefault(MekanismDataComponents.SINGLE_ITEM, singleItem);
+        color = input.get(MekanismDataComponents.COLOR.get());
+        autoEject = input.getOrDefault(MekanismDataComponents.EJECT.get(), autoEject);
+        roundRobin = input.getOrDefault(MekanismDataComponents.ROUND_ROBIN.get(), roundRobin);
+        singleItem = input.getOrDefault(MekanismDataComponents.SINGLE_ITEM.get(), singleItem);
     }
 
     @Override

@@ -2,23 +2,23 @@ package mekanism.common.tier;
 
 import mekanism.api.tier.BaseTier;
 import mekanism.api.tier.ITier;
-import mekanism.common.config.value.CachedIntValue;
+import mekanism.common.config.value.CachedLongValue;
 import mekanism.common.util.EnumUtils;
-import net.neoforged.neoforge.fluids.FluidType;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 
 public enum PipeTier implements ITier {
-    BASIC(BaseTier.BASIC, 2 * FluidType.BUCKET_VOLUME, FluidType.BUCKET_VOLUME / 4),
-    ADVANCED(BaseTier.ADVANCED, 8 * FluidType.BUCKET_VOLUME, FluidType.BUCKET_VOLUME),
-    ELITE(BaseTier.ELITE, 32 * FluidType.BUCKET_VOLUME, 8 * FluidType.BUCKET_VOLUME),
-    ULTIMATE(BaseTier.ULTIMATE, 128 * FluidType.BUCKET_VOLUME, 32 * FluidType.BUCKET_VOLUME);
+    BASIC(BaseTier.BASIC, 2 * FluidConstants.BUCKET, FluidConstants.BUCKET / 4),
+    ADVANCED(BaseTier.ADVANCED, 8 * FluidConstants.BUCKET, FluidConstants.BUCKET),
+    ELITE(BaseTier.ELITE, 32 * FluidConstants.BUCKET, 8 * FluidConstants.BUCKET),
+    ULTIMATE(BaseTier.ULTIMATE, 128 * FluidConstants.BUCKET, 32 * FluidConstants.BUCKET);
 
-    private final int baseCapacity;
-    private final int basePull;
+    private final long baseCapacity;
+    private final long basePull;
     private final BaseTier baseTier;
-    private CachedIntValue capacityReference;
-    private CachedIntValue pullReference;
+    private CachedLongValue capacityReference;
+    private CachedLongValue pullReference;
 
-    PipeTier(BaseTier tier, int capacity, int pullAmount) {
+    PipeTier(BaseTier tier, long capacity, long pullAmount) {
         baseCapacity = capacity;
         basePull = pullAmount;
         baseTier = tier;
@@ -38,26 +38,26 @@ public enum PipeTier implements ITier {
         return baseTier;
     }
 
-    public int getPipeCapacity() {
+    public long getPipeCapacity() {
         return capacityReference == null ? getBaseCapacity() : capacityReference.getOrDefault();
     }
 
-    public int getPipePullAmount() {
+    public long getPipePullAmount() {
         return pullReference == null ? getBasePull() : pullReference.getOrDefault();
     }
 
-    public int getBaseCapacity() {
+    public long getBaseCapacity() {
         return baseCapacity;
     }
 
-    public int getBasePull() {
+    public long getBasePull() {
         return basePull;
     }
 
     /**
      * ONLY CALL THIS FROM TierConfig. It is used to give the PipeTier a reference to the actual config value object
      */
-    public void setConfigReference(CachedIntValue capacityReference, CachedIntValue pullReference) {
+    public void setConfigReference(CachedLongValue capacityReference, CachedLongValue pullReference) {
         this.capacityReference = capacityReference;
         this.pullReference = pullReference;
     }

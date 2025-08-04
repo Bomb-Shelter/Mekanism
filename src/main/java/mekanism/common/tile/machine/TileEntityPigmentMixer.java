@@ -49,9 +49,9 @@ import mekanism.common.tile.component.config.slot.ChemicalSlotInfo;
 import mekanism.common.tile.component.config.slot.InventorySlotInfo;
 import mekanism.common.tile.interfaces.IBoundingBlock;
 import mekanism.common.tile.prefab.TileEntityRecipeMachine;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.fluids.FluidType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -67,7 +67,7 @@ public class TileEntityPigmentMixer extends TileEntityRecipeMachine<ChemicalChem
           RecipeError.INPUT_DOESNT_PRODUCE_OUTPUT
     );
 
-    public static final long MAX_INPUT_PIGMENT = FluidType.BUCKET_VOLUME;
+    public static final long MAX_INPUT_PIGMENT = FluidConstants.BUCKET;
     public static final long MAX_OUTPUT_PIGMENT = 2 * MAX_INPUT_PIGMENT;
 
     @WrappingComputerMethod(wrapper = ComputerChemicalTankWrapper.class, methodNames = {"getLeftInput", "getLeftInputCapacity", "getLeftInputNeeded",

@@ -17,8 +17,8 @@ import mekanism.common.tier.PipeTier;
 import mekanism.common.tier.TransporterTier;
 import mekanism.common.tier.TubeTier;
 import mekanism.common.util.EnumUtils;
-import net.neoforged.fml.config.ModConfig.Type;
-import net.neoforged.neoforge.common.ModConfigSpec;
+import io.github.fabricators_of_create.porting_lib.config.ModConfig.Type;
+import io.github.fabricators_of_create.porting_lib.config.ModConfigSpec;
 
 public class TierConfig extends BaseMekanismConfig {
 
@@ -55,10 +55,10 @@ public class TierConfig extends BaseMekanismConfig {
         for (FluidTankTier tier : EnumUtils.FLUID_TANK_TIERS) {
             TierTranslations translations = TierTranslations.create(tier);
             String tierName = tier.getBaseTier().getSimpleName().toLowerCase(Locale.ROOT);
-            CachedIntValue storageReference = CachedIntValue.wrap(this, translations.first().applyToBuilder(builder)
-                  .defineInRange(tierName + "Capacity", tier.getBaseStorage(), 1, Integer.MAX_VALUE));
-            CachedIntValue outputReference = CachedIntValue.wrap(this, translations.second().applyToBuilder(builder)
-                  .defineInRange(tierName + "Output", tier.getBaseOutput(), 1, Integer.MAX_VALUE));
+            CachedLongValue storageReference = CachedLongValue.wrap(this, translations.first().applyToBuilder(builder)
+                  .defineInRange(tierName + "Capacity", tier.getBaseStorage(), 1, Long.MAX_VALUE));
+            CachedLongValue outputReference = CachedLongValue.wrap(this, translations.second().applyToBuilder(builder)
+                  .defineInRange(tierName + "Output", tier.getBaseOutput(), 1, Long.MAX_VALUE));
             tier.setConfigReference(storageReference, outputReference);
         }
         builder.pop();
@@ -136,10 +136,10 @@ public class TierConfig extends BaseMekanismConfig {
         for (PipeTier tier : EnumUtils.PIPE_TIERS) {
             TierTranslations translations = TierTranslations.create(tier);
             String tierName = tier.getBaseTier().getSimpleName().toLowerCase(Locale.ROOT);
-            CachedIntValue capacityReference = CachedIntValue.wrap(this, translations.first().applyToBuilder(builder)
-                  .defineInRange(tierName + "Capacity", tier.getBaseCapacity(), 1, Integer.MAX_VALUE));
-            CachedIntValue pullReference = CachedIntValue.wrap(this, translations.second().applyToBuilder(builder)
-                  .defineInRange(tierName + "PullAmount", tier.getBasePull(), 1, Integer.MAX_VALUE));
+            CachedLongValue capacityReference = CachedLongValue.wrap(this, translations.first().applyToBuilder(builder)
+                  .defineInRange(tierName + "Capacity", tier.getBaseCapacity(), 1, Long.MAX_VALUE));
+            CachedLongValue pullReference = CachedLongValue.wrap(this, translations.second().applyToBuilder(builder)
+                  .defineInRange(tierName + "PullAmount", tier.getBasePull(), 1, Long.MAX_VALUE));
             tier.setConfigReference(capacityReference, pullReference);
         }
         builder.pop();

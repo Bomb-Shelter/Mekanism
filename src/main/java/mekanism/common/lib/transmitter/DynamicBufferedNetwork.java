@@ -1,5 +1,6 @@
 package mekanism.common.lib.transmitter;
 
+import io.github.fabricators_of_create.porting_lib.core.event.BaseEvent;
 import it.unimi.dsi.fastutil.longs.LongIterator;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
@@ -11,7 +12,6 @@ import mekanism.common.lib.math.Range3D;
 import mekanism.common.util.WorldUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.ChunkPos;
-import net.neoforged.bus.api.Event;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -218,7 +218,7 @@ public abstract class DynamicBufferedNetwork<ACCEPTOR, NETWORK extends DynamicBu
         return new Range3D(minX, minZ, maxX, maxZ, world.dimension());
     }
 
-    public static class TransferEvent<NETWORK extends DynamicBufferedNetwork<?, NETWORK, ?, ?>> extends Event {
+    public static abstract class TransferEvent<NETWORK extends DynamicBufferedNetwork<?, NETWORK, ?, ?>> extends BaseEvent {
 
         public final NETWORK network;
 

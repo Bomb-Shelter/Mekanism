@@ -3,6 +3,14 @@ package mekanism.common.registration.impl;
 import java.util.Collection;
 import java.util.function.BiFunction;
 import java.util.function.UnaryOperator;
+
+import io.github.fabricators_of_create.porting_lib.fluids.FluidType;
+import io.github.fabricators_of_create.porting_lib.fluids.PortingLibFluids;
+import io.github.fabricators_of_create.porting_lib.fluids.sound.SoundActions;
+import io.github.fabricators_of_create.porting_lib.registry.DeferredRegister;
+import io.github.fabricators_of_create.porting_lib.fluids.BaseFlowingFluid;
+import io.github.fabricators_of_create.porting_lib.fluids.BaseFlowingFluid.Flowing;
+import io.github.fabricators_of_create.porting_lib.fluids.BaseFlowingFluid.Source;
 import mekanism.common.Mekanism;
 import mekanism.common.base.IChemicalConstant;
 import net.minecraft.Util;
@@ -29,16 +37,8 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.common.SoundActions;
-import net.neoforged.neoforge.fluids.BaseFlowingFluid;
-import net.neoforged.neoforge.fluids.BaseFlowingFluid.Flowing;
-import net.neoforged.neoforge.fluids.BaseFlowingFluid.Source;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.FluidType;
 import io.github.fabricators_of_create.porting_lib.registry.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
-import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 
 public class FluidDeferredRegister {
@@ -77,7 +77,7 @@ public class FluidDeferredRegister {
     public FluidDeferredRegister(String modid) {
         blockRegister = DeferredRegister.create(Registries.BLOCK, modid);
         fluidRegister = DeferredRegister.create(Registries.FLUID, modid);
-        fluidTypeRegister = DeferredRegister.create(NeoForgeRegistries.Keys.FLUID_TYPES, modid);
+        fluidTypeRegister = DeferredRegister.create(PortingLibFluids.FLUID_TYPES, modid);
         //Note: We use our own deferred register so that we also can automatically attach any capability aware buckets we register
         itemRegister = new ItemDeferredRegister(modid);
     }
@@ -173,11 +173,11 @@ public class FluidDeferredRegister {
         return (((512 + redMean) * r * r) >> 8) + 4 * g * g + (((767 - redMean) * b * b) >> 8);
     }
 
-    public void register(IEventBus bus) {
-        blockRegister.register(bus);
-        fluidRegister.register(bus);
-        fluidTypeRegister.register(bus);
-        itemRegister.register(bus);
+    public void register() {
+        blockRegister.register();
+        fluidRegister.register();
+        fluidTypeRegister.register();
+        itemRegister.register();
     }
 
     public Collection<DeferredHolder<FluidType, ? extends FluidType>> getFluidTypeEntries() {

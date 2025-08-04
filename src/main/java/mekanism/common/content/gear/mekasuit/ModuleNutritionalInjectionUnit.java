@@ -18,8 +18,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
-import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
+import mekanism.api.fabric.transfer.fluids.IFluidHandler.FluidAction;
+import mekanism.api.fabric.transfer.fluids.IFluidHandlerItem;
 
 @ParametersAreNotNullByDefault
 public class ModuleNutritionalInjectionUnit implements ICustomModule<ModuleNutritionalInjectionUnit> {
@@ -33,13 +33,13 @@ public class ModuleNutritionalInjectionUnit implements ICustomModule<ModuleNutri
             //Check if we can use a single iteration of it
             IFluidHandlerItem handler = Capabilities.FLUID.getCapability(stack);
             if (handler != null) {
-                int contained = StorageUtils.getContainedFluid(handler, MekanismFluids.NUTRITIONAL_PASTE.asStack(1)).getAmount();
-                int needed = Math.min(20 - player.getFoodData().getFoodLevel(), contained / MekanismConfig.general.nutritionalPasteMBPerFood.get());
-                int toFeed = Math.min(MathUtils.clampToInt(module.getContainerEnergy(stack) / usage), needed);
+                long contained = StorageUtils.getContainedFluid(handler, MekanismFluids.NUTRITIONAL_PASTE.asStack(1)).getAmount();
+                long needed = Math.min(20 - player.getFoodData().getFoodLevel(), contained / MekanismConfig.general.nutritionalPasteDropletPerFood.get());
+                long toFeed = Math.min(MathUtils.clampToInt(module.getContainerEnergy(stack) / usage), needed);
                 if (toFeed > 0) {
                     module.useEnergy(player, stack, usage * toFeed);
-                    handler.drain(MekanismFluids.NUTRITIONAL_PASTE.asStack(toFeed * MekanismConfig.general.nutritionalPasteMBPerFood.get()), FluidAction.EXECUTE);
-                    player.getFoodData().eat(needed, MekanismConfig.general.nutritionalPasteSaturation.get());
+                    handler.drain(MekanismFluids.NUTRITIONAL_PASTE.asStack(toFeed * MekanismConfig.general.nutritionalPasteDropletPerFood.get()), FluidAction.EXECUTE);
+                    player.getFoodData().eat((int) needed, MekanismConfig.general.nutritionalPasteSaturation.get());
                 }
             }
         }
@@ -51,7 +51,7 @@ public class ModuleNutritionalInjectionUnit implements ICustomModule<ModuleNutri
             IFluidHandlerItem handler = Capabilities.FLUID.getCapability(stack);
             double ratio = 0;
             if (handler != null) {
-                int max = MekanismConfig.gear.mekaSuitNutritionalMaxStorage.getAsInt();
+                long max = MekanismConfig.gear.mekaSuitNutritionalMaxStorage.getAsLong();
                 handler.drain(MekanismFluids.NUTRITIONAL_PASTE.asStack(max), FluidAction.SIMULATE);
                 FluidStack stored = StorageUtils.getContainedFluid(handler, MekanismFluids.NUTRITIONAL_PASTE.asStack(1));
                 ratio = StorageUtils.getRatio(stored.getAmount(), MekanismConfig.gear.mekaSuitNutritionalMaxStorage.get());

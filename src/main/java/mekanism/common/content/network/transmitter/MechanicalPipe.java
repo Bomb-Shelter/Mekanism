@@ -34,7 +34,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.Block;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import mekanism.api.fabric.transfer.fluids.IFluidHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -106,7 +106,7 @@ public class MechanicalPipe extends BufferedTransmitter<IFluidHandler, FluidNetw
         }
     }
 
-    private int getAvailablePull() {
+    private long getAvailablePull() {
         if (hasTransmitterNetwork()) {
             return Math.min(tier.getPipePullAmount(), getTransmitterNetwork().fluidTank.getNeeded());
         }
@@ -229,7 +229,7 @@ public class MechanicalPipe extends BufferedTransmitter<IFluidHandler, FluidNetw
         if (hasTransmitterNetwork()) {
             FluidNetwork network = getTransmitterNetwork();
             if (!network.fluidTank.isEmpty() && !saveShare.isEmpty()) {
-                int amount = saveShare.getAmount();
+                long amount = saveShare.getAmount();
                 MekanismUtils.logMismatchedStackSize(network.fluidTank.shrinkStack(amount, Action.EXECUTE), amount);
                 buffer.setStack(saveShare);
             }

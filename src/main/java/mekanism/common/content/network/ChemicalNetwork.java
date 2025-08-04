@@ -24,10 +24,11 @@ import mekanism.common.lib.transmitter.DynamicBufferedNetwork;
 import mekanism.common.util.ChemicalUtil;
 import mekanism.common.util.EmitUtils;
 import mekanism.common.util.MekanismUtils;
+import net.fabricmc.fabric.api.event.Event;
+import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
-import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -185,7 +186,7 @@ public class ChemicalNetwork extends DynamicBufferedNetwork<IChemicalHandler, Ch
     public void onUpdate() {
         super.onUpdate();
         if (needsUpdate) {
-            NeoForge.EVENT_BUS.post(new ChemicalTransferEvent(this, lastChemical));
+            new ChemicalTransferEvent(this, lastChemical).sendEvent();
             needsUpdate = false;
         }
         if (chemicalTank.isEmpty()) {
@@ -283,11 +284,26 @@ public class ChemicalNetwork extends DynamicBufferedNetwork<IChemicalHandler, Ch
 
     public static class ChemicalTransferEvent extends TransferEvent<ChemicalNetwork> {
 
+        public static final Event<Callback> EVENT = EventFactory.createArrayBacked(Callback.class, callbacks -> event -> {
+            for (Callback callback : callbacks) {
+                callback.onChemicalTransfer(event);
+            }
+        });
+
         public final Holder<Chemical> transferType;
 
         public ChemicalTransferEvent(ChemicalNetwork network, Holder<Chemical> type) {
             super(network);
             transferType = type;
+        }
+
+        @Override
+        public void sendEvent() {
+            EVENT.invoker().onChemicalTransfer(this);
+        }
+
+        public interface Callback {
+            void onChemicalTransfer(ChemicalTransferEvent event);
         }
     }
 }

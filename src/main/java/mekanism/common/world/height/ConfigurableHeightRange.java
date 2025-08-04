@@ -8,7 +8,7 @@ import mekanism.common.config.MekanismConfigTranslations.OreVeinConfigTranslatio
 import mekanism.common.config.value.CachedEnumValue;
 import mekanism.common.config.value.CachedIntValue;
 import mekanism.common.resource.ore.BaseOreConfig;
-import net.neoforged.neoforge.common.ModConfigSpec;
+import io.github.fabricators_of_create.porting_lib.config.ModConfigSpec;
 
 public record ConfigurableHeightRange(Supplier<HeightShape> shape, ConfigurableVerticalAnchor minInclusive, ConfigurableVerticalAnchor maxInclusive,
                                       IntSupplier plateau) {

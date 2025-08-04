@@ -14,6 +14,7 @@ import mekanism.common.capabilities.security.SecurityObject;
 import mekanism.common.base.holiday.HolidayManager;
 import mekanism.common.capabilities.ICapabilityAware;
 import mekanism.common.entity.EntityRobit;
+import mekanism.common.network.fabric.PacketDistributor;
 import mekanism.common.network.to_client.security.PacketSyncSecurity;
 import mekanism.common.registries.MekanismDataComponents;
 import mekanism.common.registries.MekanismRobitSkins;
@@ -40,17 +41,15 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 
 public class ItemRobit extends ItemEnergized implements ICapabilityAware {
 
     public ItemRobit(Properties properties) {
         super(properties.rarity(Rarity.RARE).stacksTo(1)
-              .component(MekanismDataComponents.ROBIT_SKIN, MekanismRobitSkins.BASE)
-              .component(MekanismDataComponents.SECURITY, SecurityMode.PUBLIC)
-              .component(MekanismDataComponents.DEFAULT_MANUALLY_SELECTED, false)
+              .component(MekanismDataComponents.ROBIT_SKIN.get(), MekanismRobitSkins.BASE)
+              .component(MekanismDataComponents.SECURITY.get(), SecurityMode.PUBLIC)
+              .component(MekanismDataComponents.DEFAULT_MANUALLY_SELECTED.get(), false)
         );
     }
 
@@ -62,12 +61,12 @@ public class ItemRobit extends ItemEnergized implements ICapabilityAware {
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @NotNull Item.TooltipContext context, @NotNull List<Component> tooltip, @NotNull TooltipFlag flag) {
         super.appendHoverText(stack, context, tooltip, flag);
-        Component name = stack.get(MekanismDataComponents.ROBIT_NAME);
+        Component name = stack.get(MekanismDataComponents.ROBIT_NAME.get());
         if (name == null) {
             name = MekanismLang.ROBIT.translate();
         }
         tooltip.add(MekanismLang.ROBIT_NAME.translateColored(EnumColor.INDIGO, EnumColor.GRAY, name));
-        tooltip.add(MekanismLang.ROBIT_SKIN.translateColored(EnumColor.INDIGO, EnumColor.GRAY, RobitSkin.getTranslatedName(stack.getOrDefault(MekanismDataComponents.ROBIT_SKIN, MekanismRobitSkins.BASE))));
+        tooltip.add(MekanismLang.ROBIT_SKIN.translateColored(EnumColor.INDIGO, EnumColor.GRAY, RobitSkin.getTranslatedName(stack.getOrDefault(MekanismDataComponents.ROBIT_SKIN.get(), MekanismRobitSkins.BASE))));
         IItemSecurityUtils.INSTANCE.addSecurityTooltip(stack, tooltip);
         tooltip.add(MekanismLang.HAS_INVENTORY.translateColored(EnumColor.AQUA, EnumColor.GRAY, YesNo.hasInventory(stack)));
     }
@@ -103,7 +102,7 @@ public class ItemRobit extends ItemEnergized implements ICapabilityAware {
                     robit.setOwnerUUID(ownerUUID);
                 }
                 ContainerType.ITEM.copyFromStack(world.registryAccess(), stack, robit.getInventorySlots(null));
-                Component name = stack.get(MekanismDataComponents.ROBIT_NAME);
+                Component name = stack.get(MekanismDataComponents.ROBIT_NAME.get());
                 if (name != null) {
                     robit.setCustomName(name);
                 }
@@ -111,8 +110,8 @@ public class ItemRobit extends ItemEnergized implements ICapabilityAware {
                 if (securityObject != null) {
                     robit.setSecurityMode(securityObject.getSecurityMode());
                 }
-                robit.setSkin(stack.getOrDefault(MekanismDataComponents.ROBIT_SKIN, MekanismRobitSkins.BASE), player);
-                robit.setDefaultSkinManuallySelected(stack.getOrDefault(MekanismDataComponents.DEFAULT_MANUALLY_SELECTED, false));
+                robit.setSkin(stack.getOrDefault(MekanismDataComponents.ROBIT_SKIN.get(), MekanismRobitSkins.BASE), player);
+                robit.setDefaultSkinManuallySelected(stack.getOrDefault(MekanismDataComponents.DEFAULT_MANUALLY_SELECTED.get(), false));
                 world.addFreshEntity(robit);
                 world.gameEvent(player, GameEvent.ENTITY_PLACE, robit.blockPosition());
                 stack.shrink(1);
@@ -124,19 +123,19 @@ public class ItemRobit extends ItemEnergized implements ICapabilityAware {
     }
 
     @Override
-    public void attachCapabilities(RegisterCapabilitiesEvent event) {
-        event.registerItem(IItemSecurityUtils.INSTANCE.ownerCapability(), (stack, ctx) -> new SecurityObject(stack), this);
-        event.registerItem(IItemSecurityUtils.INSTANCE.securityCapability(), (stack, ctx) -> new SecurityObject(stack), this);
+    public void attachCapabilities() {
+        IItemSecurityUtils.INSTANCE.ownerCapability().registerForItems((stack, ctx) -> new SecurityObject(stack), this);
+        IItemSecurityUtils.INSTANCE.securityCapability().registerForItems((stack, ctx) -> new SecurityObject(stack), this);
     }
 
     @Override
     public void inventoryTick(@NotNull ItemStack stack, @NotNull Level level, @NotNull Entity entity, int slot, boolean isSelected) {
         super.inventoryTick(stack, level, entity, slot, isSelected);
-        if (!level.isClientSide && HolidayManager.hasRobitSkinsToday() && !stack.getOrDefault(MekanismDataComponents.DEFAULT_MANUALLY_SELECTED, false)) {
-            ResourceKey<RobitSkin> skin = stack.get(MekanismDataComponents.ROBIT_SKIN);
+        if (!level.isClientSide && HolidayManager.hasRobitSkinsToday() && !stack.getOrDefault(MekanismDataComponents.DEFAULT_MANUALLY_SELECTED.get(), false)) {
+            ResourceKey<RobitSkin> skin = stack.get(MekanismDataComponents.ROBIT_SKIN.get());
             if (skin == null || skin == MekanismRobitSkins.BASE) {
                 //Randomize the robit's skin
-                stack.set(MekanismDataComponents.ROBIT_SKIN, HolidayManager.getRandomBaseSkin(level.random));
+                stack.set(MekanismDataComponents.ROBIT_SKIN.get(), HolidayManager.getRandomBaseSkin(level.random));
             }
         }
     }

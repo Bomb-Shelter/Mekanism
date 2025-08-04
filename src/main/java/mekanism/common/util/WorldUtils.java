@@ -12,6 +12,7 @@ import mekanism.common.lib.multiblock.IMultiblock;
 import mekanism.common.lib.multiblock.IStructuralMultiblock;
 import mekanism.common.lib.multiblock.MultiblockData;
 import mekanism.common.lib.multiblock.Structure;
+import net.fabricmc.fabric.api.lookup.v1.block.BlockApiLookup;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockPos.MutableBlockPos;
 import net.minecraft.core.Direction;
@@ -408,7 +409,7 @@ public class WorldUtils {
      */
     @Nullable
     @Contract("null, _, _, _ -> null")
-    public static <CAP, CONTEXT> CAP getCapability(@Nullable Level level, BlockCapability<CAP, CONTEXT> cap, BlockPos pos, CONTEXT context) {
+    public static <CAP, CONTEXT> CAP getCapability(@Nullable Level level, BlockApiLookup<CAP, CONTEXT> cap, BlockPos pos, CONTEXT context) {
         return getCapability(level, cap, pos, null, null, context);
     }
 
@@ -426,13 +427,13 @@ public class WorldUtils {
      */
     @Nullable
     @Contract("null, _, _, _, _, _ -> null")
-    public static <CAP, CONTEXT> CAP getCapability(@Nullable Level level, BlockCapability<CAP, CONTEXT> cap, BlockPos pos, @Nullable BlockState state,
+    public static <CAP, CONTEXT> CAP getCapability(@Nullable Level level, BlockApiLookup<CAP, CONTEXT> cap, BlockPos pos, @Nullable BlockState state,
           @Nullable BlockEntity tile, CONTEXT context) {
         if (!isBlockLoaded(level, pos)) {
             //If the world is null, or it is a world reader and the block is not loaded, return null
             return null;
         }
-        return level.getCapability(cap, pos, state, tile, context);
+        return cap.find(level, pos, state, tile, context);
     }
 
     /**

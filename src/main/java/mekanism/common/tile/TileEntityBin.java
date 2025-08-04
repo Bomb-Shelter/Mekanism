@@ -4,6 +4,8 @@ import mekanism.api.Action;
 import mekanism.api.IConfigurable;
 import mekanism.api.IContentsListener;
 import mekanism.api.SerializationConstants;
+import mekanism.api.fabric.lookup.BlockApiCacheWithContext;
+import mekanism.api.fabric.transfer.items.IItemHandler;
 import mekanism.common.attachments.LockData;
 import mekanism.common.block.attribute.Attribute;
 import mekanism.common.capabilities.Capabilities;
@@ -41,15 +43,13 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.capabilities.BlockCapabilityCache;
-import net.neoforged.neoforge.items.IItemHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class TileEntityBin extends TileEntityMekanism implements IConfigurable {
 
     @Nullable
-    private BlockCapabilityCache<IItemHandler, @Nullable Direction> targetInventory;
+    private BlockApiCacheWithContext<IItemHandler, @Nullable Direction> targetInventory;
     public int addTicks = 0;
     public int removeTicks = 0;
     private int delayTicks;
@@ -102,7 +102,7 @@ public class TileEntityBin extends TileEntityMekanism implements IConfigurable {
                 if (targetInventory == null) {
                     targetInventory = Capabilities.ITEM.createCache((ServerLevel) level, getBlockPos().below(), Direction.UP);
                 }
-                TransitResponse response = request.eject(this, targetInventory.getCapability(), 0, LogisticalTransporterBase::getColor);
+                TransitResponse response = request.eject(this, targetInventory.find(), 0, LogisticalTransporterBase::getColor);
                 if (!response.isEmpty() && tier != BinTier.CREATIVE) {
                     int sendingAmount = response.getSendingAmount();
                     MekanismUtils.logMismatchedStackSize(binSlot.shrinkStack(sendingAmount, Action.EXECUTE), sendingAmount);
@@ -193,14 +193,14 @@ public class TileEntityBin extends TileEntityMekanism implements IConfigurable {
     protected void collectImplicitComponents(@NotNull DataComponentMap.Builder builder) {
         //Note: In theory doing this before super doesn't matter, but we want to make sure that the lock is set before
         // setting the data on the item just for good measure
-        builder.set(MekanismDataComponents.LOCK, LockData.create(binSlot.getLockStack()));
+        builder.set(MekanismDataComponents.LOCK.get(), LockData.create(binSlot.getLockStack()));
         super.collectImplicitComponents(builder);
     }
 
     @Override
     protected void applyImplicitComponents(@NotNull BlockEntity.DataComponentInput input) {
         //Apply the lock before processing the stored data
-        binSlot.setLockStack(input.getOrDefault(MekanismDataComponents.LOCK, LockData.EMPTY).lock());
+        binSlot.setLockStack(input.getOrDefault(MekanismDataComponents.LOCK.get(), LockData.EMPTY).lock());
         super.applyImplicitComponents(input);
     }
 
