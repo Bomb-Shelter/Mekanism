@@ -6,7 +6,7 @@ import java.util.function.LongSupplier;
 
 import io.github.fabricators_of_create.porting_lib.tool.ItemAbility;
 import mekanism.api.annotations.NothingNullByDefault;
-import mekanism.api.fabric.ItemAttributeModifierEvent;
+import io.github.fabricators_of_create.porting_lib.event.common.ItemAttributeModifierEvent;
 import mekanism.api.functions.FloatSupplier;
 import mekanism.api.radial.RadialData;
 import mekanism.api.radial.mode.IRadialMode;

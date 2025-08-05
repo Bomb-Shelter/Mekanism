@@ -3,6 +3,7 @@ package mekanism.client.model.data;
 import java.util.List;
 import java.util.Map;
 
+import io.github.fabricators_of_create.porting_lib.models.data.ModelData;
 import io.github.fabricators_of_create.porting_lib.models.data.ModelProperty;
 import mekanism.api.annotations.NothingNullByDefault;
 import net.minecraft.client.renderer.RenderType;

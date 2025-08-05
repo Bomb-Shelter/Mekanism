@@ -5,6 +5,8 @@ import java.util.Collection;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
+
+import io.github.fabricators_of_create.porting_lib.item.itemgroup.PortingLibCreativeTab;
 import mekanism.api.functions.ConstantPredicates;
 import mekanism.api.text.ILangEntry;
 import mekanism.client.SpecialColors;
@@ -43,16 +45,16 @@ public class CreativeTabDeferredRegister extends MekanismDeferredRegister<Creati
     /**
      * @apiNote We manually require the title and icon to be passed so that we ensure all tabs have one.
      */
-    public MekanismDeferredHolder<CreativeModeTab, CreativeModeTab> registerMain(ILangEntry title, Holder<Item> icon, UnaryOperator<CreativeModeTab.Builder> operator) {
+    public MekanismDeferredHolder<CreativeModeTab, CreativeModeTab> registerMain(ILangEntry title, Holder<Item> icon, UnaryOperator<PortingLibCreativeTab.PortingLibCreativeTabBuilder> operator) {
         return register(getNamespace(), title, icon, operator);
     }
 
     /**
      * @apiNote We manually require the title and icon to be passed so that we ensure all tabs have one.
      */
-    public MekanismDeferredHolder<CreativeModeTab, CreativeModeTab> register(String name, ILangEntry title, Holder<Item> icon, UnaryOperator<CreativeModeTab.Builder> operator) {
+    public MekanismDeferredHolder<CreativeModeTab, CreativeModeTab> register(String name, ILangEntry title, Holder<Item> icon, UnaryOperator<PortingLibCreativeTab.PortingLibCreativeTabBuilder> operator) {
         return register(name, () -> {
-            CreativeModeTab.Builder builder = CreativeModeTab.builder()
+            PortingLibCreativeTab.PortingLibCreativeTabBuilder builder = PortingLibCreativeTab.builder()
                   .title(title.translate())
                   .icon(() -> new ItemStack(icon))
                   .withTabFactory(MekanismCreativeTab::new);
@@ -118,7 +120,7 @@ public class CreativeTabDeferredRegister extends MekanismDeferredRegister<Creati
         }
     }
 
-    public static class MekanismCreativeTab extends CreativeModeTab {
+    public static class MekanismCreativeTab extends PortingLibCreativeTab {
 
         protected MekanismCreativeTab(CreativeModeTab.Builder builder) {
             super(builder);

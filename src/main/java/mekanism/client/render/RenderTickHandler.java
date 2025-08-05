@@ -512,7 +512,7 @@ public class RenderTickHandler {
         if (lines == null) {
             BakedModel bakedModel = Minecraft.getInstance().getBlockRenderer().getBlockModel(state);
             //TODO: Eventually we may want to add support for Model data and maybe render type
-            lines = Outlines.extract(bakedModel, state, rand, ModelData.EMPTY, null);
+            lines = Outlines.extract(bakedModel, state, rand);
             cachedWireFrames.put(state, lines);
         }
         PoseStack.Pose pose = matrix.last();

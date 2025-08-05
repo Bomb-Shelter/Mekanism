@@ -7,6 +7,7 @@ import mekanism.api.Action;
 import mekanism.api.AutomationType;
 import mekanism.api.IContentsListener;
 import mekanism.api.chemical.IChemicalHandler;
+import mekanism.api.fabric.lookup.BlockApiCacheWithContext;
 import mekanism.api.text.EnumColor;
 import mekanism.common.MekanismLang;
 import mekanism.common.attachments.containers.ContainerType;
@@ -26,13 +27,12 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.capabilities.BlockCapabilityCache;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class TileEntitySPSPort extends TileEntitySPSCasing {
 
-    private final Map<Direction, BlockCapabilityCache<IChemicalHandler, @Nullable Direction>> chemicalCapabilityCaches = new EnumMap<>(Direction.class);
+    private final Map<Direction, BlockApiCacheWithContext<IChemicalHandler, @Nullable Direction>> chemicalCapabilityCaches = new EnumMap<>(Direction.class);
     private MachineEnergyContainer<TileEntitySPSPort> energyContainer;
 
     public TileEntitySPSPort(BlockPos pos, BlockState state) {
@@ -75,7 +75,7 @@ public class TileEntitySPSPort extends TileEntitySPSCasing {
     }
 
     public void addChemicalTargetCapability(List<CapabilityOutputTarget<IChemicalHandler>> outputTargets, Direction side) {
-        BlockCapabilityCache<IChemicalHandler, @Nullable Direction> cache = chemicalCapabilityCaches.get(side);
+        BlockApiCacheWithContext<IChemicalHandler, @Nullable Direction> cache = chemicalCapabilityCaches.get(side);
         if (cache == null) {
             cache = Capabilities.CHEMICAL.createCache((ServerLevel) level, worldPosition.relative(side), side.getOpposite());
             chemicalCapabilityCaches.put(side, cache);

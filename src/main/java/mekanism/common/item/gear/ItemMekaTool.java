@@ -1,6 +1,10 @@
 package mekanism.common.item.gear;
 
+import io.github.fabricators_of_create.porting_lib.enchant.CustomEnchantingBehaviorItem;
+import io.github.fabricators_of_create.porting_lib.item.extensions.CustomSupportsEnchantItem;
+import io.github.fabricators_of_create.porting_lib.item.extensions.OnDestroyedItem;
 import io.github.fabricators_of_create.porting_lib.tool.ItemAbility;
+import io.github.fabricators_of_create.porting_lib.tool.addons.ItemAbilityItem;
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Reference2BooleanArrayMap;
@@ -15,7 +19,7 @@ import mekanism.api.Action;
 import mekanism.api.AutomationType;
 import mekanism.api.energy.IEnergyContainer;
 import mekanism.api.event.MekanismTeleportEvent;
-import mekanism.api.fabric.ItemAttributeModifierEvent;
+import io.github.fabricators_of_create.porting_lib.event.common.ItemAttributeModifierEvent;
 import mekanism.api.gear.ICustomModule;
 import mekanism.api.gear.IModule;
 import mekanism.api.gear.IModuleContainer;
@@ -82,7 +86,7 @@ import net.neoforged.neoforge.registries.holdersets.AnyHolderSet;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class ItemMekaTool extends ItemEnergized implements IRadialModuleContainerItem, IBlastingItem {
+public class ItemMekaTool extends ItemEnergized implements IRadialModuleContainerItem, IBlastingItem, OnDestroyedItem, ItemAbilityItem, CustomEnchantingBehaviorItem, CustomSupportsEnchantItem {
 
     private static final ResourceLocation RADIAL_ID = Mekanism.rl("meka_tool");
 
@@ -165,13 +169,13 @@ public class ItemMekaTool extends ItemEnergized implements IRadialModuleContaine
         //Enchantments in our data
         IModuleContainer container = IModuleHelper.INSTANCE.getModuleContainer(stack);
         int moduleLevel = container == null ? 0 : container.getModuleEnchantmentLevel(enchantment);
-        return Math.max(moduleLevel, super.getEnchantmentLevel(stack, enchantment));
+        return Math.max(moduleLevel, CustomEnchantingBehaviorItem.super.getEnchantmentLevel(stack, enchantment));
     }
 
     @NotNull
     @Override
     public ItemEnchantments getAllEnchantments(@NotNull ItemStack stack, RegistryLookup<Enchantment> lookup) {
-        ItemEnchantments enchantments = super.getAllEnchantments(stack, lookup);
+        ItemEnchantments enchantments = CustomEnchantingBehaviorItem.super.getAllEnchantments(stack, lookup);
         IModuleContainer container = IModuleHelper.INSTANCE.getModuleContainer(stack);
         if (container != null) {
             ItemEnchantments moduleEnchantments = container.moduleBasedEnchantments();
@@ -393,7 +397,7 @@ public class ItemMekaTool extends ItemEnergized implements IRadialModuleContaine
                         double targetY = pos.getY() + 1.5;
                         double targetZ = pos.getZ() + 0.5;
                         MekanismTeleportEvent.MekaTool event = new MekanismTeleportEvent.MekaTool(player, targetX, targetY, targetZ, stack, result);
-                        if (NeoForge.EVENT_BUS.post(event).isCanceled()) {
+                        if (event.post()) {
                             //Fail if the event was cancelled
                             return InteractionResultHolder.fail(stack);
                         }
@@ -428,17 +432,17 @@ public class ItemMekaTool extends ItemEnergized implements IRadialModuleContaine
 
     @Override
     public boolean isBookEnchantable(@NotNull ItemStack stack, @NotNull ItemStack book) {
-        return isEnchantable(stack) && super.isBookEnchantable(stack, book);
+        return isEnchantable(stack) && CustomEnchantingBehaviorItem.super.isBookEnchantable(stack, book);
     }
 
     @Override
     public boolean isPrimaryItemFor(@NotNull ItemStack stack, @NotNull Holder<Enchantment> enchantment) {
-        return isEnchantable(stack) && super.isPrimaryItemFor(stack, enchantment);
+        return isEnchantable(stack) && CustomSupportsEnchantItem.super.isPrimaryItemFor(stack, enchantment);
     }
 
     @Override
     public boolean supportsEnchantment(@NotNull ItemStack stack, @NotNull Holder<Enchantment> enchantment) {
-        return isEnchantable(stack) && super.supportsEnchantment(stack, enchantment);
+        return isEnchantable(stack) && CustomSupportsEnchantItem.super.supportsEnchantment(stack, enchantment);
     }
 
     @Override

@@ -21,7 +21,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.core.Direction;
 import net.minecraft.util.profiling.ProfilerFiller;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.FluidStackLinkedSet;
+import io.github.fabricators_of_create.porting_lib.resources.fluids.FluidStackLinkedSet;
 import org.jetbrains.annotations.NotNull;
 
 @NothingNullByDefault

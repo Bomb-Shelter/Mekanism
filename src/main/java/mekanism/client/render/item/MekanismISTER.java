@@ -2,6 +2,7 @@ package mekanism.client.render.item;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import io.github.fabricators_of_create.porting_lib.models.data.ModelData;
 import mekanism.common.util.EnumUtils;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -22,7 +23,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.HalfTransparentBlock;
 import net.minecraft.world.level.block.StainedGlassPaneBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.client.model.data.ModelData;
 import org.jetbrains.annotations.NotNull;
 
 public abstract class MekanismISTER extends BlockEntityWithoutLevelRenderer {

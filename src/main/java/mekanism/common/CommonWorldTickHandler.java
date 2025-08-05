@@ -2,6 +2,7 @@ package mekanism.common;
 
 import io.github.fabricators_of_create.porting_lib.entity.events.EntityJoinLevelEvent;
 import io.github.fabricators_of_create.porting_lib.level.events.BlockEvent;
+import io.github.fabricators_of_create.porting_lib.level.events.ChunkDataEvent;
 import io.github.fabricators_of_create.porting_lib.level.events.LevelEvent;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMaps;

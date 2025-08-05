@@ -19,9 +19,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
-import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import net.neoforged.neoforge.fluids.FluidType;
-import net.neoforged.neoforge.fluids.capability.wrappers.FluidBucketWrapper;
 import org.jetbrains.annotations.NotNull;
 
 public class ItemNutritionalPasteBucket extends BucketItem implements ICapabilityAware {
@@ -45,7 +42,7 @@ public class ItemNutritionalPasteBucket extends BucketItem implements ICapabilit
     @Override
     public InteractionResultHolder<ItemStack> use(@NotNull Level level, @NotNull Player player, @NotNull InteractionHand hand) {
         if (MekanismUtils.isPlayingMode(player)) {
-            int needed = Math.min(20 - player.getFoodData().getFoodLevel(), FluidConstants.BUCKET / MekanismConfig.general.nutritionalPasteDropletPerFood.get());
+            long needed = Math.min(20 - player.getFoodData().getFoodLevel(), FluidConstants.BUCKET / MekanismConfig.general.nutritionalPasteDropletPerFood.get());
             if (needed > 0) {
                 return ItemUtils.startUsingInstantly(level, player, hand);
             }
@@ -57,7 +54,7 @@ public class ItemNutritionalPasteBucket extends BucketItem implements ICapabilit
     @Override
     public ItemStack finishUsingItem(@NotNull ItemStack stack, @NotNull Level level, @NotNull LivingEntity entity) {
         if (entity instanceof Player player && MekanismUtils.isPlayingMode(player)) {
-            int needed = Math.min(20 - player.getFoodData().getFoodLevel(), FluidConstants.BUCKET / MekanismConfig.general.nutritionalPasteDropletPerFood.get());
+            int needed = (int) Math.min(20 - player.getFoodData().getFoodLevel(), FluidConstants.BUCKET / MekanismConfig.general.nutritionalPasteDropletPerFood.get());
             if (needed > 0) {
                 if (entity instanceof ServerPlayer serverPlayer) {
                     CriteriaTriggers.CONSUME_ITEM.trigger(serverPlayer, stack);

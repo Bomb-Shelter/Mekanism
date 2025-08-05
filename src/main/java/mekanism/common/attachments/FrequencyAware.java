@@ -19,11 +19,12 @@ import mekanism.common.lib.frequency.FrequencyType;
 import mekanism.common.lib.security.SecurityFrequency;
 import mekanism.common.lib.security.SecurityUtils;
 import mekanism.common.registries.MekanismDataComponents;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.fml.util.thread.EffectiveSide;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -42,7 +43,7 @@ public record FrequencyAware<FREQ extends Frequency>(Optional<FrequencyIdentity>
               frequencyType.getIdentitySerializer().codec().optionalFieldOf(SerializationConstants.IDENTITY).forGetter(FrequencyAware::identity)
         ).apply(instance, identity -> {
             FREQ frequency = null;
-            if (identity.isPresent() && EffectiveSide.get().isServer()) {
+            if (identity.isPresent() && FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER) {
                 //Only try to look up the frequency on the server
                 frequency = frequencyType.getManager(identity.get(), identity.get().ownerUUID()).getFrequency(identity.get().key());
             }
@@ -53,7 +54,7 @@ public record FrequencyAware<FREQ extends Frequency>(Optional<FrequencyIdentity>
     public static <FREQ extends Frequency> StreamCodec<ByteBuf, FrequencyAware<FREQ>> streamCodec(FrequencyType<FREQ> frequencyType) {
         return ByteBufCodecs.optional(frequencyType.getIdentitySerializer().streamCodec()).map(identity -> {
             FREQ frequency = null;
-            if (identity.isPresent() && EffectiveSide.get().isServer()) {
+            if (identity.isPresent() && FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER) {
                 //Only try to look up the frequency on the server
                 //Note: This will almost always be false
                 //TODO - 1.21: Do we want to remove this branch and have the optional always be empty when transmitting via stream?
@@ -81,7 +82,7 @@ public record FrequencyAware<FREQ extends Frequency>(Optional<FrequencyIdentity>
     @Nullable
     public FREQ getFrequency(ItemStack stack, DataComponentType<FrequencyAware<FREQ>> type) {
         FREQ frequency = frequency().orElse(null);
-        if (frequency != null && frequency.getSecurity() == SecurityMode.TRUSTED && EffectiveSide.get().isServer()) {
+        if (frequency != null && frequency.getSecurity() == SecurityMode.TRUSTED && FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER) {
             //If it is a trusted frequency, and we are on the server, validate whether the owner of the item can actually access the frequency
             UUID ownerUUID = IItemSecurityUtils.INSTANCE.getOwnerUUID(stack);
             if (ownerUUID != null && !frequency.ownerMatches(ownerUUID)) {
@@ -90,7 +91,7 @@ public record FrequencyAware<FREQ extends Frequency>(Optional<FrequencyIdentity>
                     //TODO - 1.21: Re-evaluate this
                     stack.remove(type);
                     if (stack.getItem() instanceof IColoredItem) {
-                        stack.remove(MekanismDataComponents.COLOR);
+                        stack.remove(MekanismDataComponents.COLOR.get());
                     }
                 }
             }

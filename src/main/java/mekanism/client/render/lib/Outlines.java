@@ -14,24 +14,22 @@ import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.client.model.IQuadTransformer;
-import net.neoforged.neoforge.client.model.data.ModelData;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Math;
 import org.joml.Vector3f;
 
 public class Outlines {
 
-    public static List<Line> extract(BakedModel model, @Nullable BlockState state, RandomSource rand, ModelData modelData, @Nullable RenderType renderType) {
+    public static List<Line> extract(BakedModel model, @Nullable BlockState state, RandomSource rand) {
         Set<Line> lines = new HashSet<>();
         VertexExtractor consumer = new VertexExtractor(lines);
         for (Direction direction : EnumUtils.DIRECTIONS) {
-            for (BakedQuad quad : model.getQuads(state, direction, rand, modelData, renderType)) {
+            for (BakedQuad quad : model.getQuads(state, direction, rand)) {
                 consumer.unpack(quad);
             }
         }
 
-        for (BakedQuad quad : model.getQuads(state, null, rand, modelData, renderType)) {
+        for (BakedQuad quad : model.getQuads(state, null, rand)) {
             consumer.unpack(quad);
         }
         return new ArrayList<>(lines);

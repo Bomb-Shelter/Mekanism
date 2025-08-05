@@ -10,8 +10,8 @@ import mekanism.common.registration.impl.FluidRegistryObject;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.level.block.LiquidBlock;
-import net.neoforged.neoforge.fluids.BaseFlowingFluid.Flowing;
-import net.neoforged.neoforge.fluids.BaseFlowingFluid.Source;
+import io.github.fabricators_of_create.porting_lib.fluids.BaseFlowingFluid.Flowing;
+import io.github.fabricators_of_create.porting_lib.fluids.BaseFlowingFluid.Source;
 
 public class MekanismFluids {
 

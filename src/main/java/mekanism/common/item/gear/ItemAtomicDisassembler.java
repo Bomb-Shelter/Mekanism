@@ -2,8 +2,11 @@ package mekanism.common.item.gear;
 
 import com.mojang.math.Constants;
 import com.mojang.serialization.Codec;
+import io.github.fabricators_of_create.porting_lib.enchant.CustomEnchantingBehaviorItem;
+import io.github.fabricators_of_create.porting_lib.item.extensions.CustomSupportsEnchantItem;
 import io.github.fabricators_of_create.porting_lib.tool.ItemAbilities;
 import io.github.fabricators_of_create.porting_lib.tool.ItemAbility;
+import io.github.fabricators_of_create.porting_lib.tool.addons.ItemAbilityItem;
 import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Reference2BooleanMaps;
@@ -20,7 +23,7 @@ import mekanism.api.AutomationType;
 import mekanism.api.IDisableableEnum;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.energy.IEnergyContainer;
-import mekanism.api.fabric.ItemAttributeModifierEvent;
+import io.github.fabricators_of_create.porting_lib.event.common.ItemAttributeModifierEvent;
 import mekanism.api.functions.ConstantPredicates;
 import mekanism.api.math.MathUtils;
 import mekanism.api.radial.IRadialDataHelper;
@@ -72,10 +75,9 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import io.github.fabricators_of_create.porting_lib.common.util.Lazy;
-import net.neoforged.neoforge.registries.holdersets.AnyHolderSet;
 import org.jetbrains.annotations.NotNull;
 
-public class ItemAtomicDisassembler extends ItemEnergized implements IItemHUDProvider, IRadialModeItem<DisassemblerMode>, IHasConditionalAttributes {
+public class ItemAtomicDisassembler extends ItemEnergized implements IItemHUDProvider, IRadialModeItem<DisassemblerMode>, IHasConditionalAttributes, CustomEnchantingBehaviorItem, CustomSupportsEnchantItem, ItemAbilityItem {
 
     //All basic dig actions except shears
     public static final Set<ItemAbility> ALWAYS_SUPPORTED_ACTIONS = Set.of(ItemAbilities.AXE_DIG, ItemAbilities.HOE_DIG, ItemAbilities.SHOVEL_DIG, ItemAbilities.PICKAXE_DIG,
@@ -92,7 +94,7 @@ public class ItemAtomicDisassembler extends ItemEnergized implements IItemHUDPro
 
     public ItemAtomicDisassembler(Properties properties) {
         super(properties.rarity(Rarity.RARE).port_lib$setNoRepair().stacksTo(1)
-              .component(MekanismDataComponents.DISASSEMBLER_MODE, DisassemblerMode.NORMAL)
+              .component(MekanismDataComponents.DISASSEMBLER_MODE.get(), DisassemblerMode.NORMAL)
               .component(DataComponents.TOOL, new Tool(List.of(
                     Tool.Rule.deniesDrops(MekanismTags.Blocks.INCORRECT_FOR_DISASSEMBLER),
                     new Tool.Rule(new AnyHolderSet<>(BuiltInRegistries.BLOCK.asLookup()), Optional.empty(), Optional.of(true))
@@ -253,17 +255,17 @@ public class ItemAtomicDisassembler extends ItemEnergized implements IItemHUDPro
 
     @Override
     public boolean isBookEnchantable(@NotNull ItemStack stack, @NotNull ItemStack book) {
-        return isEnchantable(stack) && super.isBookEnchantable(stack, book);
+        return isEnchantable(stack) && CustomEnchantingBehaviorItem.super.isBookEnchantable(stack, book);
     }
 
     @Override
     public boolean isPrimaryItemFor(@NotNull ItemStack stack, @NotNull Holder<Enchantment> enchantment) {
-        return isEnchantable(stack) && super.isPrimaryItemFor(stack, enchantment);
+        return isEnchantable(stack) && CustomSupportsEnchantItem.super.isPrimaryItemFor(stack, enchantment);
     }
 
     @Override
     public boolean supportsEnchantment(@NotNull ItemStack stack, @NotNull Holder<Enchantment> enchantment) {
-        return isEnchantable(stack) && super.supportsEnchantment(stack, enchantment);
+        return isEnchantable(stack) && CustomSupportsEnchantItem.super.supportsEnchantment(stack, enchantment);
     }
 
     @NothingNullByDefault

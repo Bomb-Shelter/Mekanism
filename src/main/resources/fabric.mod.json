@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "mekanism",
+  "version": "${version}",
+
+  "name": "Mekanism",
+  "description": "Mekanism is a Minecraft add-on featuring high-tech machinery that can be used to create powerful tools, armor, and weapons.",
+  "authors": [
+    "Aidancbrady", "Thommy101", "Thiakil", "pupnewfster", "dizzyd",
+    "AlphaMode"
+  ],
+  "contact": {
+    "sources": "https://github.com/Alpha-s-Stuff/TinkersConstruct"
+  },
+
+  "license": "MIT",
+  "icon": "logo.png",
+  "mixins": [
+    "mekanism.mixins.json"
+  ],
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "mekanism.common.Mekanism"
+    ],
+    "client": [
+
+    ],
+    "fabric-datagen": [
+    ],
+    "cardinal-components": [
+    ]
+  },
+  "accessWidener": "mekanism.accesswidener",
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": ">=${fabric_version}",
+    "minecraft": ">=${minecraft_version}"
+  },
+  "custom": {
+    "banner": "logo.png"
+  }
+}

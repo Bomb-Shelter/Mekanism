@@ -1,6 +1,9 @@
 package mekanism.common.item.block;
 
 import java.util.List;
+
+import io.github.fabricators_of_create.porting_lib.item.extensions.UseFirstBehaviorItem;
+import io.github.fabricators_of_create.porting_lib.level.events.BlockEvent;
 import mekanism.api.security.IBlockSecurityUtils;
 import mekanism.api.text.EnumColor;
 import mekanism.common.CommonWorldTickHandler;
@@ -30,11 +33,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.level.BlockEvent;
 import org.jetbrains.annotations.NotNull;
 
-public class ItemBlockCardboardBox extends ItemBlockMekanism<BlockCardboardBox> {
+public class ItemBlockCardboardBox extends ItemBlockMekanism<BlockCardboardBox> implements UseFirstBehaviorItem {
 
     public ItemBlockCardboardBox(BlockCardboardBox block, Item.Properties properties) {
         super(block, properties.stacksTo(16));
@@ -42,7 +43,7 @@ public class ItemBlockCardboardBox extends ItemBlockMekanism<BlockCardboardBox> 
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @NotNull Item.TooltipContext context, @NotNull List<Component> tooltip, @NotNull TooltipFlag flag) {
-        BlockData existingData = stack.get(MekanismDataComponents.BLOCK_DATA);
+        BlockData existingData = stack.get(MekanismDataComponents.BLOCK_DATA.get());
         tooltip.add(MekanismLang.BLOCK_DATA.translateColored(EnumColor.INDIGO, YesNo.of(existingData != null, true)));
         if (existingData != null) {
             existingData.addToTooltip(tooltip::add);
@@ -53,7 +54,7 @@ public class ItemBlockCardboardBox extends ItemBlockMekanism<BlockCardboardBox> 
         //Check if the player is allowed to use the cardboard box in the given position
         if (world.mayInteract(player, pos) && player.mayUseItemAt(pos.relative(sideClicked), sideClicked, stack)) {
             //If they are then check if they can "break" the block that is in that spot
-            if (!NeoForge.EVENT_BUS.post(new BlockEvent.BreakEvent(world, pos, state, player)).isCanceled()) {
+            if (!new BlockEvent.BreakEvent(world, pos, state, player).post()) {
                 //If they can then we need to see if they are allowed to "place" the cardboard box in the given position
                 //TODO: Once forge fixes https://github.com/MinecraftForge/MinecraftForge/issues/7609 use block snapshots
                 // and fire a place event to see if the player is able to "place" the cardboard box
@@ -72,7 +73,7 @@ public class ItemBlockCardboardBox extends ItemBlockMekanism<BlockCardboardBox> 
         }
         Level world = context.getLevel();
         BlockPos pos = context.getClickedPos();
-        if (!stack.has(MekanismDataComponents.BLOCK_DATA) && !player.isShiftKeyDown()) {
+        if (!stack.has(MekanismDataComponents.BLOCK_DATA.get()) && !player.isShiftKeyDown()) {
             BlockState state = world.getBlockState(pos);
             if (!state.isAir() && state.getDestroySpeed(world, pos) != Block.INDESTRUCTIBLE) {
                 if (state.is(MekanismTags.Blocks.CARDBOARD_BLACKLIST)) {
@@ -104,7 +105,7 @@ public class ItemBlockCardboardBox extends ItemBlockMekanism<BlockCardboardBox> 
                     if (box != null) {
                         box.setComponents(DataComponentMap.builder()
                               .addAll(box.components())
-                              .set(MekanismDataComponents.BLOCK_DATA, data)
+                              .set(MekanismDataComponents.BLOCK_DATA.get(), data)
                               .build());
                     }
                 }

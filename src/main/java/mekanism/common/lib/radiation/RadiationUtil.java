@@ -1,5 +1,6 @@
 package mekanism.common.lib.radiation;
 
+import mekanism.api.fabric.transfer.items.IItemHandler;
 import mekanism.api.radiation.IRadiationSource;
 import mekanism.api.radiation.capability.IRadiationEntity;
 import mekanism.api.radiation.capability.IRadiationShielding;
@@ -13,7 +14,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.IItemHandler;
 
 public class RadiationUtil {
 
@@ -39,7 +39,7 @@ public class RadiationUtil {
         for (EquipmentSlot type : EnumUtils.ARMOR_SLOTS) {
             ItemStack stack = entity.getItemBySlot(type);
             if (!stack.isEmpty()) {
-                IRadiationShielding shielding = stack.getCapability(Capabilities.RADIATION_SHIELDING);
+                IRadiationShielding shielding = Capabilities.RADIATION_SHIELDING.find(stack, null);
                 if (shielding != null) {
                     resistance += shielding.getRadiationShielding();
                 }
@@ -50,7 +50,7 @@ public class RadiationUtil {
             if (handler != null) {
                 for (int i = 0, slots = handler.getSlots(); i < slots; i++) {
                     ItemStack stack = handler.getStackInSlot(i);
-                    IRadiationShielding shielding = stack.getCapability(Capabilities.RADIATION_SHIELDING);
+                    IRadiationShielding shielding = Capabilities.RADIATION_SHIELDING.find(stack, null);
                     if (shielding != null) {
                         resistance += shielding.getRadiationShielding();
                         if (resistance >= 1) {

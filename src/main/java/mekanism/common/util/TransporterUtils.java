@@ -1,6 +1,7 @@
 package mekanism.common.util;
 
 import mekanism.api.RelativeSide;
+import mekanism.api.fabric.transfer.items.IItemHandler;
 import mekanism.api.text.EnumColor;
 import mekanism.common.capabilities.Capabilities;
 import mekanism.common.content.network.transmitter.LogisticalTransporterBase;
@@ -17,7 +18,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.neoforge.items.IItemHandler;
 import org.jetbrains.annotations.Nullable;
 
 public final class TransporterUtils {

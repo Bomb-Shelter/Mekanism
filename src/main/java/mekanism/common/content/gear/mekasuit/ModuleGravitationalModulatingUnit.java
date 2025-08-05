@@ -1,8 +1,10 @@
 package mekanism.common.content.gear.mekasuit;
 
 import java.util.function.Consumer;
+
+import io.github.fabricators_of_create.porting_lib.attributes.PortingLibAttributes;
 import mekanism.api.annotations.ParametersAreNotNullByDefault;
-import mekanism.api.fabric.ItemAttributeModifierEvent;
+import io.github.fabricators_of_create.porting_lib.event.common.ItemAttributeModifierEvent;
 import mekanism.api.gear.ICustomModule;
 import mekanism.api.gear.IHUDElement;
 import mekanism.api.gear.IModule;
@@ -66,7 +68,7 @@ public record ModuleGravitationalModulatingUnit(SprintBoost speedBoost) implemen
     public void adjustAttributes(IModule<ModuleGravitationalModulatingUnit> module, ItemAttributeModifierEvent event) {
         ItemStack stack = event.getItemStack();
         if (stack.is(MekanismItems.MEKASUIT_BODYARMOR) && module.hasEnoughEnergy(stack, MekanismConfig.gear.mekaSuitEnergyUsageGravitationalModulation)) {
-            event.addModifier(NeoForgeMod.CREATIVE_FLIGHT, CREATIVE_FLIGHT_MODIFIER, EquipmentSlotGroup.CHEST);
+            event.addModifier(PortingLibAttributes.CREATIVE_FLIGHT, CREATIVE_FLIGHT_MODIFIER, EquipmentSlotGroup.CHEST);
         }
     }
 

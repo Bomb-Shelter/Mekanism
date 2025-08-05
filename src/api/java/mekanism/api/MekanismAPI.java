@@ -57,6 +57,8 @@ public class MekanismAPI {
         return ResourceKey.createRegistryKey(rl(path));
     }
 
+    public static void init() {}
+
     /**
      * Gets the {@link ResourceKey} representing the name of the Registry for {@link Chemical chemicals}.
      *

@@ -10,21 +10,19 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 import mekanism.api.SerializationConstants;
-import mekanism.common.Mekanism;
 import mekanism.common.lib.MekanismSavedData;
+import net.fabricmc.fabric.api.event.Event;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.bus.api.EventPriority;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-@EventBusSubscriber(modid = Mekanism.MODID)
 public class MultiblockManager<T extends MultiblockData> {
 
     private static final Set<MultiblockManager<?>> managers = new HashSet<>();
@@ -172,13 +170,18 @@ public class MultiblockManager<T extends MultiblockData> {
         }
     }
 
+    public static void init() {
+        ResourceLocation LOWEST = ResourceLocation.fromNamespaceAndPath("fabric", "lowest");
+        ServerTickEvents.END_SERVER_TICK.addPhaseOrdering(Event.DEFAULT_PHASE, LOWEST);
+        ServerTickEvents.END_SERVER_TICK.register(LOWEST, MultiblockManager::endOfTickEvent);
+    }
+
     /**
      * Bit of a hack, really the multiblock system needs to not have a 'cache' middle-man.
      * <p></p>
      * Causes any multiblocks that became dirty after the master ticked to have their contents synced and thus saved (if one occurs after this tick)
      */
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    static void endOfTickEvent(ServerTickEvent.Post event) {
+    static void endOfTickEvent(MinecraftServer server) {
         for (MultiblockManager<?> manager : managers) {
             manager.endOfTick();
         }

@@ -2,7 +2,7 @@ package mekanism.common.content.gear.mekasuit;
 
 import io.github.fabricators_of_create.porting_lib.attributes.PortingLibAttributes;
 import mekanism.api.annotations.ParametersAreNotNullByDefault;
-import mekanism.api.fabric.ItemAttributeModifierEvent;
+import io.github.fabricators_of_create.porting_lib.event.common.ItemAttributeModifierEvent;
 import mekanism.api.gear.ICustomModule;
 import mekanism.api.gear.IModule;
 import mekanism.api.gear.IModuleContainer;

@@ -49,6 +49,9 @@ import mekanism.common.recipe.lookup.cache.InputRecipeCache.SingleItem;
 import mekanism.common.recipe.lookup.cache.RotaryInputRecipeCache;
 import mekanism.common.registration.impl.RecipeTypeDeferredRegister;
 import mekanism.common.registration.impl.RecipeTypeRegistryObject;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.fabric.api.recipe.v1.ingredient.DefaultCustomIngredients;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.Holder;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
@@ -64,8 +67,6 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.item.crafting.SmeltingRecipe;
 import net.minecraft.world.level.Level;
-import net.neoforged.fml.loading.FMLEnvironment;
-import net.neoforged.neoforge.common.crafting.CompoundIngredient;
 import io.github.fabricators_of_create.porting_lib.registry.DeferredHolder;
 import io.github.fabricators_of_create.porting_lib.core.util.ServerLifecycleHooks;
 import org.jetbrains.annotations.NotNull;
@@ -199,7 +200,7 @@ public class MekanismRecipeType<VANILLA_INPUT extends RecipeInput, RECIPE extend
     private static RegistryAccess tryGetRegistryAccess() {
         //Try to get a fallback world if we are in a context that may not have one
         //If we are on the client get the client's world, if we are on the server get the current server's world
-        if (FMLEnvironment.dist.isClient()) {
+        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
             Level clientWorld = MekanismClient.tryGetClientWorld();
             return clientWorld != null ? clientWorld.registryAccess() : null;
         }
@@ -214,7 +215,7 @@ public class MekanismRecipeType<VANILLA_INPUT extends RecipeInput, RECIPE extend
         if (world == null) {
             //Try to get a fallback world if we are in a context that may not have one
             //If we are on the client get the client's world, if we are on the server get the current server's world
-            if (FMLEnvironment.dist.isClient()) {
+            if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
                 Level clientWorld = MekanismClient.tryGetClientWorld();
                 if (clientWorld != null) {
                     recipeManager = clientWorld.getRecipeManager();
@@ -285,7 +286,7 @@ public class MekanismRecipeType<VANILLA_INPUT extends RecipeInput, RECIPE extend
                         //Something went wrong
                         continue;
                     }
-                    ItemStackIngredient input = IngredientCreatorAccess.item().from(CompoundIngredient.of(ingredients.toArray(Ingredient[]::new)));
+                    ItemStackIngredient input = IngredientCreatorAccess.item().from(DefaultCustomIngredients.all(ingredients.toArray(Ingredient[]::new)));
                     recipes.add(new RecipeHolder<>(RecipeViewerUtils.synthetic(smeltingRecipe.id(), "mekanism_generated"),
                           castRecipe(new BasicSmeltingRecipe(input, recipeOutput))));
                 }

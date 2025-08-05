@@ -3,13 +3,14 @@ package mekanism.client.render.hud;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.ArrayList;
 import java.util.List;
+
+import mekanism.api.fabric.transfer.items.IItemHandler;
 import mekanism.api.gear.IModuleContainer;
 import mekanism.api.gear.IModuleHelper;
 import mekanism.client.gui.GuiUtils;
 import mekanism.client.render.HUDRenderer;
 import mekanism.common.Mekanism;
 import mekanism.common.config.MekanismConfig;
-import mekanism.common.integration.curios.CuriosIntegration;
 import mekanism.common.item.interfaces.IItemHUDProvider;
 import mekanism.common.tags.MekanismTags;
 import net.minecraft.client.DeltaTracker;
@@ -21,7 +22,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.IItemHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
@@ -66,17 +66,17 @@ public class MekanismHUD implements LayeredDraw.Layer {
                 }
             }
             if (Mekanism.hooks.curios.isLoaded()) {
-                IItemHandler inv = CuriosIntegration.getCuriosInventory(player);
-                if (inv != null) {
-                    for (int i = 0, slots = inv.getSlots(); i < slots; i++) {
-                        ItemStack stack = inv.getStackInSlot(i);
-                        IItemHUDProvider hudProvider = getHudProvider(stack);
-                        if (hudProvider != null) {
-                            count += makeComponent(hudProvider, player, stack, null, renderStrings,
-                                  (provider, l, plyr, s, ignored) -> provider.addCurioHUDStrings(l, plyr, s));
-                        }
-                    }
-                }
+//                IItemHandler inv = CuriosIntegration.getCuriosInventory(player);
+//                if (inv != null) {
+//                    for (int i = 0, slots = inv.getSlots(); i < slots; i++) {
+//                        ItemStack stack = inv.getStackInSlot(i);
+//                        IItemHUDProvider hudProvider = getHudProvider(stack);
+//                        if (hudProvider != null) {
+//                            count += makeComponent(hudProvider, player, stack, null, renderStrings,
+//                                  (provider, l, plyr, s, ignored) -> provider.addCurioHUDStrings(l, plyr, s));
+//                        }
+//                    }
+//                }
             }
             Font font = minecraft.font;
             List<DelayedString> delayedDraws = null;

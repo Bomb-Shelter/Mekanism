@@ -1,5 +1,11 @@
 package mekanism.client;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import io.github.fabricators_of_create.porting_lib.client_events.event.client.ViewportEvent;
+import io.github.fabricators_of_create.porting_lib.entity.events.EntityJoinLevelEvent;
+import io.github.fabricators_of_create.porting_lib.client_events.event.client.InputEvent.MouseScrollingEvent;
+import io.github.fabricators_of_create.porting_lib.event.client.LivingEntityRenderEvents;
+import io.github.fabricators_of_create.porting_lib.resources.events.RecipesUpdatedEvent;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -39,12 +45,18 @@ import mekanism.common.network.to_server.PacketPortableTeleporterTeleport;
 import mekanism.common.recipe.MekanismRecipeType;
 import mekanism.common.registries.MekanismModules;
 import mekanism.common.util.MekanismUtils;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ArmorStandModel;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
@@ -57,14 +69,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.FogType;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.event.InputEvent.MouseScrollingEvent;
-import net.neoforged.neoforge.client.event.RecipesUpdatedEvent;
-import net.neoforged.neoforge.client.event.RenderLivingEvent;
-import net.neoforged.neoforge.client.event.ViewportEvent;
-import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 
 /**
  * Client-side tick handler for Mekanism. Used mainly for the update check upon startup.
@@ -142,23 +146,33 @@ public class ClientTickHandler {
         }
     }
 
-    @SubscribeEvent
+    public ClientTickHandler() {
+        EntityJoinLevelEvent.EVENT.register(this::onStartTracking);
+        ClientPlayConnectionEvents.JOIN.register(this::onJoinServer);
+        ClientPlayConnectionEvents.DISCONNECT.register(this::onLeaveServer);
+        ClientTickEvents.START_CLIENT_TICK.register(this::onTick);
+        MouseScrollingEvent.EVENT.register(this::onMouseEvent);
+        ViewportEvent.ComputeFogColor.EVENT.register(this::onFogLighting);
+        ViewportEvent.RenderFog.EVENT.register(this::onFog);
+        RecipesUpdatedEvent.EVENT.register(this::recipesUpdated);
+        LivingEntityRenderEvents.PRE.register(this::renderEntityPre);
+        LivingEntityRenderEvents.POST.register(this::renderEntityPost);
+    }
+
     public void onStartTracking(EntityJoinLevelEvent event) {
         if (event.getLevel().isClientSide && event.getEntity() instanceof Player player && MekanismConfig.client.enablePlayerSounds.get()) {
             SoundHandler.startFlamethrowerSound(player);
         }
     }
 
-    @SubscribeEvent
-    public void onJoinServer(ClientPlayerNetworkEvent.LoggingIn event) {
+    public void onJoinServer(ClientPacketListener handler, PacketSender sender, Minecraft client) {
         if (!isConnected) {//Note: This should always be true when the event is fired
             isConnected = true;
-            MekanismClient.launchClient(event.getConnection());
+            MekanismClient.launchClient(handler.getConnection());
         }
     }
 
-    @SubscribeEvent
-    public void onLeaveServer(ClientPlayerNetworkEvent.LoggingOut event) {
+    public void onLeaveServer(ClientPacketListener handler, Minecraft client) {
         //Note: We check if the client has actually connected before handling this, as this event is also called when the client is setting up the server
         if (isConnected) {
             isConnected = false;
@@ -166,8 +180,7 @@ public class ClientTickHandler {
         }
     }
 
-    @SubscribeEvent
-    public void onTick(ClientTickEvent.Pre event) {
+    public void onTick(Minecraft client) {
         if (minecraft.level == null || minecraft.player == null) {
             return;
         }
@@ -282,7 +295,6 @@ public class ClientTickHandler {
         return false;
     }
 
-    @SubscribeEvent
     public void onMouseEvent(MouseScrollingEvent event) {
         if (MekanismConfig.client.allowModeScroll.get() && minecraft.player != null && minecraft.player.isShiftKeyDown()) {
             double delta = event.getScrollDeltaY();
@@ -297,7 +309,6 @@ public class ClientTickHandler {
         }
     }
 
-    @SubscribeEvent
     public void onFogLighting(ViewportEvent.ComputeFogColor event) {
         if (visionEnhancement) {
             float oldRatio = 0.1F;
@@ -311,7 +322,6 @@ public class ClientTickHandler {
         }
     }
 
-    @SubscribeEvent
     public void onFog(ViewportEvent.RenderFog event) {
         if (visionEnhancement && event.getCamera().getEntity() instanceof Player player) {
             IModule<ModuleVisionEnhancementUnit> module = IModuleHelper.INSTANCE.getIfEnabled(player, EquipmentSlot.HEAD, MekanismModules.VISION_ENHANCEMENT_UNIT);
@@ -339,7 +349,6 @@ public class ClientTickHandler {
         }
     }
 
-    @SubscribeEvent
     public void recipesUpdated(RecipesUpdatedEvent event) {
         //Note: Dedicated servers first connection the server sends recipes then tags, and on reload sends tags then recipes.
         // We ignore this fact and only clear the cache in the recipes updated event however, as the cache should already be
@@ -348,21 +357,20 @@ public class ClientTickHandler {
         MekanismRecipeType.clearCache();
     }
 
-    @SubscribeEvent
-    public void renderEntityPre(RenderLivingEvent.Pre<?, ?> evt) {
-        EntityModel<?> model = evt.getRenderer().getModel();
+    public boolean renderEntityPre(LivingEntity entity, LivingEntityRenderer<?, ?> renderer, float partialRenderTick, PoseStack matrixStack, MultiBufferSource buffers, int light) {
+        EntityModel<?> model = renderer.getModel();
         if (model instanceof HumanoidModel<?> humanoidModel) {
             //If the entity has a biped model, then see if it is wearing a meka suit, in which case we want to hide various parts of the model
-            setModelVisibility(evt.getEntity(), humanoidModel, false);
+            setModelVisibility(entity, humanoidModel, false);
         }
+        return false;
     }
 
-    @SubscribeEvent
-    public void renderEntityPost(RenderLivingEvent.Post<?, ?> evt) {
-        EntityModel<?> model = evt.getRenderer().getModel();
+    public void renderEntityPost(LivingEntity entity, LivingEntityRenderer<?, ?> renderer, float partialRenderTick, PoseStack matrixStack, MultiBufferSource buffers, int light) {
+        EntityModel<?> model = renderer.getModel();
         if (model instanceof HumanoidModel<?> humanoidModel) {
             //Undo model visibility changes we made to ensure that other entities of the same type are properly visible
-            setModelVisibility(evt.getEntity(), humanoidModel, true);
+            setModelVisibility(entity, humanoidModel, true);
         }
     }
 

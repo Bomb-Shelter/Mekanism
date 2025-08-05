@@ -2,6 +2,8 @@ package mekanism.client.render.obj;
 
 import java.util.Collections;
 import java.util.Objects;
+
+import io.github.fabricators_of_create.porting_lib.models.geometry.IGeometryBakingContext;
 import mekanism.client.model.data.TransmitterModelData;
 import mekanism.client.model.data.TransmitterModelData.Diversion;
 import mekanism.common.config.MekanismConfig;
@@ -9,7 +11,6 @@ import mekanism.common.lib.transmitter.ConnectionType;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
-import net.neoforged.neoforge.client.model.geometry.IGeometryBakingContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

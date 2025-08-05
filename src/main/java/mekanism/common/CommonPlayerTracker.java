@@ -13,22 +13,22 @@ import mekanism.common.network.to_client.player_data.PacketResetPlayerClient;
 import mekanism.common.network.to_client.radiation.PacketPlayerRadiationData;
 import mekanism.common.registries.MekanismItems;
 import mekanism.common.tags.MekanismTags.Items;
+import net.fabricmc.fabric.api.entity.event.v1.ServerEntityWorldChangeEvents;
+import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
+import net.fabricmc.fabric.api.util.TriState;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.ClickEvent.Action;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.common.util.TriState;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerChangedDimensionEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.RightClickBlock;
+import io.github.fabricators_of_create.porting_lib.entity.events.player.PlayerEvents;
+import io.github.fabricators_of_create.porting_lib.entity.events.player.PlayerEvents.PlayerLoggedInEvent;
+import io.github.fabricators_of_create.porting_lib.entity.events.player.PlayerEvents.PlayerLoggedOutEvent;
+import io.github.fabricators_of_create.porting_lib.entity.events.player.PlayerInteractEvent.RightClickBlock;
 
 public class CommonPlayerTracker {
 
@@ -37,10 +37,14 @@ public class CommonPlayerTracker {
                 "https://github.com/mekanism/Mekanism#alpha-status"), MekanismLang.ALPHA_WARNING_HERE));
 
     public CommonPlayerTracker() {
-        NeoForge.EVENT_BUS.register(this);
+        PlayerLoggedInEvent.EVENT.register(this::onPlayerLoginEvent);
+        PlayerLoggedOutEvent.EVENT.register(this::onPlayerLogoutEvent);
+        ServerEntityWorldChangeEvents.AFTER_PLAYER_CHANGE_WORLD.register(this::onPlayerDimChangedEvent);
+        PlayerEvents.StartTracking.EVENT.register(this::onPlayerStartTrackingEvent);
+        ServerPlayerEvents.AFTER_RESPAWN.register(this::respawnEvent);
+        RightClickBlock.EVENT.register(this::rightClickEvent);
     }
 
-    @SubscribeEvent
     public void onPlayerLoginEvent(PlayerLoggedInEvent event) {
         Player player = event.getEntity();
         if (!player.level().isClientSide) {
@@ -51,30 +55,24 @@ public class CommonPlayerTracker {
         }
     }
 
-    @SubscribeEvent
     public void onPlayerLogoutEvent(PlayerLoggedOutEvent event) {
         Player player = event.getEntity();
         Mekanism.playerState.clearPlayer(player.getUUID(), false);
     }
 
-    @SubscribeEvent
-    public void onPlayerDimChangedEvent(PlayerChangedDimensionEvent event) {
-        ServerPlayer player = (ServerPlayer) event.getEntity();
+    public void onPlayerDimChangedEvent(ServerPlayer player, ServerLevel origin, ServerLevel destination) {
         Mekanism.playerState.clearPlayer(player.getUUID(), false);
         PacketDistributor.sendToPlayer(player, new PacketPlayerRadiationData(player));
         PlayerExposure.updateClientRadiation(player);
     }
 
-    @SubscribeEvent
-    public void onPlayerStartTrackingEvent(PlayerEvent.StartTracking event) {
+    public void onPlayerStartTrackingEvent(PlayerEvents.StartTracking event) {
         if (event.getTarget() instanceof Player player && event.getEntity() instanceof ServerPlayer serverPlayer) {
             PacketDistributor.sendToPlayer(serverPlayer, new PacketPlayerData(player.getUUID()));
         }
     }
 
-    @SubscribeEvent
-    public void respawnEvent(PlayerEvent.PlayerRespawnEvent event) {
-        ServerPlayer player = (ServerPlayer) event.getEntity();
+    public void respawnEvent(ServerPlayer oldPlayer, ServerPlayer player, boolean alive) {
         PacketDistributor.sendToPlayer(player, new PacketPlayerRadiationData(player));
         PlayerExposure.updateClientRadiation(player);
         PacketDistributor.sendToAllPlayers(new PacketResetPlayerClient(player.getUUID()));
@@ -83,7 +81,6 @@ public class CommonPlayerTracker {
     /**
      * If the player is sneaking and the dest block is a cardboard box, ensure onBlockActivated is called, and that the item use is not.
      */
-    @SubscribeEvent
     public void rightClickEvent(RightClickBlock event) {
         ItemStack itemInHand = event.getEntity().getItemInHand(event.getHand());
         if (itemInHand.is(Items.CONFIGURATORS) && !itemInHand.is(MekanismItems.CONFIGURATOR)) {

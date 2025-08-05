@@ -18,7 +18,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.bus.api.IEventBus;
 
 public class MekanismRobitSkins {
 
@@ -41,8 +40,8 @@ public class MekanismRobitSkins {
         return Collections.unmodifiableMap(internal);
     });
 
-    public static void createAndRegisterDatapack(IEventBus modEventBus) {
-        ROBIT_SKINS.createAndRegisterDatapack(modEventBus, RobitSkinSerializationHelper.DIRECT_CODEC, RobitSkinSerializationHelper.NETWORK_CODEC.codec(),
+    public static void createAndRegisterDatapack() {
+        ROBIT_SKINS.createAndRegisterDatapack(RobitSkinSerializationHelper.DIRECT_CODEC, RobitSkinSerializationHelper.NETWORK_CODEC.codec(),
               registryBuilder -> registryBuilder.defaultKey(BASE));
     }
 

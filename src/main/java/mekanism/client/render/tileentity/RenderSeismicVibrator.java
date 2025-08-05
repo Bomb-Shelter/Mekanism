@@ -62,7 +62,7 @@ public class RenderSeismicVibrator extends MekanismTileEntityRenderer<TileEntity
     public void renderWireFrame(BlockEntity tile, float partialTick, PoseStack matrix, VertexConsumer buffer) {
         if (tile instanceof TileEntitySeismicVibrator vibrator) {
             if (lines == null) {
-                lines = Outlines.extract(MekanismModelCache.INSTANCE.VIBRATOR_SHAFT.getBakedModel(), null, tile.getLevel().random, ModelData.EMPTY, null);
+                lines = Outlines.extract(MekanismModelCache.INSTANCE.VIBRATOR_SHAFT.getBakedModel(), null, tile.getLevel().random);
             }
             setupRenderer(vibrator, partialTick, matrix);
             Pose pose = matrix.last();

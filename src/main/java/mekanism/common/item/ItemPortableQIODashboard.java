@@ -1,6 +1,8 @@
 package mekanism.common.item;
 
 import java.util.List;
+
+import io.github.fabricators_of_create.porting_lib.item.extensions.OnDestroyedItem;
 import mekanism.api.security.IItemSecurityUtils;
 import mekanism.api.text.EnumColor;
 import mekanism.common.MekanismLang;
@@ -37,10 +39,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import org.jetbrains.annotations.NotNull;
 
-public class ItemPortableQIODashboard extends Item implements IFrequencyItem, IGuiItem, IColoredItem, ICapabilityAware {
+public class ItemPortableQIODashboard extends Item implements IFrequencyItem, IGuiItem, IColoredItem, ICapabilityAware, OnDestroyedItem {
 
     public ItemPortableQIODashboard(Properties properties) {
         super(properties.stacksTo(1).rarity(Rarity.RARE)

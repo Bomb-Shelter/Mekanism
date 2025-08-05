@@ -4,6 +4,7 @@ import java.util.function.Function;
 
 import io.github.fabricators_of_create.porting_lib.models.geometry.IGeometryBakingContext;
 import io.github.fabricators_of_create.porting_lib.models.geometry.IUnbakedGeometry;
+import io.github.fabricators_of_create.porting_lib.models.obj.ObjModel;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;

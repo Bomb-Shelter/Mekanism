@@ -1,6 +1,8 @@
 package mekanism.common.tile.qio;
 
 import java.util.Optional;
+
+import io.github.fabricators_of_create.porting_lib.models.data.ModelData;
 import mekanism.api.SerializationConstants;
 import mekanism.client.model.data.DataBasedModelLoader;
 import mekanism.common.content.qio.QIOFrequency;
@@ -26,7 +28,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.client.model.data.ModelData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -132,11 +133,11 @@ public class TileEntityQIORedstoneAdapter extends TileEntityQIOComponent {
 
     @NotNull
     @Override
-    public ModelData getModelData() {
+    public ModelData getRenderData() {
         if (isEmitting) {
             return ModelData.of(DataBasedModelLoader.EMITTING, null);
         }
-        return super.getModelData();
+        return ModelData.EMPTY;
     }
 
     @NotNull
@@ -169,7 +170,7 @@ public class TileEntityQIORedstoneAdapter extends TileEntityQIOComponent {
     @Override
     protected void applyImplicitComponents(@NotNull BlockEntity.DataComponentInput input) {
         super.applyImplicitComponents(input);
-        itemType = input.getOrDefault(MekanismDataComponents.ITEM_TARGET, Optional.empty()).orElse(null);
+        itemType = input.getOrDefault(MekanismDataComponents.ITEM_TARGET.get(), Optional.<HashedItem>empty()).orElse(null);
         count = input.getOrDefault(MekanismDataComponents.LONG_AMOUNT.get(), count);
         fuzzy = input.getOrDefault(MekanismDataComponents.FUZZY.get(), fuzzy);
         inverted = input.getOrDefault(MekanismDataComponents.INVERSE.get(), inverted);

@@ -8,6 +8,7 @@ import java.util.function.Function;
 import io.github.fabricators_of_create.porting_lib.registry.RegistryBuilder;
 import mekanism.api.MekanismAPI;
 import mekanism.api.robit.RobitSkin;
+import net.fabricmc.fabric.api.event.registry.DynamicRegistries;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -43,19 +44,27 @@ public class DatapackDeferredRegister<T> extends DeferredMapCodecRegister<T> {
     /**
      * Only call this from mekanism and for custom datapack registries
      */
-    public void createAndRegisterDatapack(IEventBus bus, Codec<T> directCodec, @Nullable Codec<T> networkCodec) {
-        register(bus);
+    public void createAndRegisterDatapack(Codec<T> directCodec, @Nullable Codec<T> networkCodec) {
+        register();
         //Create a new datapack registry using the direct codec that is created based on the serializer's codec
-        bus.addListener((DataPackRegistryEvent.NewRegistry event) -> event.dataPackRegistry(datapackRegistryName, directCodec, networkCodec));
+        if (networkCodec != null) {
+            DynamicRegistries.registerSynced(datapackRegistryName, directCodec, networkCodec);
+        } else {
+            DynamicRegistries.register(datapackRegistryName, directCodec);
+        }
     }
 
     /**
      * Only call this from mekanism and for custom datapack registries
      */
-    public void createAndRegisterDatapack(IEventBus bus, Codec<T> directCodec, @Nullable Codec<T> networkCodec, Consumer<RegistryBuilder<T>> consumer) {
-        register(bus);
+    public void createAndRegisterDatapack(Codec<T> directCodec, @Nullable Codec<T> networkCodec, Consumer<RegistryBuilder<T>> consumer) {
+        register();
         //Create a new datapack registry using the direct codec that is created based on the serializer's codec
-        bus.addListener((DataPackRegistryEvent.NewRegistry event) -> event.dataPackRegistry(datapackRegistryName, directCodec, networkCodec, consumer));
+        if (networkCodec != null) { // Fabric consumer is handled in RegistryDataLoaderRegistryDataMixin
+            DynamicRegistries.registerSynced(datapackRegistryName, directCodec, networkCodec);
+        } else {
+            DynamicRegistries.register(datapackRegistryName, directCodec);
+        }
     }
 
     public ResourceKey<T> dataKey(String name) {

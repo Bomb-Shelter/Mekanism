@@ -1,7 +1,14 @@
 package mekanism.common;
 
 import com.mojang.authlib.GameProfile;
+import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.logging.LogUtils;
+import io.github.fabricators_of_create.porting_lib.chunk.loading.ForcedChunkManager;
+import io.github.fabricators_of_create.porting_lib.config.ModConfigEvent;
+import io.github.fabricators_of_create.porting_lib.event.common.ItemAttributeModifierEvent;
+import io.github.fabricators_of_create.porting_lib.level.events.LevelEvent;
+import io.github.fabricators_of_create.porting_lib.milk.PortingLibMilk;
+import io.github.fabricators_of_create.porting_lib.resources.events.DataMapsUpdatedEvent;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -35,6 +42,7 @@ import mekanism.common.content.evaporation.EvaporationValidator;
 import mekanism.common.content.gear.MekaSuitDispenseBehavior;
 import mekanism.common.content.gear.ModuleDispenseBehavior;
 import mekanism.common.content.gear.ModuleHelper;
+import mekanism.common.content.gear.mekasuit.ModuleGravitationalModulatingUnit;
 import mekanism.common.content.matrix.MatrixMultiblockData;
 import mekanism.common.content.matrix.MatrixValidator;
 import mekanism.common.content.network.ChemicalNetwork.ChemicalTransferEvent;
@@ -64,6 +72,7 @@ import mekanism.common.lib.frequency.FrequencyType;
 import mekanism.common.lib.inventory.personalstorage.PersonalStorageManager;
 import mekanism.common.lib.multiblock.MultiblockCache;
 import mekanism.common.lib.multiblock.MultiblockManager;
+import mekanism.common.lib.radiation.MeltdownLevelData;
 import mekanism.common.lib.radiation.PlayerExposure;
 import mekanism.common.lib.radiation.RadiationManager;
 import mekanism.common.lib.transmitter.TransmitterNetworkRegistry;
@@ -103,14 +112,25 @@ import mekanism.common.tile.component.TileComponentChunkLoader;
 import mekanism.common.tile.machine.TileEntityOredictionificator.ODConfigValueInvalidationListener;
 import mekanism.common.world.GenHandler;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.event.lifecycle.v1.CommonLifecycleEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.cauldron.CauldronInteraction;
 import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.packs.PackType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DispenserBlock;
@@ -168,42 +188,47 @@ public class Mekanism implements ModInitializer {
 
     private ReloadListener recipeCacheManager;
 
+    public Mekanism() {
+        instance = this;
+        //Set our version number to match the fabric.mod.json file, which matches the one in our build.gradle
+        versionNumber = new Version(FabricLoader.getInstance().getModContainer(MODID).orElseThrow());
+        packetHandler = new PacketHandler(versionNumber);
+    }
+
     @Override
     public void onInitialize() {
-        instance = this;
-        ModContainer modContainer = FabricLoader.getInstance().getModContainer(MODID).orElseThrow();
-        //Set our version number to match the neoforge.mods.toml file, which matches the one in our build.gradle
-        versionNumber = new Version(modContainer);
-        MekanismConfig.registerConfigs(modContainer);
+        MekanismConfig.registerConfigs(MODID);
 
-        NeoForgeMod.enableMilkFluid();
+        PortingLibMilk.enableMilkFluid();
         EnergyTransferEvent.EVENT.register(this::onEnergyTransferred);
         ChemicalTransferEvent.EVENT.register(this::onChemicalTransferred);
         FluidTransferEvent.EVENT.register(this::onLiquidTransferred);
-        NeoForge.EVENT_BUS.addListener(this::onModifyItemAttributes);
-        NeoForge.EVENT_BUS.addListener(this::onWorldLoad);
-        NeoForge.EVENT_BUS.addListener(this::onWorldUnload);
-        NeoForge.EVENT_BUS.addListener(this::registerCommands);
-        NeoForge.EVENT_BUS.addListener(this::serverStopped);
-        NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, this::addReloadListenersLowest);
-        NeoForge.EVENT_BUS.addListener(this::onTagsReload);
-        NeoForge.EVENT_BUS.addListener(this::onDataMapsUpdated);
+        ItemAttributeModifierEvent.EVENT.register(this::onModifyItemAttributes);
+        LevelEvent.Load.EVENT.register(this::onWorldLoad);
+        LevelEvent.Unload.EVENT.register(this::onWorldUnload);
+        CommandRegistrationCallback.EVENT.register(this::registerCommands);
+        ServerLifecycleEvents.SERVER_STOPPED.register(this::serverStopped);
+        addReloadListenersLowest();
+        CommonLifecycleEvents.TAGS_LOADED.register(this::onTagsReload);
+        DataMapsUpdatedEvent.EVENT.register(this::onDataMapsUpdated);
         NeoForge.EVENT_BUS.addListener(MekanismPermissions::registerPermissionNodes);
-        NeoForge.EVENT_BUS.register(IncompleteRecipeScanner.class);
+        IncompleteRecipeScanner.init();
 //        modEventBus.addListener(EventPriority.HIGH, Capabilities::registerProxyableCapabilities);
         Capabilities.registerCapabilities();
-        modEventBus.addListener(this::commonSetup);
-        modEventBus.addListener(this::registerChunkTicketControllers);
-        modEventBus.addListener(MekanismConfig::onConfigLoad);
-        modEventBus.addListener(this::imcQueue);
-        modEventBus.addListener(this::imcHandle);
-        addRegistrationListeners(modEventBus);
-        packetHandler = new PacketHandler(modEventBus, versionNumber);
+        commonSetup();
+        registerChunkTicketControllers();
+        ModConfigEvent.Loading.EVENT.register(MekanismConfig::onConfigLoad);
+        ModConfigEvent.Unloading.EVENT.register(MekanismConfig::onConfigLoad);
+        ModConfigEvent.Reloading.EVENT.register(MekanismConfig::onConfigLoad);
+        imcQueue();
+        imcHandle();
+        addRegistrationListeners();
         //Super early hooks, only reliable thing is for checking dependencies that we declare we are after
-        hooks.hookConstructor(modEventBus);
+        hooks.hookConstructor();
 
         // Fabric
-        CommonWorldTickHandler.init();
+        MeltdownLevelData.init();
+        MultiblockManager.init();
     }
 
     public static synchronized void addModule(IModModule modModule) {
@@ -214,9 +239,9 @@ public class Mekanism implements ModInitializer {
         return instance.packetHandler;
     }
 
-    private void addRegistrationListeners(IEventBus modEventBus) {
-        modEventBus.addListener(this::registerEventListener);
-        modEventBus.addListener(this::registerRegistries);
+    private void addRegistrationListeners() {
+        registerEventListener();
+        registerRegistries();
 
         MekanismItems.ITEMS.register();
         MekanismBlocks.BLOCKS.register();
@@ -242,24 +267,25 @@ public class Mekanism implements ModInitializer {
         MekanismLootFunctions.REGISTER.register();
         MekanismChemicals.CHEMICALS.register();
         MekanismChemicalIngredientTypes.INGREDIENT_TYPES.register();
-        MekanismRobitSkins.createAndRegisterDatapack(modEventBus);
+        MekanismRobitSkins.createAndRegisterDatapack();
         MekanismModules.MODULES.register();
         MekanismRecipeConditions.register();
         MekanismItemPredicates.PREDICATES.register();
         MekanismDataMapTypes.REGISTER.register();
     }
 
-    private void registerRegistries(NewRegistryEvent event) {
-        event.register(MekanismAPI.CHEMICAL_REGISTRY);
-        event.register(MekanismAPI.CHEMICAL_INGREDIENT_TYPES);
-        event.register(MekanismAPI.MODULE_REGISTRY);
-        event.register(MekanismAPI.ROBIT_SKIN_SERIALIZER_REGISTRY);
+    private void registerRegistries() {
+        MekanismAPI.init(); // Fabric Registries already get registered when we create them
+//        event.register(MekanismAPI.CHEMICAL_REGISTRY);
+//        event.register(MekanismAPI.CHEMICAL_INGREDIENT_TYPES);
+//        event.register(MekanismAPI.MODULE_REGISTRY);
+//        event.register(MekanismAPI.ROBIT_SKIN_SERIALIZER_REGISTRY);
     }
 
     @SuppressWarnings("removal")
-    private void registerEventListener(RegisterEvent event) {
+    private void registerEventListener() {
         //Register the empty chemical
-        event.register(MekanismAPI.CHEMICAL_REGISTRY_NAME, MekanismAPI.EMPTY_CHEMICAL_KEY.location(), () -> MekanismAPI.EMPTY_CHEMICAL);
+        Registry.register(MekanismAPI.CHEMICAL_REGISTRY, MekanismAPI.EMPTY_CHEMICAL_KEY.location(), MekanismAPI.EMPTY_CHEMICAL);
     }
 
     public static ResourceLocation rl(String path) {
@@ -278,7 +304,7 @@ public class Mekanism implements ModInitializer {
         return recipeCacheManager;
     }
 
-    private void onTagsReload(TagsUpdatedEvent event) {
+    private void onTagsReload(RegistryAccess registries, boolean client) {
         TagCache.resetTagCaches();
     }
 
@@ -288,21 +314,21 @@ public class Mekanism implements ModInitializer {
         ));
     }
 
-    private void addReloadListenersLowest(AddReloadListenerEvent event) {
+    private void addReloadListenersLowest() {
         //Note: We register reload listeners here which we want to make sure run after CraftTweaker or any other mods that may modify recipes or loot tables
-        event.addListener(getRecipeCacheManager());
+        ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(getRecipeCacheManager());
     }
 
-    private void registerCommands(RegisterCommandsEvent event) {
+    private void registerCommands(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
         BuildCommand.register("boiler", MekanismLang.BOILER, new BoilerBuilder());
         BuildCommand.register("matrix", MekanismLang.MATRIX, new MatrixBuilder());
         BuildCommand.register("tank", MekanismLang.DYNAMIC_TANK, new TankBuilder());
         BuildCommand.register("evaporation", MekanismLang.EVAPORATION_PLANT, new EvaporationBuilder());
         BuildCommand.register("sps", MekanismLang.SPS, new SPSBuilder());
-        event.getDispatcher().register(CommandMek.register());
+        dispatcher.register(CommandMek.register());
     }
 
-    private void serverStopped(ServerStoppedEvent event) {
+    private void serverStopped(MinecraftServer server) {
         //Clear all cache data, wait until server stopper though so that we make sure saving can use any data it needs
         playerState.clear(false);
         activeVibrators.clear();
@@ -322,9 +348,9 @@ public class Mekanism implements ModInitializer {
         PersonalStorageManager.reset();
     }
 
-    private void imcQueue(InterModEnqueueEvent event) {
+    private void imcQueue() {
         //IMC messages we send to other mods
-        hooks.sendIMCMessages(event);
+        hooks.sendIMCMessages();
         //IMC messages that we are sending to ourselves
         MekanismIMC.addModuleContainer((Holder<Item>) MekanismItems.MEKA_TOOL, MekanismIMC.ADD_MEKA_TOOL_MODULES);
         MekanismIMC.addModuleContainer((Holder<Item>) MekanismItems.MEKASUIT_HELMET, MekanismIMC.ADD_MEKA_SUIT_HELMET_MODULES);
@@ -345,28 +371,26 @@ public class Mekanism implements ModInitializer {
               MekanismModules.SOUL_SURFER_UNIT);
     }
 
-    private void imcHandle(InterModProcessEvent event) {
-        ModuleHelper.get().processIMC(event);
+    private void imcHandle() {
+        ModuleHelper.get().processIMC();
     }
 
-    private void commonSetup(FMLCommonSetupEvent event) {
+    private void commonSetup() {
         //Initialization notification
         logger.info("Version {} initializing...", versionNumber);
         hooks.hookCommonSetup();
         setRecipeCacheManager(new ReloadListener());
         HolidayManager.init();
 
-        event.enqueueWork(() -> {
-            //Collect annotation scan data
-            MekAnnotationScanner.collectScanData();
-            //Register dispenser behaviors
-            MekanismFluids.FLUIDS.registerBucketDispenserBehavior();
-            registerFluidTankBehaviors(MekanismBlocks.BASIC_FLUID_TANK, MekanismBlocks.ADVANCED_FLUID_TANK, MekanismBlocks.ELITE_FLUID_TANK,
-                  MekanismBlocks.ULTIMATE_FLUID_TANK, MekanismBlocks.CREATIVE_FLUID_TANK);
-            registerDispenseBehavior(new ModuleDispenseBehavior(), MekanismItems.MEKA_TOOL);
-            registerDispenseBehavior(new MekaSuitDispenseBehavior(), MekanismItems.MEKASUIT_HELMET, MekanismItems.MEKASUIT_BODYARMOR, MekanismItems.MEKASUIT_PANTS,
-                  MekanismItems.MEKASUIT_BOOTS);
-        });
+        //Collect annotation scan data
+        MekAnnotationScanner.collectScanData();
+        //Register dispenser behaviors
+        MekanismFluids.FLUIDS.registerBucketDispenserBehavior();
+        registerFluidTankBehaviors(MekanismBlocks.BASIC_FLUID_TANK, MekanismBlocks.ADVANCED_FLUID_TANK, MekanismBlocks.ELITE_FLUID_TANK,
+              MekanismBlocks.ULTIMATE_FLUID_TANK, MekanismBlocks.CREATIVE_FLUID_TANK);
+        registerDispenseBehavior(new ModuleDispenseBehavior(), MekanismItems.MEKA_TOOL);
+        registerDispenseBehavior(new MekaSuitDispenseBehavior(), MekanismItems.MEKASUIT_HELMET, MekanismItems.MEKASUIT_BODYARMOR, MekanismItems.MEKASUIT_PANTS,
+              MekanismItems.MEKASUIT_BOOTS);
 
         //Register player tracker
         NeoForge.EVENT_BUS.register(new CommonPlayerTracker());
@@ -398,8 +422,8 @@ public class Mekanism implements ModInitializer {
         }
     }
 
-    private void registerChunkTicketControllers(RegisterTicketControllersEvent event) {
-        event.register(TileComponentChunkLoader.TICKET_CONTROLLER);
+    private void registerChunkTicketControllers() {
+        ForcedChunkManager.registerController(TileComponentChunkLoader.TICKET_CONTROLLER);
     }
 
     private void onEnergyTransferred(EnergyTransferEvent event) {

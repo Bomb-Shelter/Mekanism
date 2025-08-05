@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import mekanism.common.Mekanism;
-import net.neoforged.fml.ModContainer;
 import io.github.fabricators_of_create.porting_lib.config.IConfigSpec;
 import io.github.fabricators_of_create.porting_lib.config.ModConfigEvent;
 
@@ -25,16 +24,16 @@ public class MekanismConfig {
     public static final UsageConfig usage = new UsageConfig();
     public static final WorldConfig world = new WorldConfig();
 
-    public static void registerConfigs(ModContainer modContainer) {
-        MekanismConfigHelper.registerConfig(KNOWN_CONFIGS, modContainer, client);
-        MekanismConfigHelper.registerConfig(KNOWN_CONFIGS, modContainer, common);
-        MekanismConfigHelper.registerConfig(KNOWN_CONFIGS, modContainer, general);
-        MekanismConfigHelper.registerConfig(KNOWN_CONFIGS, modContainer, gear);
-        MekanismConfigHelper.registerConfig(KNOWN_CONFIGS, modContainer, startup);
-        MekanismConfigHelper.registerConfig(KNOWN_CONFIGS, modContainer, storage);
-        MekanismConfigHelper.registerConfig(KNOWN_CONFIGS, modContainer, tiers);
-        MekanismConfigHelper.registerConfig(KNOWN_CONFIGS, modContainer, usage);
-        MekanismConfigHelper.registerConfig(KNOWN_CONFIGS, modContainer, world);
+    public static void registerConfigs(String modId) {
+        MekanismConfigHelper.registerConfig(KNOWN_CONFIGS, modId, client);
+        MekanismConfigHelper.registerConfig(KNOWN_CONFIGS, modId, common);
+        MekanismConfigHelper.registerConfig(KNOWN_CONFIGS, modId, general);
+        MekanismConfigHelper.registerConfig(KNOWN_CONFIGS, modId, gear);
+        MekanismConfigHelper.registerConfig(KNOWN_CONFIGS, modId, startup);
+        MekanismConfigHelper.registerConfig(KNOWN_CONFIGS, modId, storage);
+        MekanismConfigHelper.registerConfig(KNOWN_CONFIGS, modId, tiers);
+        MekanismConfigHelper.registerConfig(KNOWN_CONFIGS, modId, usage);
+        MekanismConfigHelper.registerConfig(KNOWN_CONFIGS, modId, world);
     }
 
     public static void onConfigLoad(ModConfigEvent configEvent) {

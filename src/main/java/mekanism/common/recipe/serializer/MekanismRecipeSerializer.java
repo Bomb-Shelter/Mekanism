@@ -10,6 +10,8 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+
+import io.github.fabricators_of_create.porting_lib.core.util.PortingLibStreamCodecs;
 import mekanism.api.SerializationConstants;
 import mekanism.api.SerializerHelper;
 import mekanism.api.chemical.Chemical;
@@ -54,7 +56,6 @@ import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
-import net.neoforged.neoforge.network.codec.NeoForgeStreamCodecs;
 
 public record MekanismRecipeSerializer<RECIPE extends Recipe<?>>(MapCodec<RECIPE> codec, StreamCodec<RegistryFriendlyByteBuf, RECIPE> streamCodec)
       implements RecipeSerializer<RECIPE> {
@@ -211,7 +212,7 @@ public record MekanismRecipeSerializer<RECIPE extends Recipe<?>>(MapCodec<RECIPE
                 return DataResult.error(() -> "No output specified, must have at least an Item or Chemical output");
             }
             return DataResult.success(result);
-        }), NeoForgeStreamCodecs.composite(
+        }), PortingLibStreamCodecs.composite(
               ItemStackIngredient.STREAM_CODEC, PressurizedReactionRecipe::getInputSolid,
               FluidStackIngredient.STREAM_CODEC, PressurizedReactionRecipe::getInputFluid,
               IngredientCreatorAccess.chemicalStack().streamCodec(), PressurizedReactionRecipe::getInputChemical,

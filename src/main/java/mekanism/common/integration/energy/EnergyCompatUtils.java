@@ -5,9 +5,9 @@ import java.util.function.BiFunction;
 import mekanism.api.energy.IStrictEnergyHandler;
 import mekanism.api.fabric.lookup.ICapabilityProvider;
 import mekanism.common.capabilities.Capabilities;
-import mekanism.common.integration.energy.fluxnetworks.FNEnergyCompat;
+//import mekanism.common.integration.energy.fluxnetworks.FNEnergyCompat;
 import mekanism.common.integration.energy.forgeenergy.ForgeEnergyCompat;
-import mekanism.common.integration.energy.grandpower.GPEnergyCompat;
+//import mekanism.common.integration.energy.grandpower.GPEnergyCompat;
 import mekanism.common.registration.impl.TileEntityTypeDeferredRegister.BlockEntityTypeBuilder;
 import mekanism.common.tile.base.CapabilityTileEntity;
 import net.fabricmc.fabric.api.lookup.v1.block.BlockApiLookup;
@@ -34,9 +34,9 @@ public class EnergyCompatUtils {
           //We always have our own energy capability as the first one we check
           new StrictEnergyCompat(),
           //Note: We check the Grand Power capability above Forge's so that we allow it to use the higher throughput amount supported by Grand Power
-          new GPEnergyCompat(),
+//          new GPEnergyCompat(),
           //Note: We check the Flux Networks capability above Forge's so that we allow it to use the higher throughput amount supported by Flux Networks
-          new FNEnergyCompat(),
+//          new FNEnergyCompat(),
           new ForgeEnergyCompat()
     );
 

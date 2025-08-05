@@ -3,27 +3,17 @@ package mekanism.common.integration;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+
+import io.github.fabricators_of_create.porting_lib.entity.events.player.PlayerEvents;
 import mekanism.common.integration.computer.FactoryRegistry;
 import mekanism.common.integration.computer.computercraft.CCCapabilityHelper;
-import mekanism.common.integration.crafttweaker.content.CrTContentUtils;
-import mekanism.common.integration.curios.CuriosIntegration;
 import mekanism.common.integration.energy.EnergyCompatUtils;
-import mekanism.common.integration.framedblocks.FramedBlocksIntegration;
 import mekanism.common.integration.gender.MekanismGenderArmor;
-import mekanism.common.integration.jsonthings.JsonThingsIntegration;
-import mekanism.common.integration.lookingat.theoneprobe.TOPProvider;
-import mekanism.common.integration.projecte.MekanismNormalizedSimpleStacks;
 import mekanism.common.recipe.bin.BinInsertRecipe;
 import mekanism.common.registries.MekanismItems;
+import net.fabricmc.fabric.impl.datagen.FabricDataGenHelper;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.bus.api.EventPriority;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.InterModComms;
-import net.neoforged.fml.ModList;
-import net.neoforged.fml.event.lifecycle.InterModEnqueueEvent;
-import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.data.loading.DatagenModLoader;
 
 /**
  * Hooks for Mekanism. Use to grab items or blocks out of different mods.
@@ -39,7 +29,7 @@ public final class MekanismHooks {
         }
 
         private void sendImc(String method, Supplier<?> toSend) {
-            InterModComms.sendTo(modid, method, toSend);
+//            FabricLoader.getInstance().getObjectShare().sendTo(modid, method, toSend);
         }
 
         public ResourceLocation rl(String path) {
@@ -75,9 +65,9 @@ public final class MekanismHooks {
     public static final String PROJECTE_MOD_ID = "projecte";
 
     public MekanismHooks() {
-        ModList modList = ModList.get();
+        FabricLoader modList = FabricLoader.getInstance();
         //Note: The modlist is null when running tests
-        Predicate<String> loadedCheck = modList == null ? modid -> false : modList::isLoaded;
+        Predicate<String> loadedCheck = modList == null ? modid -> false : modList::isModLoaded;
         computerCraft = new IntegrationInfo("computercraft", loadedCheck);
         craftTweaker = new IntegrationInfo("crafttweaker", loadedCheck);
         curios = new IntegrationInfo("curios", loadedCheck);
@@ -96,22 +86,22 @@ public final class MekanismHooks {
         framedBlocks = new IntegrationInfo("framedblocks", loadedCheck);
     }
 
-    public void hookConstructor(final IEventBus modEventBus) {
+    public void hookConstructor() {
         if (curios.isLoaded()) {
-            CuriosIntegration.addListeners(modEventBus);
+//            CuriosIntegration.addListeners(modEventBus);
         }
-        if (craftTweaker.isLoaded() && !DatagenModLoader.isRunningDataGen()) {
+        if (craftTweaker.isLoaded() && !FabricDataGenHelper.ENABLED) {
             //Register our CrT listener at lowest priority to try and ensure they get later ids than our normal registries
-            modEventBus.addListener(EventPriority.LOWEST, CrTContentUtils::registerCrTContent);
+//            modEventBus.addListener(EventPriority.LOWEST, CrTContentUtils::registerCrTContent);
         }
         if (jsonThings.isLoaded()) {
-            JsonThingsIntegration.hook(modEventBus);
+//            JsonThingsIntegration.hook(modEventBus);
         }
         if (projecte.isLoaded()) {
-            MekanismNormalizedSimpleStacks.NSS_SERIALIZERS.register(modEventBus);
+//            MekanismNormalizedSimpleStacks.NSS_SERIALIZERS.register(modEventBus);
         }
         if (framedBlocks.isLoaded()) {
-            FramedBlocksIntegration.init(modEventBus);
+//            FramedBlocksIntegration.init(modEventBus);
         }
     }
 
@@ -134,19 +124,19 @@ public final class MekanismHooks {
 
         //TODO - 1.20: Move this out of here and back to always being registered whenever it gets fixed in Neo.
         // Modifying the result doesn't apply properly when "quick crafting"
-        if (ModList.get().isLoaded("fastbench")) {
-            NeoForge.EVENT_BUS.addListener(BinInsertRecipe::onCrafting);
+        if (FabricLoader.getInstance().isModLoaded("fastbench")) {
+            PlayerEvents.ItemCraftedEvent.EVENT.register(BinInsertRecipe::onCrafting);
         }
     }
 
-    public void sendIMCMessages(InterModEnqueueEvent event) {
+    public void sendIMCMessages() {
         if (darkModeEverywhere.isLoaded()) {
             //Note: While it is only strings, so it is safe to call and IMC validates the mods are loaded
             // we add this check here, so we can skip iterating the list of things we want to blacklist when it is not present
             sendDarkModeEverywhereIMC();
         }
         if (theOneProbe.isLoaded()) {
-            theOneProbe.sendImc("getTheOneProbe", TOPProvider::new);
+//            theOneProbe.sendImc("getTheOneProbe", TOPProvider::new);
         }
     }
 

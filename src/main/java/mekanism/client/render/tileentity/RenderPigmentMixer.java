@@ -77,7 +77,7 @@ public class RenderPigmentMixer extends MekanismTileEntityRenderer<TileEntityPig
     public void renderWireFrame(BlockEntity tile, float partialTick, PoseStack matrix, VertexConsumer buffer) {
         if (tile instanceof TileEntityPigmentMixer mixer) {
             if (lines == null) {
-                lines = Outlines.extract(MekanismModelCache.INSTANCE.PIGMENT_MIXER_SHAFT.getBakedModel(), null, tile.getLevel().random, ModelData.EMPTY, null);
+                lines = Outlines.extract(MekanismModelCache.INSTANCE.PIGMENT_MIXER_SHAFT.getBakedModel(), null, tile.getLevel().random);
             }
             setupRenderer(mixer, partialTick, matrix);
             Pose pose = matrix.last();

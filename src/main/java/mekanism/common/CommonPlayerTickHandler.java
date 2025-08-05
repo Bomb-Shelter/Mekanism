@@ -5,6 +5,12 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.LongSupplier;
 import java.util.function.Predicate;
+
+import io.github.fabricators_of_create.porting_lib.entity.events.living.LivingDeathEvent;
+import io.github.fabricators_of_create.porting_lib.entity.events.living.LivingEvents.LivingJumpEvent;
+import io.github.fabricators_of_create.porting_lib.entity.events.living.LivingFallEvent;
+import io.github.fabricators_of_create.porting_lib.entity.events.tick.PlayerTickEvent;
+import io.github.fabricators_of_create.porting_lib.entity.events.player.PlayerEvents.BreakSpeed;
 import mekanism.api.Action;
 import mekanism.api.AutomationType;
 import mekanism.api.MekanismAPITags;
@@ -20,7 +26,6 @@ import mekanism.common.content.gear.IBlastingItem;
 import mekanism.common.content.gear.mekasuit.ModuleGravitationalModulatingUnit;
 import mekanism.common.content.gear.mekasuit.ModuleHydraulicPropulsionUnit;
 import mekanism.common.content.gear.mekasuit.ModuleLocomotiveBoostingUnit;
-import mekanism.common.integration.curios.CuriosIntegration;
 import mekanism.common.item.gear.ItemFreeRunners;
 import mekanism.common.item.gear.ItemMekaSuitArmor;
 import mekanism.common.item.gear.ItemScubaMask;
@@ -47,16 +52,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.bus.api.EventPriority;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.neoforge.common.damagesource.DamageContainer;
-import net.neoforged.neoforge.event.entity.EntityInvulnerabilityCheckEvent;
-import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
-import net.neoforged.neoforge.event.entity.living.LivingEvent.LivingJumpEvent;
-import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
-import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent.BreakSpeed;
-import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -88,7 +83,14 @@ public class CommonPlayerTickHandler {
         return hydraulic != null ? hydraulic.getCustomInstance().getStepHeight() : 0F;
     }
 
-    @SubscribeEvent
+    public CommonPlayerTickHandler() {
+        PlayerTickEvent.Post.EVENT.register(this::onTick);
+        LivingDeathEvent.EVENT.register(this::onLivingDeath);
+        LivingFallEvent.EVENT.register(this::livingFall);
+        LivingJumpEvent.EVENT.register(this::onLivingJump);
+        BreakSpeed.EVENT.register(this::getBreakSpeed);
+    }
+
     public void onTick(PlayerTickEvent.Post event) {
         //Note: Player's can't be frozen with the tick rate manager, so we don't have to check it here
         if (!event.getEntity().level().isClientSide()) {
@@ -155,7 +157,6 @@ public class CommonPlayerTickHandler {
         return false;
     }
 
-    @SubscribeEvent(priority = EventPriority.LOW)
     public void onLivingDeath(LivingDeathEvent event) {
         if (!event.getEntity().isOnFire() && !event.getEntity().fireImmune() && MekanismDamageTypes.FLAMETHROWER.is(event.getSource())) {
             //If they took damage from a flamethrower, set that they are on fire so that they drop cooked food
@@ -219,7 +220,6 @@ public class CommonPlayerTickHandler {
     /**
      * Based on the values and calculations that happen in {@link LivingEntity#calculateFallDamage(float, float)}
      */
-    @SubscribeEvent
     public void livingFall(LivingFallEvent event) {
         LivingEntity entity = event.getEntity();
         float safeFallDistance = (float) entity.getAttributeValue(Attributes.SAFE_FALL_DISTANCE);
@@ -267,7 +267,6 @@ public class CommonPlayerTickHandler {
         }
     }
 
-    @SubscribeEvent
     public void onLivingJump(LivingJumpEvent event) {
         if (event.getEntity() instanceof Player player) {
             ItemStack boots = player.getItemBySlot(EquipmentSlot.FEET);
@@ -304,10 +303,10 @@ public class CommonPlayerTickHandler {
             }
         }
         if (Mekanism.hooks.curios.isLoaded()) {
-            ItemStack curio = CuriosIntegration.findFirstCurio(base, FREE_RUNNERS_PREDICATE);
-            if (!curio.isEmpty()) {
-                return freeRunnerFallInfo(curio);
-            }
+//            ItemStack curio = CuriosIntegration.findFirstCurio(base, FREE_RUNNERS_PREDICATE);
+//            if (!curio.isEmpty()) {
+//                return freeRunnerFallInfo(curio);
+//            }
         }
         return null;
     }
@@ -320,7 +319,6 @@ public class CommonPlayerTickHandler {
     private record FallEnergyInfo(@Nullable IEnergyContainer container, FloatSupplier damageRatio, LongSupplier energyCost) {
     }
 
-    @SubscribeEvent
     public void getBreakSpeed(BreakSpeed event) {
         Player player = event.getEntity();
         float speed = event.getNewSpeed();

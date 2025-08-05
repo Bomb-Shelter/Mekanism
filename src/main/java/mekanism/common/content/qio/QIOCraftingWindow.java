@@ -237,11 +237,11 @@ public class QIOCraftingWindow implements IContentsListener {
 
     private void craftingStarted(@NotNull Player player) {
         isCrafting = true;
-        CommonHooks.setCraftingPlayer(player);
+//        CommonHooks.setCraftingPlayer(player);
     }
 
     private void craftingFinished(@NotNull Level world) {
-        CommonHooks.setCraftingPlayer(null);
+//        CommonHooks.setCraftingPlayer(null);
         isCrafting = false;
         if (changedWhileCrafting) {
             //If our inputs changed while crafting then update the output slot

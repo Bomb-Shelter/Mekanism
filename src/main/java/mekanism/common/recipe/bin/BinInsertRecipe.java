@@ -21,7 +21,7 @@ import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent.ItemCraftedEvent;
+import io.github.fabricators_of_create.porting_lib.entity.events.player.PlayerEvents.ItemCraftedEvent;
 
 //TODO: Test this recipe in various modded crafting tables/auto crafters
 @NothingNullByDefault
@@ -117,7 +117,7 @@ public class BinInsertRecipe extends BinRecipe {
             }
         }
         //TODO: I think we can just skip this when handling it as a SpecialQIORecipe
-        binStack.set(MekanismDataComponents.FROM_RECIPE, true);
+        binStack.set(MekanismDataComponents.FROM_RECIPE.get(), true);
         return binStack;
     }
 
@@ -185,7 +185,7 @@ public class BinInsertRecipe extends BinRecipe {
         ItemStack result = event.getCrafting();
         if (!result.isEmpty() && result.getItem() instanceof ItemBlockBin) {
             //Remove the marker that the bin was crafted from a bin recipe
-            Boolean fromRecipe = result.remove(MekanismDataComponents.FROM_RECIPE);
+            Boolean fromRecipe = result.remove(MekanismDataComponents.FROM_RECIPE.get());
             if (fromRecipe != null && fromRecipe) {
                 //And if it was try to move extra items from the container into it
                 ComponentBackedBinInventorySlot slot = convertToSlot(result);

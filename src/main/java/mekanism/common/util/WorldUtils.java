@@ -1,5 +1,8 @@
 package mekanism.common.util;
 
+import io.github.fabricators_of_create.porting_lib.fluids.FluidType;
+import io.github.fabricators_of_create.porting_lib.fluids.sound.SoundActions;
+import io.github.fabricators_of_create.porting_lib.level.events.BlockDropsEvent;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -44,12 +47,7 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
-import net.neoforged.neoforge.capabilities.BlockCapability;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.common.SoundActions;
-import net.neoforged.neoforge.event.level.BlockDropsEvent;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.FluidType;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -555,7 +553,7 @@ public class WorldUtils {
             }
         }
         BlockDropsEvent event = new BlockDropsEvent(level, pos, state, tile, initialDrops, entity, tool);
-        NeoForge.EVENT_BUS.post(event);
+        event.sendEvent();
         if (event.isCanceled()) {
             return Collections.emptyList();
         }

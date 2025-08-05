@@ -1,5 +1,6 @@
 package mekanism.common.entity;
 
+import io.github.fabricators_of_create.porting_lib.models.data.ModelProperty;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -121,9 +122,6 @@ import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.level.portal.DimensionTransition;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.client.model.data.ModelData;
-import net.neoforged.neoforge.client.model.data.ModelProperty;
-import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.damagesource.DamageContainer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -400,7 +398,7 @@ public class EntityRobit extends PathfinderMob implements IRobit, IMekanismInven
             return;
         }
         MekanismTeleportEvent.Robit event = new MekanismTeleportEvent.Robit(this);
-        if (NeoForge.EVENT_BUS.post(event).isCanceled()) {
+        if (event.post()) {
             //Fail if the event was cancelled
             return;
         }

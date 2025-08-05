@@ -49,7 +49,7 @@ public class MekanismContainerType<T, CONTAINER extends AbstractContainerMenu> e
         return new MekanismContainerType<>(type, constructor, (id, inv, buf) -> constructor.create(id, inv, getEntityFromBuf(buf, type), true));
     }
 
-    protected MekanismContainerType(Class<T> type, IMekanismContainerFactory<T, CONTAINER> mekanismConstructor, IContainerFactory<CONTAINER> constructor) {
+    protected MekanismContainerType(Class<T> type, IMekanismContainerFactory<T, CONTAINER> mekanismConstructor, ExtendedFactory<CONTAINER, T> constructor) {
         super(type, mekanismConstructor, constructor);
     }
 

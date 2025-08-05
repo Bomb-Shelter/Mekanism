@@ -5,10 +5,11 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import java.util.HashMap;
 import java.util.Map;
+
+import io.github.fabricators_of_create.porting_lib.models.data.ModelProperty;
+import io.github.fabricators_of_create.porting_lib.models.geometry.IGeometryLoader;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
-import net.neoforged.neoforge.client.model.data.ModelProperty;
-import net.neoforged.neoforge.client.model.geometry.IGeometryLoader;
 import org.jetbrains.annotations.NotNull;
 
 /**

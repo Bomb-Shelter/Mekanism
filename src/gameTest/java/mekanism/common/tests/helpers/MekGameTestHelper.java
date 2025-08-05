@@ -8,6 +8,7 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import java.util.function.Function;
 import mekanism.api.annotations.NothingNullByDefault;
+import mekanism.api.fabric.transfer.items.IItemHandler;
 import mekanism.common.capabilities.Capabilities;
 import mekanism.common.lib.inventory.HashedItem;
 import mekanism.common.util.WorldUtils;
@@ -36,7 +37,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.testframework.gametest.ExtendedGameTestHelper;
 
 @NothingNullByDefault

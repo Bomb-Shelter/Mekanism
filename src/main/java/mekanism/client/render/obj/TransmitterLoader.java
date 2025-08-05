@@ -3,10 +3,10 @@ package mekanism.client.render.obj;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import io.github.fabricators_of_create.porting_lib.models.geometry.IGeometryLoader;
+import io.github.fabricators_of_create.porting_lib.models.obj.ObjLoader;
+import io.github.fabricators_of_create.porting_lib.models.obj.ObjModel;
 import mekanism.api.SerializationConstants;
-import net.neoforged.neoforge.client.model.geometry.IGeometryLoader;
-import net.neoforged.neoforge.client.model.obj.ObjLoader;
-import net.neoforged.neoforge.client.model.obj.ObjModel;
 import org.jetbrains.annotations.NotNull;
 
 public class TransmitterLoader implements IGeometryLoader<TransmitterModel> {

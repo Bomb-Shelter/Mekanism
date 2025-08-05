@@ -1,6 +1,6 @@
 package mekanism.common.item.interfaces;
 
-import mekanism.api.fabric.ItemAttributeModifierEvent;
+import io.github.fabricators_of_create.porting_lib.event.common.ItemAttributeModifierEvent;
 
 public interface IHasConditionalAttributes {
 

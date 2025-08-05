@@ -17,10 +17,11 @@ import mekanism.common.Mekanism;
 import mekanism.common.inventory.slot.BasicInventorySlot;
 import mekanism.common.lib.MekanismSavedData;
 import mekanism.common.registries.MekanismDataComponents;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.fml.util.thread.EffectiveSide;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,7 +32,7 @@ public class PersonalStorageManager {
     private static final Map<UUID, PersonalStorageData> STORAGE_BY_PLAYER_UUID = new HashMap<>();
 
     private static Optional<PersonalStorageData> forOwner(UUID playerUUID) {
-        if (EffectiveSide.get().isClient()) {
+        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
             return Optional.empty();
         }
         return Optional.of(STORAGE_BY_PLAYER_UUID.computeIfAbsent(playerUUID, uuid -> MekanismSavedData.createSavedData(PersonalStorageData::new, "personal_storage" + File.separator + uuid)));
@@ -113,13 +114,13 @@ public class PersonalStorageManager {
      */
     public static Optional<AbstractPersonalStorageItemInventory> getInventoryIfPresent(ItemStack stack) {
         UUID owner = IItemSecurityUtils.INSTANCE.getOwnerUUID(stack);
-        return owner != null && stack.has(MekanismDataComponents.PERSONAL_STORAGE_ID) ? getInventoryFor(stack, owner) : Optional.empty();
+        return owner != null && stack.has(MekanismDataComponents.PERSONAL_STORAGE_ID.get()) ? getInventoryFor(stack, owner) : Optional.empty();
     }
 
     public static void deleteInventory(ItemStack stack) {
         UUID owner = IItemSecurityUtils.INSTANCE.getOwnerUUID(stack);
         if (owner != null) {
-            UUID storageId = stack.remove(MekanismDataComponents.PERSONAL_STORAGE_ID);
+            UUID storageId = stack.remove(MekanismDataComponents.PERSONAL_STORAGE_ID.get());
             if (storageId != null) {
                 //If there actually was an id stored then remove the corresponding inventory
                 Optional<PersonalStorageData> data = forOwner(owner);
@@ -133,10 +134,10 @@ public class PersonalStorageManager {
 
     @NotNull
     private static UUID getInventoryId(ItemStack stack) {
-        UUID invId = stack.get(MekanismDataComponents.PERSONAL_STORAGE_ID);
+        UUID invId = stack.get(MekanismDataComponents.PERSONAL_STORAGE_ID.get());
         if (invId == null) {
             invId = UUID.randomUUID();
-            stack.set(MekanismDataComponents.PERSONAL_STORAGE_ID, invId);
+            stack.set(MekanismDataComponents.PERSONAL_STORAGE_ID.get(), invId);
         }
         return invId;
     }

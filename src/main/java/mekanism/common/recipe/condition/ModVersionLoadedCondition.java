@@ -1,6 +1,7 @@
 package mekanism.common.recipe.condition;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
@@ -9,11 +10,19 @@ import net.fabricmc.fabric.api.resource.conditions.v1.ResourceCondition;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditionType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
+import net.fabricmc.loader.api.Version;
+import net.fabricmc.loader.api.VersionParsingException;
 import net.minecraft.core.HolderLookup;
-import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.jetbrains.annotations.Nullable;
 
-public record ModVersionLoadedCondition(String modid, String minVersion) implements ResourceCondition {
+public record ModVersionLoadedCondition(String modid, Version minVersion) implements ResourceCondition {
+    private static final Codec<Version> VERSION_CODEC = Codec.STRING.flatXmap(s -> {
+        try {
+            return DataResult.success(Version.parse(s));
+        } catch (VersionParsingException e) {
+            return DataResult.error(e::getMessage);
+        }
+    }, o -> DataResult.success(o.getFriendlyString()));
 
     @Override
     public boolean test(@Nullable HolderLookup.Provider registryLookup) {
@@ -23,7 +32,7 @@ public record ModVersionLoadedCondition(String modid, String minVersion) impleme
             return false;
         }
         ModContainer modContainer = containerById.get();
-        return new ComparableVersion(minVersion).compareTo(new ComparableVersion(modContainer.getMetadata().getVersion().toString())) <= 0;
+        return minVersion.compareTo(modContainer.getMetadata().getVersion()) <= 0;
     }
 
     @Override
@@ -34,7 +43,7 @@ public record ModVersionLoadedCondition(String modid, String minVersion) impleme
     public static MapCodec<ModVersionLoadedCondition> makeCodec() {
         return RecordCodecBuilder.mapCodec(instance -> instance.group(
               Codec.STRING.fieldOf(SerializationConstants.MODID).forGetter(ModVersionLoadedCondition::modid),
-              Codec.STRING.fieldOf(SerializationConstants.VERSION).forGetter(ModVersionLoadedCondition::minVersion)
+              VERSION_CODEC.fieldOf(SerializationConstants.VERSION).forGetter(ModVersionLoadedCondition::minVersion)
         ).apply(instance, ModVersionLoadedCondition::new));
     }
 }

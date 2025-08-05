@@ -22,10 +22,6 @@ import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.level.ChunkEvent;
-import net.neoforged.neoforge.event.level.ChunkTicketLevelUpdatedEvent;
 import org.jetbrains.annotations.Nullable;
 
 public class ChunkCommand {

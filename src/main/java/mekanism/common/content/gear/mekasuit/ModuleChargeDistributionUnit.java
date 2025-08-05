@@ -5,6 +5,7 @@ import mekanism.api.AutomationType;
 import mekanism.api.annotations.ParametersAreNotNullByDefault;
 import mekanism.api.energy.IEnergyContainer;
 import mekanism.api.energy.IStrictEnergyHandler;
+import mekanism.api.fabric.transfer.items.IItemHandler;
 import mekanism.api.gear.ICustomModule;
 import mekanism.api.gear.IModule;
 import mekanism.api.gear.IModuleContainer;
@@ -13,14 +14,12 @@ import mekanism.common.config.MekanismConfig;
 import mekanism.common.content.network.EnergyNetwork;
 import mekanism.common.content.network.distribution.EnergySaveTarget;
 import mekanism.common.content.network.distribution.EnergySaveTarget.DelegateSaveHandler;
-import mekanism.common.integration.curios.CuriosIntegration;
 import mekanism.common.integration.energy.EnergyCompatUtils;
 import mekanism.common.util.EmitUtils;
 import mekanism.common.util.StorageUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.IItemHandler;
 
 @ParametersAreNotNullByDefault
 public record ModuleChargeDistributionUnit(boolean chargeSuit, boolean chargeInventory) implements ICustomModule<ModuleChargeDistributionUnit> {
@@ -84,15 +83,15 @@ public record ModuleChargeDistributionUnit(boolean chargeSuit, boolean chargeInv
                 }
             }
             if (Mekanism.hooks.curios.isLoaded()) {
-                IItemHandler handler = CuriosIntegration.getCuriosInventory(player);
-                if (handler != null) {
-                    for (int slot = 0, slots = handler.getSlots(); slot < slots; slot++) {
-                        toCharge = charge(energyContainer, handler.getStackInSlot(slot), toCharge);
-                        if (toCharge == 0L) {
-                            return;
-                        }
-                    }
-                }
+//                IItemHandler handler = CuriosIntegration.getCuriosInventory(player);
+//                if (handler != null) {
+//                    for (int slot = 0, slots = handler.getSlots(); slot < slots; slot++) {
+//                        toCharge = charge(energyContainer, handler.getStackInSlot(slot), toCharge);
+//                        if (toCharge == 0L) {
+//                            return;
+//                        }
+//                    }
+//                }
             }
         }
     }

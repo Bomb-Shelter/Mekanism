@@ -1,5 +1,6 @@
 package mekanism.common.lib.radiation;
 
+import io.github.fabricators_of_create.porting_lib.entity.events.tick.EntityTickEvent;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.util.Map;
 import java.util.UUID;

@@ -5,23 +5,19 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import javax.annotation.ParametersAreNonnullByDefault;
-import mekanism.common.Mekanism;
+
 import mekanism.common.registries.MekanismAttachmentTypes;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.Level;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 import io.github.fabricators_of_create.porting_lib.core.util.INBTSerializable;
-import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import org.jetbrains.annotations.Nullable;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
-@EventBusSubscriber(modid = Mekanism.MODID)
 public class MeltdownLevelData implements INBTSerializable<ListTag> {
 
     private final List<Meltdown> meltdowns = new ArrayList<>();
@@ -30,14 +26,14 @@ public class MeltdownLevelData implements INBTSerializable<ListTag> {
         meltdowns.add(new Meltdown(minPos, maxPos, magnitude, chance, radius, multiblockID));
     }
 
-    @SubscribeEvent
-    public static void tickWorld(LevelTickEvent.Post event) {
-        Level level = event.getLevel();
-        if (level instanceof ServerLevel serverLevel) {
-            MeltdownLevelData existingData = level.getExistingDataOrNull(MekanismAttachmentTypes.MELTDOWN_DATA);
-            if (existingData != null) {
-                existingData.tick(serverLevel);
-            }
+    public static void init() {
+        ServerTickEvents.END_WORLD_TICK.register(MeltdownLevelData::tickWorld);
+    }
+
+    public static void tickWorld(ServerLevel serverLevel) {
+        MeltdownLevelData existingData = serverLevel.getAttached(MekanismAttachmentTypes.MELTDOWN_DATA);
+        if (existingData != null) {
+            existingData.tick(serverLevel);
         }
     }
 

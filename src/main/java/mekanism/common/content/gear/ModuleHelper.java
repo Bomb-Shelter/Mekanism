@@ -37,7 +37,6 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Item.Properties;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.fml.event.lifecycle.InterModProcessEvent;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -55,19 +54,19 @@ public class ModuleHelper implements IModuleHelper {//TODO - 1.22: Evaluate movi
     private final Map<ModuleData<?>, Set<Item>> supportedContainers = new IdentityHashMap<>();
     private final Map<ModuleData<?>, Set<ModuleData<?>>> conflictingModules = new IdentityHashMap<>();
 
-    public void processIMC(InterModProcessEvent event) {
-        Map<Item, String> moduleContainers = addModuleContainers(event);
+    public void processIMC() {
+        Map<Item, String> moduleContainers = addModuleContainers();
         this.moduleContainers.addAll(moduleContainers.keySet());
         Map<ModuleData<?>, ImmutableSet.Builder<Item>> supportedContainersBuilderMap = new IdentityHashMap<>();
         for (Map.Entry<Item, String> entry : moduleContainers.entrySet()) {
-            mapSupportedModules(event, entry.getValue(), entry.getKey(), supportedContainersBuilderMap);
+            mapSupportedModules(entry.getValue(), entry.getKey(), supportedContainersBuilderMap);
         }
         for (Map.Entry<ModuleData<?>, ImmutableSet.Builder<Item>> entry : supportedContainersBuilderMap.entrySet()) {
             supportedContainers.put(entry.getKey(), entry.getValue().build());
         }
     }
 
-    private Map<Item, String> addModuleContainers(InterModProcessEvent event) {
+    private Map<Item, String> addModuleContainers() {
         Map<Item, String> moduleContainers = new Reference2ObjectArrayMap<>(5);
         Set<String> imcMethods = new HashSet<>(5);
         event.getIMCStream(MekanismIMC.ADD_MODULE_CONTAINER::equals).forEach(message -> {
@@ -90,7 +89,7 @@ public class ModuleHelper implements IModuleHelper {//TODO - 1.22: Evaluate movi
     }
 
     @SuppressWarnings("removal")
-    private void mapSupportedModules(InterModProcessEvent event, String imcMethod, Item moduleContainer,
+    private void mapSupportedModules(String imcMethod, Item moduleContainer,
           Map<ModuleData<?>, ImmutableSet.Builder<Item>> supportedContainersBuilderMap) {
         ImmutableSet.Builder<ModuleData<?>> supportedModulesBuilder = ImmutableSet.builder();
         event.getIMCStream(imcMethod::equals).forEach(message -> {

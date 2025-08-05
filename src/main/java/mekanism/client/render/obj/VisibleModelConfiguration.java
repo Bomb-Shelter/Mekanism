@@ -1,7 +1,8 @@
 package mekanism.client.render.obj;
 
+import io.github.fabricators_of_create.porting_lib.models.geometry.IGeometryBakingContext;
+
 import java.util.Collection;
-import net.neoforged.neoforge.client.model.geometry.IGeometryBakingContext;
 
 public class VisibleModelConfiguration extends WrapperModelConfiguration {
 
