@@ -1,5 +1,9 @@
 package mekanism.client.model;
 
+import io.github.fabricators_of_create.porting_lib.models.geometry.IGeometryBakingContext;
+import io.github.fabricators_of_create.porting_lib.models.geometry.IUnbakedGeometry;
+import io.github.fabricators_of_create.porting_lib.models.obj.ObjLoader;
+import io.github.fabricators_of_create.porting_lib.models.obj.ObjModel;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,14 +33,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.client.event.ModelEvent.BakingCompleted;
-import net.neoforged.neoforge.client.event.ModelEvent.RegisterAdditional;
-import net.neoforged.neoforge.client.model.data.ModelData;
-import net.neoforged.neoforge.client.model.geometry.IGeometryBakingContext;
-import net.neoforged.neoforge.client.model.geometry.IUnbakedGeometry;
-import net.neoforged.neoforge.client.model.obj.ObjLoader;
-import net.neoforged.neoforge.client.model.obj.ObjModel;
-import net.neoforged.neoforge.client.model.obj.ObjModel.ModelSettings;
 import org.jetbrains.annotations.Nullable;
 
 public class BaseModelCache {
@@ -169,7 +165,7 @@ public class BaseModelCache {
         @Override
         protected void reload(BakingCompleted evt) {
             super.reload(evt);
-            model = ObjLoader.INSTANCE.loadModel(new ModelSettings(rl, true, useDiffuseLighting(), true, true, null));
+            model = ObjLoader.INSTANCE.loadModel(new ObjModel.ModelSettings(rl, true, useDiffuseLighting(), true, true, null));
         }
 
         @Override

@@ -11,9 +11,12 @@ import mekanism.api.text.IHasTranslationKey;
 import mekanism.client.recipe_viewer.alias.RVAliasHelper;
 import mekanism.common.Mekanism;
 import mezz.jei.api.constants.VanillaTypes;
+import mezz.jei.api.fabric.constants.FabricTypes;
+import mezz.jei.api.fabric.ingredients.fluids.IJeiFluidIngredient;
+import mezz.jei.api.fabric.ingredients.fluids.JeiFluidIngredient;
 import mezz.jei.api.ingredients.IIngredientType;
-import mezz.jei.api.neoforge.NeoForgeTypes;
 import mezz.jei.api.registration.IIngredientAliasRegistration;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
@@ -23,12 +26,11 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.FluidType;
 
 public class JEIAliasHelper implements RVAliasHelper<ItemStack, FluidStack, ChemicalStack> {
 
     private static final Function<ItemStack, String> ITEM_TO_STRING = stack -> stack.getItem().toString();
-    private static final Function<FluidStack, String> FLUID_TO_STRING = stack -> stack.getFluid().toString();
+    private static final Function<IJeiFluidIngredient, String> FLUID_TO_STRING = stack -> stack.getFluidVariant().getFluid().toString();
     private static final Function<ChemicalStack, String> CHEMICAL_TO_STRING = stack -> stack.getChemical().toString();
 
     private final IIngredientAliasRegistration registration;
@@ -54,7 +56,7 @@ public class JEIAliasHelper implements RVAliasHelper<ItemStack, FluidStack, Chem
 
     @Override
     public FluidStack fluidIngredient(Holder<Fluid> fluid) {
-        return new FluidStack(fluid, FluidType.BUCKET_VOLUME);
+        return new FluidStack(fluid, FluidConstants.BUCKET);
     }
 
     @Override
@@ -64,17 +66,17 @@ public class JEIAliasHelper implements RVAliasHelper<ItemStack, FluidStack, Chem
 
     @Override
     public List<FluidStack> fluidTagContents(TagKey<Fluid> tag) {
-        return tagContents(BuiltInRegistries.FLUID, tag, holder -> new FluidStack(holder, FluidType.BUCKET_VOLUME));
+        return tagContents(BuiltInRegistries.FLUID, tag, holder -> new FluidStack(holder, FluidConstants.BUCKET));
     }
 
     @Override
     public ChemicalStack chemicalIngredient(Holder<Chemical> chemical) {
-        return new ChemicalStack(chemical, FluidType.BUCKET_VOLUME);
+        return new ChemicalStack(chemical, FluidConstants.BUCKET);
     }
 
     @Override
     public List<ChemicalStack> chemicalTagContents(TagKey<Chemical> tag) {
-        return tagContents(MekanismAPI.CHEMICAL_REGISTRY, tag, holder -> new ChemicalStack(holder, FluidType.BUCKET_VOLUME));
+        return tagContents(MekanismAPI.CHEMICAL_REGISTRY, tag, holder -> new ChemicalStack(holder, FluidConstants.BUCKET));
     }
 
     private <TYPE, STACK> List<STACK> tagContents(Registry<TYPE> registry, TagKey<TYPE> tag, Function<Holder<TYPE>, STACK> stackFunction) {
@@ -92,7 +94,7 @@ public class JEIAliasHelper implements RVAliasHelper<ItemStack, FluidStack, Chem
 
     @Override
     public void addFluidAliases(List<FluidStack> stacks, IHasTranslationKey... aliases) {
-        addAliases(NeoForgeTypes.FLUID_STACK, stacks, FLUID_TO_STRING, aliases);
+        addAliases(FabricTypes.FLUID_STACK, stacks.stream().map(stack -> new JeiFluidIngredient(stack.getVariant(), stack.getAmount())).map(IJeiFluidIngredient.class::cast).toList(), FLUID_TO_STRING, aliases);
     }
 
     @Override

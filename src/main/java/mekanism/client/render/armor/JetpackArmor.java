@@ -3,25 +3,35 @@ package mekanism.client.render.armor;
 import com.mojang.blaze3d.vertex.PoseStack;
 import mekanism.client.model.ModelArmoredJetpack;
 import mekanism.client.model.ModelJetpack;
+import mekanism.common.Mekanism;
+import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-public class JetpackArmor implements ICustomArmor, ResourceManagerReloadListener {
+public class JetpackArmor implements ICustomArmor, ResourceManagerReloadListener, IdentifiableResourceReloadListener {
 
-    public static final JetpackArmor JETPACK = new JetpackArmor(false);
-    public static final JetpackArmor ARMORED_JETPACK = new JetpackArmor(true);
+    public static final JetpackArmor JETPACK = new JetpackArmor(Mekanism.rl("jetpack"), false);
+    public static final JetpackArmor ARMORED_JETPACK = new JetpackArmor(Mekanism.rl("armored_jetpack"), true);
 
     private final boolean armored;
+    private final ResourceLocation id;
     private ModelJetpack model;
 
-    private JetpackArmor(boolean armored) {
+    private JetpackArmor(ResourceLocation id, boolean armored) {
         this.armored = armored;
+        this.id = id;
+    }
+
+    @Override
+    public ResourceLocation getFabricId() {
+        return id;
     }
 
     @Override

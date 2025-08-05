@@ -55,11 +55,12 @@ import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.RecipeTypes;
 import mezz.jei.api.constants.VanillaTypes;
+import mezz.jei.api.fabric.constants.FabricTypes;
+import mezz.jei.api.fabric.ingredients.fluids.JeiFluidIngredient;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.helpers.IStackHelper;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.ingredients.subtypes.ISubtypeInterpreter;
-import mezz.jei.api.neoforge.NeoForgeTypes;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.transfer.IRecipeTransferHandlerHelper;
 import mezz.jei.api.registration.IGuiHandlerRegistration;
@@ -70,13 +71,13 @@ import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.registration.IRecipeTransferRegistration;
 import mezz.jei.api.registration.ISubtypeRegistration;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
-import net.neoforged.neoforge.fluids.FluidType;
 import org.jetbrains.annotations.NotNull;
 
 @JeiPlugin
@@ -154,11 +155,11 @@ public class MekanismJEI implements IModPlugin {
         List<ChemicalStack> types = MekanismAPI.CHEMICAL_REGISTRY.holders()
               //Don't add the empty type. We will allow JEI to filter out any that are hidden from recipe viewers
               .filter(chemical -> !chemical.is(MekanismAPI.EMPTY_CHEMICAL_KEY))
-              .map(chemical -> new ChemicalStack(chemical, FluidType.BUCKET_VOLUME))
+              .map(chemical -> new ChemicalStack(chemical, FluidConstants.BUCKET))
               .toList();
         CHEMICAL_STACK_HELPER.setColorHelper(registry.getColorHelper());
         registry.register(TYPE_CHEMICAL, types, CHEMICAL_STACK_HELPER, new ChemicalStackRenderer(), Chemical.HOLDER_CODEC.xmap(
-              chemical -> new ChemicalStack(chemical, FluidType.BUCKET_VOLUME),
+              chemical -> new ChemicalStack(chemical, FluidConstants.BUCKET),
               ChemicalStack::getChemicalHolder
         ));
     }
@@ -266,7 +267,8 @@ public class MekanismJEI implements IModPlugin {
         RecipeRegistryHelper.register(registry, RecipeViewerRecipeType.CHEMICAL_CONVERSION, MekanismRecipeType.CHEMICAL_CONVERSION);
         RecipeRegistryHelper.addAnvilRecipes(registry, MekanismItems.HDPE_REINFORCED_ELYTRA, item -> new ItemStack[]{MekanismItems.HDPE_SHEET.asStack()});
         //Note: Use a "full" bucket's worth of heavy water, so that JEI renders it as desired in the info page
-        registry.addIngredientInfo(MekanismFluids.HEAVY_WATER.asStack(FluidType.BUCKET_VOLUME), NeoForgeTypes.FLUID_STACK,
+        var heavyWater = MekanismFluids.HEAVY_WATER.asStack(FluidConstants.BUCKET);
+        registry.addIngredientInfo(new JeiFluidIngredient(heavyWater.getVariant(), heavyWater.getAmount()), FabricTypes.FLUID_STACK,
               MekanismLang.RECIPE_VIEWER_INFO_HEAVY_WATER.translate(MekanismConfig.general.pumpHeavyWaterAmount.get()));
         registry.addIngredientInfo(MekanismAPI.MODULE_REGISTRY.stream().map(data -> new ItemStack(data.getItemHolder())).toList(),
               VanillaTypes.ITEM_STACK, MekanismLang.RECIPE_VIEWER_INFO_MODULE_INSTALLATION.translate());

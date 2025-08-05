@@ -3,25 +3,35 @@ package mekanism.client.render.armor;
 import com.mojang.blaze3d.vertex.PoseStack;
 import mekanism.client.model.ModelArmoredFreeRunners;
 import mekanism.client.model.ModelFreeRunners;
+import mekanism.common.Mekanism;
+import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-public class FreeRunnerArmor implements ICustomArmor, ResourceManagerReloadListener {
+public class FreeRunnerArmor implements ICustomArmor, ResourceManagerReloadListener, IdentifiableResourceReloadListener {
 
-    public static final FreeRunnerArmor FREE_RUNNERS = new FreeRunnerArmor(false);
-    public static final FreeRunnerArmor ARMORED_FREE_RUNNERS = new FreeRunnerArmor(true);
+    public static final FreeRunnerArmor FREE_RUNNERS = new FreeRunnerArmor(Mekanism.rl("free_runner"), false);
+    public static final FreeRunnerArmor ARMORED_FREE_RUNNERS = new FreeRunnerArmor(Mekanism.rl("armored_free_runner"), true);
 
     private final boolean armored;
+    private final ResourceLocation id;
     private ModelFreeRunners model;
 
-    private FreeRunnerArmor(boolean armored) {
+    private FreeRunnerArmor(ResourceLocation id, boolean armored) {
         this.armored = armored;
+        this.id = id;
+    }
+
+    @Override
+    public ResourceLocation getFabricId() {
+        return id;
     }
 
     @Override

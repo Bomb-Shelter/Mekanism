@@ -23,11 +23,14 @@ import mekanism.common.registration.impl.TileEntityTypeRegistryObject;
 import mekanism.common.registries.MekanismDataComponents;
 import mekanism.common.tile.prefab.TileEntityAdvancedElectricMachine;
 import mekanism.common.tile.prefab.TileEntityElectricMachine;
+import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.client.Camera;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
+import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.MenuScreens.ScreenConstructor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
@@ -35,6 +38,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.client.renderer.item.ItemPropertyFunction;
 import net.minecraft.core.Holder;
@@ -88,12 +92,12 @@ public class ClientRegistrationUtil {
     }
 
     @SafeVarargs
-    public static <T extends BlockEntity> void bindTileEntityRenderer(EntityRenderersEvent.RegisterRenderers event, BlockEntityRendererProvider<T> rendererProvider,
+    public static <T extends BlockEntity> void bindTileEntityRenderer(BlockEntityRendererProvider<T> rendererProvider,
           TileEntityTypeRegistryObject<? extends T>... tileEntityTypeROs) {
         if (tileEntityTypeROs.length == 0) {
             throw new IllegalArgumentException("No renderers provided.");
         } else if (tileEntityTypeROs.length == 1) {
-            event.registerBlockEntityRenderer(tileEntityTypeROs[0].get(), rendererProvider);
+            BlockEntityRenderers.register(tileEntityTypeROs[0].get(), rendererProvider);
         } else {
             BlockEntityRendererProvider<T> provider = new BlockEntityRendererProvider<>() {
                 @Nullable
@@ -116,34 +120,31 @@ public class ClientRegistrationUtil {
                 }
             };
             for (TileEntityTypeRegistryObject<? extends T> tileTypeRO : tileEntityTypeROs) {
-                event.registerBlockEntityRenderer(tileTypeRO.get(), provider);
+                BlockEntityRenderers.register(tileTypeRO.get(), provider);
             }
         }
     }
 
-    public static void registerClientReloadListeners(RegisterClientReloadListenersEvent event, PreparableReloadListener... listeners) {
-        for (PreparableReloadListener listener : listeners) {
+    public static void registerClientReloadListeners(ResourceManagerHelper event, IdentifiableResourceReloadListener... listeners) {
+        for (IdentifiableResourceReloadListener listener : listeners) {
             event.registerReloadListener(listener);
         }
     }
 
-    public static <C extends AbstractContainerMenu, U extends Screen & MenuAccess<C>> void registerScreen(RegisterMenuScreensEvent event,
-          ContainerTypeRegistryObject<C> type, ScreenConstructor<C, U> factory) {
-        event.register(type.get(), factory);
+    public static <C extends AbstractContainerMenu, U extends Screen & MenuAccess<C>> void registerScreen(ContainerTypeRegistryObject<C> type, ScreenConstructor<C, U> factory) {
+        MenuScreens.register(type.get(), factory);
     }
 
     //Helper method to register GuiElectricMachine due to generics not being able to be resolved through registerScreen
     @SuppressWarnings("RedundantTypeArguments")
-    public static <TILE extends TileEntityElectricMachine, C extends MekanismTileContainer<TILE>> void registerElectricScreen(RegisterMenuScreensEvent event,
-          ContainerTypeRegistryObject<C> type) {
-        ClientRegistrationUtil.<C, GuiElectricMachine<TILE, C>>registerScreen(event, type, GuiElectricMachine::new);
+    public static <TILE extends TileEntityElectricMachine, C extends MekanismTileContainer<TILE>> void registerElectricScreen(ContainerTypeRegistryObject<C> type) {
+        ClientRegistrationUtil.<C, GuiElectricMachine<TILE, C>>registerScreen(type, GuiElectricMachine::new);
     }
 
     //Helper method to register GuiAdvancedElectricMachine due to generics not being able to be resolved through registerScreen
     @SuppressWarnings("RedundantTypeArguments")
-    public static <TILE extends TileEntityAdvancedElectricMachine, C extends MekanismTileContainer<TILE>> void registerAdvancedElectricScreen(RegisterMenuScreensEvent event,
-          ContainerTypeRegistryObject<C> type) {
-        ClientRegistrationUtil.<C, GuiAdvancedElectricMachine<TILE, C>>registerScreen(event, type, GuiAdvancedElectricMachine::new);
+    public static <TILE extends TileEntityAdvancedElectricMachine, C extends MekanismTileContainer<TILE>> void registerAdvancedElectricScreen(ContainerTypeRegistryObject<C> type) {
+        ClientRegistrationUtil.<C, GuiAdvancedElectricMachine<TILE, C>>registerScreen(type, GuiAdvancedElectricMachine::new);
     }
 
     public static void registerKeyBindings(RegisterKeyMappingsEvent event, KeyMapping... keys) {

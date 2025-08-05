@@ -7,6 +7,7 @@ import mekanism.client.model.ModelEnergyCore;
 import mekanism.client.render.MekanismRenderer;
 import mekanism.client.render.item.MekanismISTER;
 import mekanism.client.render.tileentity.RenderEnergyCube;
+import mekanism.common.Mekanism;
 import mekanism.common.attachments.component.AttachedSideConfig;
 import mekanism.common.item.block.ItemBlockEnergyCube;
 import mekanism.common.lib.transmitter.TransmissionType;
@@ -20,6 +21,7 @@ import mekanism.common.util.StorageUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -30,6 +32,10 @@ public class RenderEnergyCubeItem extends MekanismISTER {
 
     public static final RenderEnergyCubeItem RENDERER = new RenderEnergyCubeItem();
     private ModelEnergyCore core;
+
+    protected RenderEnergyCubeItem() {
+        super(Mekanism.rl("energy_cube"));
+    }
 
     @Override
     public void onResourceManagerReload(@NotNull ResourceManager resourceManager) {

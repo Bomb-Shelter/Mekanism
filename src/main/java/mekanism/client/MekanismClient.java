@@ -3,6 +3,9 @@ package mekanism.client;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.util.Map;
 import java.util.UUID;
+
+import mekanism.client.render.MekanismRenderer;
+import mekanism.client.render.MekanismShaders;
 import mekanism.client.render.RenderTickHandler;
 import mekanism.client.render.tileentity.RenderSPS;
 import mekanism.client.sound.SoundHandler;
@@ -15,26 +18,23 @@ import mekanism.common.lib.transmitter.TransmitterNetworkRegistry;
 import mekanism.common.network.PacketUtils;
 import mekanism.common.network.to_server.PacketKey;
 import mekanism.common.recipe.MekanismRecipeType;
+import net.fabricmc.api.ClientModInitializer;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.Connection;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.common.Mod;
-import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
-import net.neoforged.neoforge.client.gui.ConfigurationScreen;
-import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import org.jetbrains.annotations.Nullable;
 
-@Mod(value = Mekanism.MODID, dist = Dist.CLIENT)
-public class MekanismClient {
+public class MekanismClient implements ClientModInitializer {
 
-    public MekanismClient(ModContainer container) {
+    @Override
+    public void onInitializeClient() {
         container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
         ClientHolidayInfo.init();
+        MekanismShaders.init();
+        ClientRegistration.init();
+        MekanismRenderer.init();
     }
 
     public static final Map<UUID, SecurityData> clientSecurityMap = new Object2ObjectOpenHashMap<>();

@@ -6,7 +6,6 @@ import mekanism.common.integration.computer.computercraft.CCCapabilityHelper;
 import mekanism.common.integration.computer.opencomputers2.OC2CapabilityHelper;
 import mekanism.common.registration.impl.TileEntityTypeDeferredRegister.BlockEntityTypeBuilder;
 import mekanism.common.tile.base.CapabilityTileEntity;
-import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 
 public class ComputerCapabilityHelper {
 

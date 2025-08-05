@@ -9,11 +9,12 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
+import io.github.fabricators_of_create.porting_lib.models.geometry.IGeometryLoader;
 import mekanism.api.RelativeSide;
 import mekanism.common.util.EnumUtils;
 import net.minecraft.client.renderer.block.model.BlockElement;
 import net.minecraft.util.GsonHelper;
-import net.neoforged.neoforge.client.model.geometry.IGeometryLoader;
 import org.jetbrains.annotations.NotNull;
 
 /**

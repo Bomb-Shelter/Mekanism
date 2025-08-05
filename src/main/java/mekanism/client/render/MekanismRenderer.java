@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+
+import io.github.fabricators_of_create.porting_lib.event.client.TextureAtlasStitchedEvent;
 import mekanism.api.MekanismAPI;
 import mekanism.api.MekanismAPITags;
 import mekanism.api.SupportsColorMap;
@@ -52,11 +54,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FastColor;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.TextureAtlasStitchedEvent;
-import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -72,6 +69,10 @@ public class MekanismRenderer {
     public static TextureAtlasSprite teleporterPortal;
     public static TextureAtlasSprite redstonePulse;
     public static final Map<TransmissionType, TextureAtlasSprite> overlays = new EnumMap<>(TransmissionType.class);
+
+    public static void init() {
+        TextureAtlasStitchedEvent.EVENT.register(MekanismRenderer::onStitch);
+    }
 
     /**
      * Get a fluid texture when a stack does not exist.
@@ -298,7 +299,6 @@ public class MekanismRenderer {
         }
     }
 
-    @SubscribeEvent
     public static void onStitch(TextureAtlasStitchedEvent event) {
         TextureAtlas map = event.getAtlas();
         if (!map.location().equals(TextureAtlas.LOCATION_BLOCKS)) {

@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import io.github.fabricators_of_create.porting_lib.models.data.ModelData;
 import mekanism.common.util.EnumUtils;
+import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.EntityModelSet;
@@ -14,6 +15,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.BlockItem;
@@ -25,10 +27,13 @@ import net.minecraft.world.level.block.StainedGlassPaneBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 
-public abstract class MekanismISTER extends BlockEntityWithoutLevelRenderer {
+public abstract class MekanismISTER extends BlockEntityWithoutLevelRenderer implements IdentifiableResourceReloadListener {
 
-    protected MekanismISTER() {
+    private final ResourceLocation id;
+
+    protected MekanismISTER(ResourceLocation id) {
         super(Minecraft.getInstance().getBlockEntityRenderDispatcher(), Minecraft.getInstance().getEntityModels());
+        this.id = id;
     }
 
     protected EntityModelSet getEntityModels() {
@@ -45,6 +50,11 @@ public abstract class MekanismISTER extends BlockEntityWithoutLevelRenderer {
 
     protected Camera getCamera() {
         return getBlockEntityRenderDispatcher().camera;
+    }
+
+    @Override
+    public ResourceLocation getFabricId() {
+        return this.id;
     }
 
     @Override

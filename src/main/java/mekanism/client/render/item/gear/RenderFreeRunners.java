@@ -5,7 +5,9 @@ import com.mojang.math.Axis;
 import mekanism.client.model.ModelArmoredFreeRunners;
 import mekanism.client.model.ModelFreeRunners;
 import mekanism.client.render.item.MekanismISTER;
+import mekanism.common.Mekanism;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -13,13 +15,14 @@ import org.jetbrains.annotations.NotNull;
 
 public class RenderFreeRunners extends MekanismISTER {
 
-    public static final RenderFreeRunners RENDERER = new RenderFreeRunners(false);
-    public static final RenderFreeRunners ARMORED_RENDERER = new RenderFreeRunners(true);
+    public static final RenderFreeRunners RENDERER = new RenderFreeRunners(Mekanism.rl("render_free_runners"), false);
+    public static final RenderFreeRunners ARMORED_RENDERER = new RenderFreeRunners(Mekanism.rl("render_armored_free_runners"), true);
 
     private final boolean armored;
     private ModelFreeRunners freeRunners;
 
-    private RenderFreeRunners(boolean armored) {
+    private RenderFreeRunners(ResourceLocation id, boolean armored) {
+        super(id);
         this.armored = armored;
     }
 

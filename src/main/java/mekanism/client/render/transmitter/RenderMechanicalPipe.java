@@ -2,6 +2,7 @@ package mekanism.client.render.transmitter;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import io.github.fabricators_of_create.porting_lib.resources.fluids.FluidStackLinkedSet;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -33,7 +34,6 @@ import net.minecraft.core.Direction.AxisDirection;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.phys.Vec3;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.FluidStackLinkedSet;
 import org.jetbrains.annotations.Nullable;
 
 @NothingNullByDefault

@@ -1,25 +1,31 @@
 package mekanism.client.render.item.block;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import io.github.fabricators_of_create.porting_lib.models.data.ModelData;
 import mekanism.api.fluid.IMekanismFluidHandler;
 import mekanism.client.render.MekanismRenderer;
 import mekanism.client.render.RenderResizableCuboid;
 import mekanism.client.render.RenderResizableCuboid.FaceDisplay;
 import mekanism.client.render.item.MekanismISTER;
 import mekanism.client.render.tileentity.RenderFluidTank;
+import mekanism.common.Mekanism;
 import mekanism.common.attachments.containers.ContainerType;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Sheets;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.client.model.data.ModelData;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 
 public class RenderFluidTankItem extends MekanismISTER {
 
-    public static final RenderFluidTankItem RENDERER = new RenderFluidTankItem();
+    public static final RenderFluidTankItem RENDERER = new RenderFluidTankItem(Mekanism.rl("render_fluid_tank"));
+
+    protected RenderFluidTankItem(ResourceLocation id) {
+        super(id);
+    }
 
     @Override
     public void onResourceManagerReload(@NotNull ResourceManager resourceManager) {

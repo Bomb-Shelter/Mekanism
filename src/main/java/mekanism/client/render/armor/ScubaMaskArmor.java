@@ -2,22 +2,31 @@ package mekanism.client.render.armor;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import mekanism.client.model.ModelScubaMask;
+import mekanism.common.Mekanism;
+import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-public class ScubaMaskArmor implements ICustomArmor, ResourceManagerReloadListener {
+public class ScubaMaskArmor implements ICustomArmor, ResourceManagerReloadListener, IdentifiableResourceReloadListener {
 
+    public static final ResourceLocation ID = Mekanism.rl("scuba_mash");
     public static final ScubaMaskArmor SCUBA_MASK = new ScubaMaskArmor();
 
     private ModelScubaMask model;
 
     private ScubaMaskArmor() {
+    }
+
+    @Override
+    public ResourceLocation getFabricId() {
+        return ID;
     }
 
     @Override

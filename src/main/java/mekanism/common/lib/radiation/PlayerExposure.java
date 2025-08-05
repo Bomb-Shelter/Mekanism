@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.UUID;
 import mekanism.api.math.MathUtils;
 import mekanism.api.radiation.capability.IRadiationEntity;
-import mekanism.common.Mekanism;
 import mekanism.common.capabilities.Capabilities;
 import mekanism.common.network.fabric.PacketDistributor;
 import mekanism.common.network.to_client.radiation.PacketEnvironmentalRadiationData;
@@ -22,17 +21,19 @@ import net.minecraft.world.level.Level;
 import io.github.fabricators_of_create.porting_lib.core.util.ServerLifecycleHooks;
 import org.jetbrains.annotations.Nullable;
 
-@EventBusSubscriber(modid = Mekanism.MODID)
 public class PlayerExposure {
 
     private static final Map<UUID, PreviousRadiationData> playerEnvironmentalExposureMap = new Object2ObjectOpenHashMap<>();
     private static final Map<UUID, PreviousRadiationData> playerExposureMap = new Object2ObjectOpenHashMap<>();
 
+    public static void init() {
+        EntityTickEvent.Post.EVENT.register(PlayerExposure::onLivingTick);
+    }
+
     public static void tickServer(ServerPlayer player) {
         updateEntityRadiation(player);
     }
 
-    @SubscribeEvent
     public static void onLivingTick(EntityTickEvent.Post event) {
         Level world = event.getEntity().level();
         if (!world.isClientSide() && event.getEntity() instanceof LivingEntity living && !(living instanceof Player) && !world.tickRateManager().isEntityFrozen(living)) {

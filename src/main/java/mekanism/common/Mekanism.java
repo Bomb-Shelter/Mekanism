@@ -229,6 +229,7 @@ public class Mekanism implements ModInitializer {
         // Fabric
         MeltdownLevelData.init();
         MultiblockManager.init();
+        PlayerExposure.init();
     }
 
     public static synchronized void addModule(IModModule modModule) {

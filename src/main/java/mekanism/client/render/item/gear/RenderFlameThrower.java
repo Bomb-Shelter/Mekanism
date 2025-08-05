@@ -4,7 +4,9 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import mekanism.client.model.ModelFlamethrower;
 import mekanism.client.render.item.MekanismISTER;
+import mekanism.common.Mekanism;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -14,6 +16,10 @@ public class RenderFlameThrower extends MekanismISTER {
 
     public static final RenderFlameThrower RENDERER = new RenderFlameThrower();
     private ModelFlamethrower flamethrower;
+
+    protected RenderFlameThrower() {
+        super(Mekanism.rl("flame_thrower"));
+    }
 
     @Override
     public void onResourceManagerReload(@NotNull ResourceManager resourceManager) {

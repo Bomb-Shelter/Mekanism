@@ -7,7 +7,6 @@ import mekanism.api.radiation.capability.IRadiationShielding;
 import mekanism.common.Mekanism;
 import mekanism.common.capabilities.Capabilities;
 import mekanism.common.config.MekanismConfig;
-import mekanism.common.integration.curios.CuriosIntegration;
 import mekanism.common.util.EnumUtils;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
@@ -46,19 +45,19 @@ public class RadiationUtil {
             }
         }
         if (resistance < 1 && Mekanism.hooks.curios.isLoaded()) {
-            IItemHandler handler = CuriosIntegration.getCuriosInventory(entity);
-            if (handler != null) {
-                for (int i = 0, slots = handler.getSlots(); i < slots; i++) {
-                    ItemStack stack = handler.getStackInSlot(i);
-                    IRadiationShielding shielding = Capabilities.RADIATION_SHIELDING.find(stack, null);
-                    if (shielding != null) {
-                        resistance += shielding.getRadiationShielding();
-                        if (resistance >= 1) {
-                            return 1;
-                        }
-                    }
-                }
-            }
+//            IItemHandler handler = CuriosIntegration.getCuriosInventory(entity);
+//            if (handler != null) {
+//                for (int i = 0, slots = handler.getSlots(); i < slots; i++) {
+//                    ItemStack stack = handler.getStackInSlot(i);
+//                    IRadiationShielding shielding = Capabilities.RADIATION_SHIELDING.find(stack, null);
+//                    if (shielding != null) {
+//                        resistance += shielding.getRadiationShielding();
+//                        if (resistance >= 1) {
+//                            return 1;
+//                        }
+//                    }
+//                }
+//            }
         }
         return resistance;
     }

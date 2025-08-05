@@ -19,6 +19,7 @@ import mekanism.common.config.MekanismConfig;
 import mekanism.common.registries.MekanismAttachmentTypes;
 import mekanism.common.registries.MekanismDamageTypes;
 import mekanism.common.util.MekanismUtils;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
@@ -33,8 +34,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import io.github.fabricators_of_create.porting_lib.core.util.ServerLifecycleHooks;
 import org.jetbrains.annotations.Nullable;
 
@@ -77,6 +76,10 @@ public final class RadiationManager implements IRadiationManager {
     static final double BASELINE = 0.000_000_100; // 100 nSv/h
     static final double MIN_MAGNITUDE = 0.000_010; // 10 uSv/h
 
+    public RadiationManager() {
+        ServerTickEvents.START_SERVER_TICK.register(this::onTickPre);
+    }
+
     @Override
     public boolean isRadiationEnabled() {
         return isGlobalRadiationEnabled();
@@ -89,11 +92,11 @@ public final class RadiationManager implements IRadiationManager {
 
     @Nullable
     private static RadiationLevelData getData(Level level) {
-        return level.getExistingDataOrNull(MekanismAttachmentTypes.RADIATION_LEVEL_DATA);
+        return level.getAttached(MekanismAttachmentTypes.RADIATION_LEVEL_DATA);
     }
 
     private static RadiationLevelData getOrCreateData(Level level) {
-        return level.getData(MekanismAttachmentTypes.RADIATION_LEVEL_DATA);
+        return level.getAttachedOrCreate(MekanismAttachmentTypes.RADIATION_LEVEL_DATA);
     }
 
     @Override
@@ -224,7 +227,7 @@ public final class RadiationManager implements IRadiationManager {
             return;
         }
         if (!(entity instanceof Player player) || MekanismUtils.isPlayingMode(player)) {
-            IRadiationEntity radiationEntity = entity.getCapability(Capabilities.RADIATION_ENTITY);
+            IRadiationEntity radiationEntity = Capabilities.RADIATION_ENTITY.find(entity, null);
             if (radiationEntity != null) {
                 radiationEntity.radiate(magnitude * (1 - Math.min(1, RadiationUtil.getRadiationResistance(entity))));
             }
@@ -283,11 +286,10 @@ public final class RadiationManager implements IRadiationManager {
         }
     }
 
-    @SubscribeEvent
-    public void onTickPre(ServerTickEvent.Pre event) {
+    public void onTickPre(MinecraftServer server) {
         // each tick, there's a 1/20 chance we'll decay radiation sources (averages to 1 decay operation per second)
         shouldDecayThisTick = isGlobalRadiationEnabled() &&
-                              event.getServer().tickRateManager().runsNormally() &&
+                              server.tickRateManager().runsNormally() &&
                               RAND.nextInt(SharedConstants.TICKS_PER_SECOND) == 0;
     }
 

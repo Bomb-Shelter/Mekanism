@@ -4,7 +4,9 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import mekanism.client.model.ModelScubaMask;
 import mekanism.client.render.item.MekanismISTER;
+import mekanism.common.Mekanism;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -14,6 +16,10 @@ public class RenderScubaMask extends MekanismISTER {
 
     public static final RenderScubaMask RENDERER = new RenderScubaMask();
     private ModelScubaMask scubaMask;
+
+    protected RenderScubaMask() {
+        super(Mekanism.rl("scuba_mask"));
+    }
 
     @Override
     public void onResourceManagerReload(@NotNull ResourceManager resourceManager) {

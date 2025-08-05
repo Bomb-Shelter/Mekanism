@@ -1,5 +1,6 @@
 package mekanism.client.render.item;
 
+import io.github.fabricators_of_create.porting_lib.item.client.IItemDecorator;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import java.util.List;
@@ -14,7 +15,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.client.IItemDecorator;
 
 public class MekaSuitBarDecorator implements IItemDecorator {
 

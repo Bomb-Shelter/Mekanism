@@ -3,6 +3,8 @@ package mekanism.client.render.transmitter;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.PoseStack.Pose;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import io.github.fabricators_of_create.porting_lib.models.geometry.IGeometryBakingContext;
+import io.github.fabricators_of_create.porting_lib.models.geometry.StandaloneGeometryBakingContext;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,9 +34,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.client.model.data.ModelData;
-import net.neoforged.neoforge.client.model.geometry.IGeometryBakingContext;
-import net.neoforged.neoforge.client.model.geometry.StandaloneGeometryBakingContext;
 import org.joml.Vector3f;
 
 @NothingNullByDefault

@@ -2,6 +2,7 @@ package mekanism.client.render.item;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.fabricators_of_create.porting_lib.item.client.IItemDecorator;
+import mekanism.client.ClientRegistration;
 import mekanism.common.registration.impl.BlockRegistryObject;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.MekanismUtils.ResourceType;
@@ -12,7 +13,7 @@ import net.minecraft.world.item.ItemStack;
 
 public class TransmitterTypeDecorator implements IItemDecorator {
 
-    public static void registerDecorators(RegisterItemDecorationsEvent event, BlockRegistryObject<?, ?>... blocks) {
+    public static void registerDecorators(ClientRegistration.RegisterItemDecorationHelper event, BlockRegistryObject<?, ?>... blocks) {
         for (BlockRegistryObject<?, ?> block : blocks) {
             event.register(block, new TransmitterTypeDecorator(block.getId()));
         }

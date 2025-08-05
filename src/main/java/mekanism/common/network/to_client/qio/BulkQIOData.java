@@ -13,12 +13,17 @@ import mekanism.common.inventory.container.QIOItemViewerContainer.ItemSlotData;
 import mekanism.common.lib.inventory.HashedItem;
 import mekanism.common.lib.inventory.HashedItem.UUIDAwareHashedItem;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 public record BulkQIOData(Map<UUID, ItemSlotData> inventory, long countCapacity, int typeCapacity, long totalItems, List<IScrollableSlot> items) {
 
     public static final BulkQIOData INITIAL_SERVER = new BulkQIOData(Collections.emptyMap(), 0, 0, 0, Collections.emptyList());
+
+    public static StreamCodec<RegistryFriendlyByteBuf, BulkQIOData> streamCodec(@Nullable QIOFrequency frequency) {
+        return StreamCodec.ofMember((data, buf) -> encodeToPacket(buf, frequency), BulkQIOData::fromPacket);
+    }
 
     public static void encodeToPacket(RegistryFriendlyByteBuf buffer, @Nullable QIOFrequency frequency) {
         buffer.writeBoolean(frequency != null);

@@ -8,6 +8,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
+
+import io.github.fabricators_of_create.porting_lib.models.geometry.IGeometryBakingContext;
+import io.github.fabricators_of_create.porting_lib.models.geometry.IUnbakedGeometry;
+import io.github.fabricators_of_create.porting_lib.models.geometry.SimpleModelState;
+import io.github.fabricators_of_create.porting_lib.render_types.RenderTypeGroup;
 import mekanism.api.RelativeSide;
 import mekanism.client.render.lib.QuadTransformation;
 import mekanism.client.render.lib.QuadUtils;
@@ -23,10 +28,6 @@ import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.client.RenderTypeGroup;
-import net.neoforged.neoforge.client.model.SimpleModelState;
-import net.neoforged.neoforge.client.model.geometry.IGeometryBakingContext;
-import net.neoforged.neoforge.client.model.geometry.IUnbakedGeometry;
 import org.jetbrains.annotations.Nullable;
 
 public class EnergyCubeGeometry implements IUnbakedGeometry<EnergyCubeGeometry> {
@@ -43,7 +44,7 @@ public class EnergyCubeGeometry implements IUnbakedGeometry<EnergyCubeGeometry> 
 
     @Override
     public BakedModel bake(IGeometryBakingContext context, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelState,
-          ItemOverrides overrides) {
+                           ItemOverrides overrides) {
         TextureAtlasSprite particle = spriteGetter.apply(context.getMaterial("particle"));
 
         ResourceLocation renderTypeHint = context.getRenderTypeHint();

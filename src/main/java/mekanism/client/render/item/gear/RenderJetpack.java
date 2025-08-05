@@ -5,7 +5,9 @@ import com.mojang.math.Axis;
 import mekanism.client.model.ModelArmoredJetpack;
 import mekanism.client.model.ModelJetpack;
 import mekanism.client.render.item.MekanismISTER;
+import mekanism.common.Mekanism;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -13,13 +15,14 @@ import org.jetbrains.annotations.NotNull;
 
 public class RenderJetpack extends MekanismISTER {
 
-    public static final RenderJetpack RENDERER = new RenderJetpack(false);
-    public static final RenderJetpack ARMORED_RENDERER = new RenderJetpack(true);
+    public static final RenderJetpack RENDERER = new RenderJetpack(Mekanism.rl("render_jetpack"), false);
+    public static final RenderJetpack ARMORED_RENDERER = new RenderJetpack(Mekanism.rl("render_armored_jetpack"), true);
 
     private final boolean armored;
     private ModelJetpack jetpack;
 
-    private RenderJetpack(boolean armored) {
+    private RenderJetpack(ResourceLocation id, boolean armored) {
+        super(id);
         this.armored = armored;
     }
 

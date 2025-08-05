@@ -1,6 +1,6 @@
 accessWidener v2 named
 
-accessible method net/minecraft/client/KeyMapping isDown ()V
+#accessible method net/minecraft/client/KeyMapping isDown ()V
 
 accessible field net/minecraft/client/gui/Gui overlayMessageTime I
 

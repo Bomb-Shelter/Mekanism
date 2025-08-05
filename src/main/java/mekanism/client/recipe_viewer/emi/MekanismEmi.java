@@ -105,7 +105,7 @@ public class MekanismEmi implements EmiPlugin {
     private static void addChemicalComponent(Set<Object> representation, ItemStack stack) {
         IChemicalHandler handler = ContainerType.CHEMICAL.createHandlerIfData(stack);
         if (handler == null) {
-            handler = stack.getCapability(Capabilities.CHEMICAL.item());
+            handler = Capabilities.CHEMICAL.item().find(stack, null);
         }
         if (handler != null) {
             int tanks = handler.getChemicalTanks();

@@ -1,5 +1,6 @@
 package mekanism.common.inventory.container.type;
 
+import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerType.ExtendedFactory;
 import mekanism.common.inventory.container.item.PortableQIODashboardContainer;
 import mekanism.common.inventory.container.type.MekanismItemContainerType.IMekanismItemContainerFactory;
 import mekanism.common.item.ItemPortableQIODashboard;
@@ -36,7 +37,7 @@ public class MekanismItemContainerType<ITEM extends Item, CONTAINER extends Abst
         );
     }
 
-    protected MekanismItemContainerType(Class<ITEM> type, IMekanismItemContainerFactory<ITEM, CONTAINER> mekanismConstructor, IContainerFactory<CONTAINER> constructor) {
+    protected MekanismItemContainerType(Class<ITEM> type, IMekanismItemContainerFactory<ITEM, CONTAINER> mekanismConstructor, ExtendedFactory<CONTAINER, Item> constructor) {
         super(type, mekanismConstructor, constructor);
     }
 

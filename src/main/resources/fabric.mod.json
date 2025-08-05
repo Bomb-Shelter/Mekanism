@@ -24,11 +24,15 @@
       "mekanism.common.Mekanism"
     ],
     "client": [
-
+      "mekanism.client.MekanismClient"
     ],
     "fabric-datagen": [
     ],
-    "cardinal-components": [
+    "emi": [
+      "mekanism.client.recipe_viewer.emi.MekanismEmi"
+    ],
+    "jei_mod_plugin": [
+      "mekanism.client.recipe_viewer.jei.MekanismJEI"
     ]
   },
   "accessWidener": "mekanism.accesswidener",

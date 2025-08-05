@@ -4,7 +4,9 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import mekanism.client.model.ModelAtomicDisassembler;
 import mekanism.client.render.item.MekanismISTER;
+import mekanism.common.Mekanism;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -14,6 +16,10 @@ public class RenderAtomicDisassembler extends MekanismISTER {
 
     public static final RenderAtomicDisassembler RENDERER = new RenderAtomicDisassembler();
     private ModelAtomicDisassembler atomicDisassembler;
+
+    protected RenderAtomicDisassembler() {
+        super(Mekanism.rl("atomic_disassembler"));
+    }
 
     @Override
     public void onResourceManagerReload(@NotNull ResourceManager resourceManager) {

@@ -22,7 +22,6 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.MenuType.MenuSupplier;
 import net.minecraft.world.item.Item;
-import net.neoforged.neoforge.network.IContainerFactory;
 import org.jetbrains.annotations.NotNull;
 
 public class ContainerTypeDeferredRegister extends MekanismDeferredRegister<MenuType<?>> {
@@ -91,10 +90,6 @@ public class ContainerTypeDeferredRegister extends MekanismDeferredRegister<Menu
 
     public <CONTAINER extends AbstractContainerMenu> ContainerTypeRegistryObject<CONTAINER> register(String name, MenuSupplier<CONTAINER> factory) {
         return registerMenu(name, () -> new MenuType<>(factory, FeatureFlags.VANILLA_SET));
-    }
-
-    public <CONTAINER extends AbstractContainerMenu> ContainerTypeRegistryObject<CONTAINER> register(String name, IContainerFactory<CONTAINER> factory) {
-        return register(name, (MenuSupplier<CONTAINER>) factory);
     }
 
     public <CONTAINER extends AbstractContainerMenu> ContainerTypeRegistryObject<CONTAINER> register(INamedEntry nameProvider, Supplier<MenuType<CONTAINER>> supplier) {
