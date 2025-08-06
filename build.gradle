@@ -473,6 +473,7 @@ repositories { RepositoryHandler handler ->
         it.forRepositories(handler.mavenCentral())
         it.filter {
             includeGroup('org.appliedenergistics')
+            includeGroup('me.lucko')
         }
     }
 }
@@ -491,6 +492,7 @@ dependencies {
     for (String module in port_lib_modules.split(",")) {
         modImplementation(include("io.github.fabricators_of_create.Porting-Lib:$module:$port_lib_version+$minecraft_version"))
     }
+    modImplementation(include('me.lucko:fabric-permissions-api:0.3.3'))
 
     compileOnly(project(':annotation-processor'))
     localRuntime(project(':annotation-processor'))

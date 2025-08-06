@@ -4,6 +4,8 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
+import me.lucko.fabric.api.permissions.v0.Permissions;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.security.IOwnerObject;
 import mekanism.api.security.ISecurityObject;
@@ -18,7 +20,6 @@ import mekanism.common.lib.frequency.FrequencyType;
 import mekanism.common.util.MekanismUtils;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.neoforge.server.permission.PermissionAPI;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -41,7 +42,7 @@ public final class SecurityUtils implements ISecurityUtils {
     private boolean isOp(Player p) {
         Objects.requireNonNull(p, "Player may not be null.");
         return MekanismConfig.general.opsBypassRestrictions.get() && p instanceof ServerPlayer player &&
-               PermissionAPI.getPermission(player, MekanismPermissions.BYPASS_SECURITY);
+               Permissions.check(player, MekanismPermissions.BYPASS_SECURITY, player.server.getPlayerList().isOp(player.getGameProfile()));
     }
 
     @Override

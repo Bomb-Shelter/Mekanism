@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiPredicate;
+import java.util.function.Supplier;
+
 import mekanism.api.RelativeSide;
 import mekanism.client.model.baked.ExtensionBakedModel.QuadsKey;
 import mekanism.client.model.energycube.EnergyCubeGeometry.FaceData;
@@ -18,24 +20,25 @@ import mekanism.client.render.lib.QuadTransformation;
 import mekanism.common.tile.TileEntityEnergyCube;
 import mekanism.common.tile.TileEntityEnergyCube.CubeSideState;
 import mekanism.common.util.EnumUtils;
+import net.fabricmc.fabric.api.renderer.v1.model.ModelHelper;
+import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.minecraft.Util;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.client.ChunkRenderTypeSet;
-import net.neoforged.neoforge.client.RenderTypeGroup;
-import net.neoforged.neoforge.client.model.IDynamicBakedModel;
-import net.neoforged.neoforge.client.model.data.ModelData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class EnergyCubeBakedModel implements IDynamicBakedModel {
+public class EnergyCubeBakedModel implements BakedModel {
 
     private static final CubeSideState[] INACTIVE = Util.make(new CubeSideState[EnumUtils.DIRECTIONS.length], sideStates -> Arrays.fill(sideStates, CubeSideState.INACTIVE));
     private static final QuadTransformation LED_TRANSFORMS = QuadTransformation.list(QuadTransformation.fullbright, QuadTransformation.uvShift(-0.125F, 0));
@@ -93,6 +96,29 @@ public class EnergyCubeBakedModel implements IDynamicBakedModel {
             this.blockRenderTypes = ChunkRenderTypeSet.of(renderTypes.block());
             this.itemRenderTypes = Collections.singletonList(renderTypes.entity());
             this.fabulousItemRenderTypes = Collections.singletonList(renderTypes.entityFabulous());
+        }
+    }
+
+    @Override
+    public boolean isVanillaAdapter() {
+        return false;
+    }
+
+    @Override
+    public void emitBlockQuads(BlockAndTintGetter blockView, BlockState state, BlockPos pos, Supplier<RandomSource> randomSupplier, RenderContext context) {
+        Object renderData = blockView.getBlockEntityRenderData(pos);
+        CubeSideState[] sideStates;
+        if (renderData instanceof CubeSideState[] data) {
+            if (data.length != EnumUtils.SIDES.length) {
+                //If there is no side data then treat everything as inactive
+                sideStates = INACTIVE;
+            }
+        } else {
+            sideStates = INACTIVE;
+        }
+
+        for (int i = 0; i < 7; i++) {
+
         }
     }
 
