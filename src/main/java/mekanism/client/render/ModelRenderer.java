@@ -4,15 +4,17 @@ import it.unimi.dsi.fastutil.floats.Float2ObjectMap;
 import it.unimi.dsi.fastutil.floats.Float2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.util.Map;
 import mekanism.client.render.MekanismRenderer.Model3D;
 import mekanism.client.render.data.RenderData;
 import mekanism.client.render.data.ValveRenderData;
 import mekanism.common.util.MekanismUtils;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.minecraft.core.Direction;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.FluidType;
 import org.jetbrains.annotations.Nullable;
 
 public final class ModelRenderer {
@@ -20,9 +22,9 @@ public final class ModelRenderer {
     private ModelRenderer() {
     }
 
-    private static final int BLOCK_STAGES = FluidType.BUCKET_VOLUME;
+    private static final long BLOCK_STAGES = FluidConstants.BUCKET;
 
-    private static final Map<RenderData, Int2ObjectMap<Model3D>> cachedCenterData = new Object2ObjectOpenHashMap<>();
+    private static final Map<RenderData, Long2ObjectMap<Model3D>> cachedCenterData = new Object2ObjectOpenHashMap<>();
     private static final Map<ValveRenderData, Float2ObjectMap<Model3D>> cachedValveFluids = new Object2ObjectOpenHashMap<>();
 
     public static int getStage(FluidStack stack, int stages, double scale) {
@@ -40,17 +42,17 @@ public final class ModelRenderer {
      * @apiNote If the data is gaseous then scale is ignored
      */
     public static Model3D getModel(RenderData data, double scale) {
-        int maxStages = Math.max(data.height * BLOCK_STAGES, 1);
-        int stage;
+        long maxStages = Math.max(data.height * BLOCK_STAGES, 1);
+        long stage;
         if (data.height == 0) {
             //If there is no height set it to 1 for the stage as max stages is going to be one as well
             stage = 1;
         } else if (data.isGaseous()) {
             stage = maxStages;
         } else {
-            stage = Math.min(maxStages, (int) (scale * maxStages));
+            stage = Math.min(maxStages, (long) (scale * maxStages));
         }
-        Int2ObjectMap<Model3D> modelMap = cachedCenterData.computeIfAbsent(data, d -> new Int2ObjectOpenHashMap<>());
+        Long2ObjectMap<Model3D> modelMap = cachedCenterData.computeIfAbsent(data, d -> new Long2ObjectOpenHashMap<>());
         Model3D model = modelMap.get(stage);
         if (model == null) {
             model = new Model3D()

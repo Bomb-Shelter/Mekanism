@@ -39,7 +39,6 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
-import net.neoforged.neoforge.client.model.data.ModelData;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
@@ -205,7 +204,7 @@ public class RenderNutritionalLiquifier extends MekanismTileEntityRenderer<TileE
             if (override != null) {
                 model = override;
             }
-            sprite = model.getParticleIcon(ModelData.EMPTY);
+            sprite = model.getParticleIcon();
             this.gravity = 1.0F;
             this.quadSize = 0.1F * (world.random.nextFloat() * 0.5F + 0.5F);
             this.uo = world.random.nextFloat() * 3.0F;

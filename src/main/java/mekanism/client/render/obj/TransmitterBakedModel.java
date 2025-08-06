@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
+import io.github.fabricators_of_create.porting_lib.models.geometry.IGeometryBakingContext;
 import io.github.fabricators_of_create.porting_lib.models.geometry.SimpleModelState;
 import io.github.fabricators_of_create.porting_lib.models.obj.ObjModel;
 import mekanism.api.annotations.NothingNullByDefault;
