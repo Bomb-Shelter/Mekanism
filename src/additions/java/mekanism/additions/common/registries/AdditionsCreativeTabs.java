@@ -1,6 +1,8 @@
 package mekanism.additions.common.registries;
 
 import java.util.Map;
+
+import io.github.fabricators_of_create.porting_lib.item.itemgroup.PortingLibCreativeTab;
 import mekanism.additions.common.AdditionsLang;
 import mekanism.additions.common.MekanismAdditions;
 import mekanism.api.text.EnumColor;
@@ -8,10 +10,10 @@ import mekanism.common.registration.MekanismDeferredHolder;
 import mekanism.common.registration.impl.BlockRegistryObject;
 import mekanism.common.registration.impl.CreativeTabDeferredRegister;
 import mekanism.common.registries.MekanismCreativeTabs;
+import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroupEntries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
-import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 
 public class AdditionsCreativeTabs {
 
@@ -19,17 +21,16 @@ public class AdditionsCreativeTabs {
 
     public static final MekanismDeferredHolder<CreativeModeTab, CreativeModeTab> ADDITIONS = CREATIVE_TABS.registerMain(AdditionsLang.MEKANISM_ADDITIONS,
           AdditionsItems.BALLOONS.get(EnumColor.BRIGHT_GREEN), builder ->
-                builder.backgroundTexture(MekanismAdditions.rl("textures/gui/creative_tab.png"))
-                      .withSearchBar(65)//Allow our tabs to be searchable for convenience purposes
-                      .withTabsBefore(MekanismCreativeTabs.MEKANISM.getKey())
+                (PortingLibCreativeTab.PortingLibCreativeTabBuilder) builder.backgroundTexture(MekanismAdditions.rl("textures/gui/creative_tab.png"))
+                      //.withSearchBar(65)//Allow our tabs to be searchable for convenience purposes
+                      //.withTabsBefore(MekanismCreativeTabs.MEKANISM.getKey())
                       .displayItems((displayParameters, output) -> {
                           CreativeTabDeferredRegister.addToDisplay(AdditionsItems.ITEMS, output);
                           CreativeTabDeferredRegister.addToDisplay(AdditionsBlocks.BLOCKS, output);
                       })
     );
 
-    private static void addToExistingTabs(BuildCreativeModeTabContentsEvent event) {
-        ResourceKey<CreativeModeTab> tabKey = event.getTabKey();
+    private static void addToExistingTabs(ResourceKey<CreativeModeTab> tabKey, FabricItemGroupEntries event) {
         if (tabKey == CreativeModeTabs.COLORED_BLOCKS) {
             addToDisplay(event, AdditionsBlocks.GLOW_PANELS, AdditionsBlocks.PLASTIC_BLOCKS, AdditionsBlocks.SLICK_PLASTIC_BLOCKS, AdditionsBlocks.PLASTIC_GLOW_BLOCKS,
                   AdditionsBlocks.REINFORCED_PLASTIC_BLOCKS, AdditionsBlocks.PLASTIC_ROADS, AdditionsBlocks.TRANSPARENT_PLASTIC_BLOCKS, AdditionsBlocks.PLASTIC_STAIRS,

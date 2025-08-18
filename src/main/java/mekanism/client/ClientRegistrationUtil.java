@@ -4,6 +4,7 @@ import com.mojang.blaze3d.shaders.FogShape;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.lang.ref.WeakReference;
 
+import io.github.fabricators_of_create.porting_lib.item.injects.ItemPropertiesInjection;
 import io.github.fabricators_of_create.porting_lib.models.DynamicFluidContainerModel;
 import mekanism.api.text.EnumColor;
 import mekanism.client.gui.machine.GuiAdvancedElectricMachine;
@@ -23,6 +24,7 @@ import mekanism.common.registration.impl.TileEntityTypeRegistryObject;
 import mekanism.common.registries.MekanismDataComponents;
 import mekanism.common.tile.prefab.TileEntityAdvancedElectricMachine;
 import mekanism.common.tile.prefab.TileEntityElectricMachine;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.client.Camera;
@@ -147,9 +149,9 @@ public class ClientRegistrationUtil {
         ClientRegistrationUtil.<C, GuiAdvancedElectricMachine<TILE, C>>registerScreen(type, GuiAdvancedElectricMachine::new);
     }
 
-    public static void registerKeyBindings(RegisterKeyMappingsEvent event, KeyMapping... keys) {
+    public static void registerKeyBindings(KeyMapping... keys) {
         for (KeyMapping key : keys) {
-            event.register(key);
+            KeyBindingHelper.registerKeyBinding(key);
         }
     }
 

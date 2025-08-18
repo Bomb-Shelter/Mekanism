@@ -7,6 +7,7 @@ import com.google.common.collect.Table.Cell;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import io.github.fabricators_of_create.porting_lib.client_events.event.client.PlaySoundCallback;
 import io.github.fabricators_of_create.porting_lib.item.client.IItemDecorator;
 import io.github.fabricators_of_create.porting_lib.item.client.callbacks.ItemDecorationsCallback;
 import io.github.fabricators_of_create.porting_lib.models.SeparateTransformsModel;
@@ -209,13 +210,13 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ElytraItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.NotNull;
 
-@EventBusSubscriber(modid = Mekanism.MODID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
 public class ClientRegistration implements ModelLoadingPlugin {
 
     private static final FieldReflectionHelper<SeparateTransformsModel.Baked, BakedModel> SEPARATE_PERSPECTIVE_BASE_MODEL =
@@ -224,11 +225,14 @@ public class ClientRegistration implements ModelLoadingPlugin {
           new FieldReflectionHelper<>(SeparateTransformsModel.Baked.class, "perspectives", ImmutableMap::of);
     private static final Map<ResourceLocation, CustomModelRegistryObject> customModels = new ConcurrentHashMap<>();
 
-    @SubscribeEvent
     public static void init() {
         new ClientTickHandler();
         new RenderTickHandler();
-        NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, SoundHandler::onTilePlaySound);
+        SoundHandler.init();
+        registerKeybindings();
+        PlaySoundCallback.EVENT.register((engine, sound, originalSound) -> {
+            return SoundHandler.onTilePlaySound(sound, originalSound);
+        });
         if (Mekanism.hooks.recipeViewerCompatEnabled()) {
             NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, RenderTickHandler::guiOpening);
         }
@@ -238,7 +242,7 @@ public class ClientRegistration implements ModelLoadingPlugin {
         moduleHelper.addMekaSuitModuleModelSpec("modulator", MekanismModules.GRAVITATIONAL_MODULATING_UNIT, EquipmentSlot.CHEST);
         moduleHelper.addMekaSuitModuleModelSpec("elytra", MekanismModules.ELYTRA_UNIT, EquipmentSlot.CHEST, LivingEntity::isFallFlying);
 
-        event.enqueueWork(() -> {
+        Minecraft.getInstance().execute(() -> {
             //Set fluids to a translucent render layer
             for (Holder<Fluid> fluid : MekanismFluids.FLUIDS.getFluidEntries()) {
                 BlockRenderLayerMap.INSTANCE.putFluid(fluid.value(), RenderType.translucent());
@@ -284,7 +288,7 @@ public class ClientRegistration implements ModelLoadingPlugin {
                     //Fallback to the vanilla check in case any mods like quark are making vanilla actually make use of the entity
                     canFly = stack.getDamageValue() < stack.getMaxDamage() - 1;
                 } else {
-                    canFly = MekanismItems.HDPE_REINFORCED_ELYTRA.get().canElytraFly(stack, entity);
+                    canFly = MekanismItems.HDPE_REINFORCED_ELYTRA.get().useCustomElytra(entity, stack, false);
                 }
                 return canFly ? 0.0F : 1.0F;
             });
@@ -304,9 +308,8 @@ public class ClientRegistration implements ModelLoadingPlugin {
         ItemDecorationsCallback.EVENT.register(ClientRegistration::registerItemDecorations);
     }
 
-    @SubscribeEvent
-    public static void registerKeybindings(RegisterKeyMappingsEvent event) {
-        MekanismKeyHandler.registerKeybindings(event);
+    public static void registerKeybindings() {
+        MekanismKeyHandler.registerKeybindings();
     }
 
     @SubscribeEvent

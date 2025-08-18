@@ -1,5 +1,7 @@
 package mekanism.client.render;
 
+import io.github.fabricators_of_create.porting_lib.client_extensions.IClientBlockExtensions;
+import io.github.fabricators_of_create.porting_lib.client_extensions.IClientItemExtensions;
 import mekanism.client.render.armor.ICustomArmor;
 import mekanism.client.render.armor.ISpecialGear;
 import mekanism.common.block.BlockBounding;
@@ -16,8 +18,6 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.HitResult.Type;
-import net.neoforged.neoforge.client.extensions.common.IClientBlockExtensions;
-import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import org.jetbrains.annotations.NotNull;
 
 //This class is used to prevent class loading issues on the server without having to use OnlyIn hacks

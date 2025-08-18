@@ -1,5 +1,6 @@
 package mekanism.client.sound;
 
+import io.github.fabricators_of_create.porting_lib.client_events.event.client.PlaySoundCallback;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -18,6 +19,7 @@ import mekanism.common.tile.interfaces.ITileSound;
 import mekanism.common.tile.interfaces.IUpgradeTile;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.WorldUtils;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
@@ -53,7 +55,6 @@ import org.jetbrains.annotations.NotNull;
  *
  * @apiNote Only used by client
  */
-@EventBusSubscriber(modid = Mekanism.MODID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
 public class SoundHandler {
 
     private SoundHandler() {
@@ -240,40 +241,43 @@ public class SoundHandler {
         return player.position().distanceToSqr(sound.getX(), sound.getY(), sound.getZ()) < scaledDistance * scaledDistance;
     }
 
-    @SubscribeEvent
-    public static void onSoundEngineSetup(SoundEngineLoadEvent event) {
+    public static void init() {
+        ClientLifecycleEvents.CLIENT_STARTED.register(client -> {
+            onSoundEngineSetup();
+        });
+    }
+
+    public static void onSoundEngineSetup() {
         //Grab the sound engine, so that we are able to play sounds. We use this event rather than requiring the use of an AT
         if (soundEngine == null) {
             //Note: We include a null check as the constructor for SoundEngine is public and calls this event
             // And we do not want to end up grabbing a modders variant of this
-            soundEngine = event.getEngine();
+            soundEngine = Minecraft.getInstance().getSoundManager().soundEngine;
         }
     }
 
-    public static void onTilePlaySound(PlaySoundEvent event) {
+    public static SoundInstance onTilePlaySound(SoundInstance resultSound, SoundInstance originalSound) {
         // Ignore any sound event which is null or is happening in a muffled check
-        SoundInstance resultSound = event.getSound();
         if (resultSound == null || IN_MUFFLED_CHECK) {
-            return;
+            return resultSound;
         }
 
         // Ignore any sound event outside this mod namespace
-        ResourceLocation soundLoc = event.getOriginalSound().getLocation();
+        ResourceLocation soundLoc = originalSound.getLocation();
         //If it is mekanism or one of the submodules let continue
         if (!soundLoc.getNamespace().startsWith(Mekanism.MODID)) {
-            return;
+            return resultSound;
         }
 
         // If this is a Mek player sound, unwrap any muffling that other mods may have attempted. I haven't
         // sorted out a good way to deal with long-lived, non-repeating, dynamic volume sounds -- something
         // to investigate in the future.
-        if (event.getOriginalSound() instanceof PlayerSound sound) {
-            event.setSound(sound);
-            return;
+        if (originalSound instanceof PlayerSound sound) {
+            return sound;
         }
 
         //Ignore any non-tile Mek sounds
-        if (event.getName().startsWith("tile.")) {
+        if (resultSound.getLocation().getPath().startsWith("tile.")) {
             //At this point, we've got a known block Mekanism sound.
             // Update our soundMap so that we can actually have a shot at stopping this sound; note that we also
             // need to "unoffset" the sound position so that we build the correct key for the sound map
@@ -281,6 +285,8 @@ public class SoundHandler {
             BlockPos pos = BlockPos.containing(resultSound.getX() - 0.5, resultSound.getY() - 0.5, resultSound.getZ() - 0.5);
             soundMap.put(pos.asLong(), resultSound);
         }
+
+        return resultSound;
     }
 
     private static class TileTickableSound extends AbstractTickableSoundInstance {
@@ -329,7 +335,7 @@ public class SoundHandler {
                 //Make sure we set our volume back to what it actually would be for purposes of letting other mods know
                 // what volume to use
                 volume = originalVolume;
-                SoundInstance s = ClientHooks.playSound(soundEngine, this);
+                SoundInstance s = PlaySoundCallback.EVENT.invoker().onPlaySound(soundEngine, this, this);
                 IN_MUFFLED_CHECK = false;
 
                 if (s == this) {

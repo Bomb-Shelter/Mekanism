@@ -484,7 +484,10 @@ tasks.named('test', Test) {
 
 dependencies {
     minecraft("com.mojang:minecraft:${project.minecraft_version}")
-    mappings(loom.officialMojangMappings())
+    mappings(loom.layered() {
+        officialMojangMappings()
+        parchment("org.parchmentmc.data:parchment-${property("neoForge.parchment.minecraftVersion")}:${property("neoForge.parchment.mappingsVersion")}@zip")
+    })
 
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"

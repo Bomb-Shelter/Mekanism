@@ -1,5 +1,7 @@
 package mekanism.common.registries;
 
+import io.github.fabricators_of_create.porting_lib.item.itemgroup.PortingLibCreativeTab;
+import io.github.fabricators_of_create.porting_lib.tags.Tags;
 import mekanism.api.MekanismAPI;
 import mekanism.api.MekanismAPITags;
 import mekanism.common.Mekanism;
@@ -19,6 +21,8 @@ import mekanism.common.tier.TransporterTier;
 import mekanism.common.util.ChemicalUtil;
 import mekanism.common.util.EnumUtils;
 import mekanism.common.util.FluidUtils;
+import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroupEntries;
+import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -29,8 +33,6 @@ import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluids;
-import net.neoforged.neoforge.common.Tags;
-import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 
 public class MekanismCreativeTabs {
 
@@ -38,7 +40,7 @@ public class MekanismCreativeTabs {
 
     public static final MekanismDeferredHolder<CreativeModeTab, CreativeModeTab> MEKANISM = CREATIVE_TABS.registerMain(MekanismLang.MEKANISM,
           MekanismBlocks.METALLURGIC_INFUSER.getItemHolder(), builder ->
-                builder.withSearchBar()//Allow our tabs to be searchable for convenience purposes
+                (PortingLibCreativeTab.PortingLibCreativeTabBuilder) builder//.withSearchBar()//Allow our tabs to be searchable for convenience purposes
                       .displayItems((displayParameters, output) -> {
                           CreativeTabDeferredRegister.addToDisplay(MekanismItems.ITEMS, output);
                           CreativeTabDeferredRegister.addToDisplay(MekanismBlocks.BLOCKS, output);
@@ -70,8 +72,7 @@ public class MekanismCreativeTabs {
         }
     }
 
-    private static void addToExistingTabs(BuildCreativeModeTabContentsEvent event) {
-        ResourceKey<CreativeModeTab> tabKey = event.getTabKey();
+    private static void addToExistingTabs(ResourceKey<CreativeModeTab> tabKey, FabricItemGroupEntries event) {
         if (tabKey == CreativeModeTabs.BUILDING_BLOCKS) {
             CreativeTabDeferredRegister.addToDisplay(event, MekanismBlocks.SALT_BLOCK, MekanismBlocks.BRONZE_BLOCK, MekanismBlocks.STEEL_BLOCK,
                   MekanismBlocks.CHARCOAL_BLOCK, MekanismBlocks.REFINED_OBSIDIAN_BLOCK, MekanismBlocks.REFINED_GLOWSTONE_BLOCK);
@@ -135,7 +136,7 @@ public class MekanismCreativeTabs {
                   MekanismBlocks.CREATIVE_FLUID_TANK
             );
             CreativeTabDeferredRegister.addToDisplay(MekanismFluids.FLUIDS, event);
-            addFilledTanks(event.getParameters(), event, false);
+            addFilledTanks(event.getContext(), event, false);
         } else if (tabKey == CreativeModeTabs.COMBAT) {
             CreativeTabDeferredRegister.addToDisplay(event, MekanismItems.ATOMIC_DISASSEMBLER, MekanismItems.FLAMETHROWER, MekanismItems.ELECTRIC_BOW,
                   MekanismItems.MEKA_TOOL, MekanismItems.MEKASUIT_HELMET, MekanismItems.MEKASUIT_BODYARMOR, MekanismItems.MEKASUIT_PANTS, MekanismItems.MEKASUIT_BOOTS,

@@ -69,8 +69,8 @@ public class MekanismKeyHandler {
               MekanismConfig.client.save();
           }).build();
 
-    public static void registerKeybindings(RegisterKeyMappingsEvent event) {
-        ClientRegistrationUtil.registerKeyBindings(event, handModeSwitchKey, headModeSwitchKey, chestModeSwitchKey, legsModeSwitchKey, feetModeSwitchKey,
+    public static void registerKeybindings() {
+        ClientRegistrationUtil.registerKeyBindings(handModeSwitchKey, headModeSwitchKey, chestModeSwitchKey, legsModeSwitchKey, feetModeSwitchKey,
               detailsKey, descriptionKey, moduleTweakerKey, boostKey, hudKey);
     }
 
