@@ -184,6 +184,7 @@ import mekanism.common.tile.transmitter.TileEntityLogisticalTransporter;
 import mekanism.common.util.WorldUtils;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
+import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
@@ -215,7 +216,6 @@ import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.NotNull;
 
-@EventBusSubscriber(modid = Mekanism.MODID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
 public class ClientRegistration implements ModelLoadingPlugin {
 
     private static final FieldReflectionHelper<SeparateTransformsModel.Baked, BakedModel> SEPARATE_PERSPECTIVE_BASE_MODEL =
@@ -224,7 +224,6 @@ public class ClientRegistration implements ModelLoadingPlugin {
           new FieldReflectionHelper<>(SeparateTransformsModel.Baked.class, "perspectives", ImmutableMap::of);
     private static final Map<ResourceLocation, CustomModelRegistryObject> customModels = new ConcurrentHashMap<>();
 
-    @SubscribeEvent
     public static void init() {
         new ClientTickHandler();
         new RenderTickHandler();
@@ -238,56 +237,54 @@ public class ClientRegistration implements ModelLoadingPlugin {
         moduleHelper.addMekaSuitModuleModelSpec("modulator", MekanismModules.GRAVITATIONAL_MODULATING_UNIT, EquipmentSlot.CHEST);
         moduleHelper.addMekaSuitModuleModelSpec("elytra", MekanismModules.ELYTRA_UNIT, EquipmentSlot.CHEST, LivingEntity::isFallFlying);
 
-        event.enqueueWork(() -> {
-            //Set fluids to a translucent render layer
-            for (Holder<Fluid> fluid : MekanismFluids.FLUIDS.getFluidEntries()) {
-                BlockRenderLayerMap.INSTANCE.putFluid(fluid.value(), RenderType.translucent());
+        //Set fluids to a translucent render layer
+        for (Holder<Fluid> fluid : MekanismFluids.FLUIDS.getFluidEntries()) {
+            BlockRenderLayerMap.INSTANCE.putFluid(fluid.value(), RenderType.translucent());
+        }
+        ClientRegistrationUtil.setPropertyOverride(MekanismBlocks.CARDBOARD_BOX.getItemHolder(), Mekanism.rl("storage"),
+              (stack, world, entity, seed) -> stack.has(MekanismDataComponents.BLOCK_DATA.get()) ? 1 : 0);
+
+        ClientRegistrationUtil.setPropertyOverride(MekanismItems.CRAFTING_FORMULA, Mekanism.rl("invalid"), (stack, world, entity, seed) -> {
+            FormulaAttachment attachment = stack.getOrDefault(MekanismDataComponents.FORMULA_HOLDER.get(), FormulaAttachment.EMPTY);
+            return attachment.hasItems() && attachment.invalid() ? 1 : 0;
+        });
+        ClientRegistrationUtil.setPropertyOverride(MekanismItems.CRAFTING_FORMULA, Mekanism.rl("encoded"), (stack, world, entity, seed) -> {
+            FormulaAttachment attachment = stack.getOrDefault(MekanismDataComponents.FORMULA_HOLDER.get(), FormulaAttachment.EMPTY);
+            return attachment.hasItems() && !attachment.invalid() ? 1 : 0;
+        });
+        ClientRegistrationUtil.setPropertyOverride(MekanismItems.CONFIGURATION_CARD, Mekanism.rl("encoded"),
+              (stack, world, entity, seed) -> ((ItemConfigurationCard) stack.getItem()).hasData(stack) ? 1 : 0);
+        ClientRegistrationUtil.setPropertyOverride(MekanismItems.CONFIGURATOR, Mekanism.rl("mode"), (stack, world, entity, seed) -> {
+            ConfiguratorMode mode = ((ItemConfigurator) stack.getItem()).getMode(stack);
+            return switch (mode) {
+                default -> 0;
+                case EMPTY -> 1;
+                case ROTATE -> 2;
+                case WRENCH -> 3;
+            };
+        });
+
+        ClientRegistrationUtil.setPropertyOverride(MekanismItems.ELECTRIC_BOW, Mekanism.rl("pull"),
+              (stack, world, entity, seed) -> entity != null && entity.getUseItem() == stack ? (stack.getUseDuration(entity) - entity.getUseItemRemainingTicks()) / (float) SharedConstants.TICKS_PER_SECOND : 0);
+        ClientRegistrationUtil.setPropertyOverride(MekanismItems.ELECTRIC_BOW, Mekanism.rl("pulling"),
+              (stack, world, entity, seed) -> entity != null && entity.isUsingItem() && entity.getUseItem() == stack ? 1.0F : 0.0F);
+
+        ClientRegistrationUtil.setPropertyOverride(MekanismItems.GEIGER_COUNTER, Mekanism.rl("radiation"), (stack, world, entity, seed) -> {
+            if (entity instanceof Player) {
+                return ClientRadiation.getClientScale().ordinal();
             }
-            ClientRegistrationUtil.setPropertyOverride(MekanismBlocks.CARDBOARD_BOX.getItemHolder(), Mekanism.rl("storage"),
-                  (stack, world, entity, seed) -> stack.has(MekanismDataComponents.BLOCK_DATA.get()) ? 1 : 0);
-
-            ClientRegistrationUtil.setPropertyOverride(MekanismItems.CRAFTING_FORMULA, Mekanism.rl("invalid"), (stack, world, entity, seed) -> {
-                FormulaAttachment attachment = stack.getOrDefault(MekanismDataComponents.FORMULA_HOLDER.get(), FormulaAttachment.EMPTY);
-                return attachment.hasItems() && attachment.invalid() ? 1 : 0;
-            });
-            ClientRegistrationUtil.setPropertyOverride(MekanismItems.CRAFTING_FORMULA, Mekanism.rl("encoded"), (stack, world, entity, seed) -> {
-                FormulaAttachment attachment = stack.getOrDefault(MekanismDataComponents.FORMULA_HOLDER.get(), FormulaAttachment.EMPTY);
-                return attachment.hasItems() && !attachment.invalid() ? 1 : 0;
-            });
-            ClientRegistrationUtil.setPropertyOverride(MekanismItems.CONFIGURATION_CARD, Mekanism.rl("encoded"),
-                  (stack, world, entity, seed) -> ((ItemConfigurationCard) stack.getItem()).hasData(stack) ? 1 : 0);
-            ClientRegistrationUtil.setPropertyOverride(MekanismItems.CONFIGURATOR, Mekanism.rl("mode"), (stack, world, entity, seed) -> {
-                ConfiguratorMode mode = ((ItemConfigurator) stack.getItem()).getMode(stack);
-                return switch (mode) {
-                    default -> 0;
-                    case EMPTY -> 1;
-                    case ROTATE -> 2;
-                    case WRENCH -> 3;
-                };
-            });
-
-            ClientRegistrationUtil.setPropertyOverride(MekanismItems.ELECTRIC_BOW, Mekanism.rl("pull"),
-                  (stack, world, entity, seed) -> entity != null && entity.getUseItem() == stack ? (stack.getUseDuration(entity) - entity.getUseItemRemainingTicks()) / (float) SharedConstants.TICKS_PER_SECOND : 0);
-            ClientRegistrationUtil.setPropertyOverride(MekanismItems.ELECTRIC_BOW, Mekanism.rl("pulling"),
-                  (stack, world, entity, seed) -> entity != null && entity.isUsingItem() && entity.getUseItem() == stack ? 1.0F : 0.0F);
-
-            ClientRegistrationUtil.setPropertyOverride(MekanismItems.GEIGER_COUNTER, Mekanism.rl("radiation"), (stack, world, entity, seed) -> {
-                if (entity instanceof Player) {
-                    return ClientRadiation.getClientScale().ordinal();
-                }
-                return 0;
-            });
-            //Note: Our implementation allows for a null entity so don't worry about it and pass it
-            ClientRegistrationUtil.setPropertyOverride(MekanismItems.HDPE_REINFORCED_ELYTRA, Mekanism.rl("broken"), (stack, world, entity, seed) -> {
-                boolean canFly;
-                if (entity == null) {
-                    //Fallback to the vanilla check in case any mods like quark are making vanilla actually make use of the entity
-                    canFly = stack.getDamageValue() < stack.getMaxDamage() - 1;
-                } else {
-                    canFly = MekanismItems.HDPE_REINFORCED_ELYTRA.get().canElytraFly(stack, entity);
-                }
-                return canFly ? 0.0F : 1.0F;
-            });
+            return 0;
+        });
+        //Note: Our implementation allows for a null entity so don't worry about it and pass it
+        ClientRegistrationUtil.setPropertyOverride(MekanismItems.HDPE_REINFORCED_ELYTRA, Mekanism.rl("broken"), (stack, world, entity, seed) -> {
+            boolean canFly;
+            if (entity == null) {
+                //Fallback to the vanilla check in case any mods like quark are making vanilla actually make use of the entity
+                canFly = stack.getDamageValue() < stack.getMaxDamage() - 1;
+            } else {
+                canFly = MekanismItems.HDPE_REINFORCED_ELYTRA.get().canElytraFly(stack, entity);
+            }
+            return canFly ? 0.0F : 1.0F;
         });
 
         addCustomModel(MekanismBlocks.QIO_DRIVE_ARRAY, (orig, evt) -> new DriveArrayBakedModel(orig));
@@ -296,17 +293,20 @@ public class ClientRegistration implements ModelLoadingPlugin {
         addLitModel(MekanismItems.MEKA_TOOL);
 
         // Fabric
+        registerKeybindings();
         registerRenderers();
         registerLayer();
         registerClientReloadListeners();
         registerScreens();
         RegisterGeometryLoadersCallback.EVENT.register(ClientRegistration::registerModelLoaders);
         ItemDecorationsCallback.EVENT.register(ClientRegistration::registerItemDecorations);
+        registerParticleFactories();
+        registerBlockColorHandlers();
+        registerItemColorHandlers();
     }
 
-    @SubscribeEvent
-    public static void registerKeybindings(RegisterKeyMappingsEvent event) {
-        MekanismKeyHandler.registerKeybindings(event);
+    public static void registerKeybindings() {
+        MekanismKeyHandler.registerKeybindings();
     }
 
     @SubscribeEvent
@@ -517,7 +517,7 @@ public class ClientRegistration implements ModelLoadingPlugin {
                   return -1;
               }, MekanismBlocks.BASIC_FLUID_TANK, MekanismBlocks.ADVANCED_FLUID_TANK, MekanismBlocks.ELITE_FLUID_TANK, MekanismBlocks.ULTIMATE_FLUID_TANK,
               MekanismBlocks.CREATIVE_FLUID_TANK);
-        ClientRegistrationUtil.registerBlockColorHandler(event, (state, world, pos, tintIndex) -> {
+        ClientRegistrationUtil.registerBlockColorHandler((state, world, pos, tintIndex) -> {
                   if (pos != null) {
                       TileEntityQIOComponent tile = WorldUtils.getTileEntity(TileEntityQIOComponent.class, world, pos);
                       if (tile != null) {
@@ -528,7 +528,7 @@ public class ClientRegistration implements ModelLoadingPlugin {
                   return -1;
               }, MekanismBlocks.QIO_DRIVE_ARRAY, MekanismBlocks.QIO_DASHBOARD, MekanismBlocks.QIO_IMPORTER, MekanismBlocks.QIO_EXPORTER,
               MekanismBlocks.QIO_REDSTONE_ADAPTER);
-        ClientRegistrationUtil.registerBlockColorHandler(event, (state, world, pos, tintIndex) -> {
+        ClientRegistrationUtil.registerBlockColorHandler((state, world, pos, tintIndex) -> {
                   if (tintIndex == 1 && pos != null) {
                       TileEntityLogisticalTransporter transporter = WorldUtils.getTileEntity(TileEntityLogisticalTransporter.class, world, pos);
                       if (transporter != null) {
@@ -544,14 +544,13 @@ public class ClientRegistration implements ModelLoadingPlugin {
         for (Map.Entry<IResource, BlockRegistryObject<?, ?>> entry : MekanismBlocks.PROCESSED_RESOURCE_BLOCKS.entrySet()) {
             if (entry.getKey() instanceof PrimaryResource primaryResource) {
                 int tint = primaryResource.getTint();
-                ClientRegistrationUtil.registerBlockColorHandler(event, (state, world, pos, index) -> index == 1 ? tint : -1, entry.getValue());
+                ClientRegistrationUtil.registerBlockColorHandler((state, world, pos, index) -> index == 1 ? tint : -1, entry.getValue());
             }
         }
     }
 
-    @SubscribeEvent
-    public static void registerItemColorHandlers(RegisterColorHandlersEvent.Item event) {
-        ClientRegistrationUtil.registerItemColorHandler(event, (stack, tintIndex) -> {
+    public static void registerItemColorHandlers() {
+        ClientRegistrationUtil.registerItemColorHandler((stack, tintIndex) -> {
                   Item item = stack.getItem();
                   if (tintIndex == 1 && item instanceof ItemBlockFluidTank tank) {
                       return tank.getTier().getBaseTier().getPackedColor();
@@ -559,15 +558,15 @@ public class ClientRegistration implements ModelLoadingPlugin {
                   return -1;
               }, MekanismBlocks.BASIC_FLUID_TANK, MekanismBlocks.ADVANCED_FLUID_TANK, MekanismBlocks.ELITE_FLUID_TANK, MekanismBlocks.ULTIMATE_FLUID_TANK,
               MekanismBlocks.CREATIVE_FLUID_TANK);
-        ClientRegistrationUtil.registerBucketColorHandler(event, MekanismFluids.FLUIDS);
+        ClientRegistrationUtil.registerBucketColorHandler(MekanismFluids.FLUIDS);
         for (Cell<ResourceType, PrimaryResource, ItemRegistryObject<Item>> item : MekanismItems.PROCESSED_RESOURCES.cellSet()) {
             int tint = item.getColumnKey().getTint();
-            ClientRegistrationUtil.registerItemColorHandler(event, (stack, index) -> index == 1 ? tint : -1, item.getValue());
+            ClientRegistrationUtil.registerItemColorHandler((stack, index) -> index == 1 ? tint : -1, item.getValue());
         }
-        ClientRegistrationUtil.registerIColoredItemHandler(event, MekanismItems.PORTABLE_QIO_DASHBOARD, MekanismBlocks.QIO_DRIVE_ARRAY, MekanismBlocks.QIO_DASHBOARD,
+        ClientRegistrationUtil.registerIColoredItemHandler(MekanismItems.PORTABLE_QIO_DASHBOARD, MekanismBlocks.QIO_DRIVE_ARRAY, MekanismBlocks.QIO_DASHBOARD,
               MekanismBlocks.QIO_IMPORTER, MekanismBlocks.QIO_EXPORTER, MekanismBlocks.QIO_REDSTONE_ADAPTER);
 
-        ClientRegistrationUtil.registerItemColorHandler(event, (stack, index) -> {
+        ClientRegistrationUtil.registerItemColorHandler((stack, index) -> {
             if (index == 1) {
                 IModule<ModuleColorModulationUnit> colorModulationUnit = IModuleHelper.INSTANCE.getModule(stack, MekanismModules.COLOR_MODULATION_UNIT);
                 if (colorModulationUnit == null) {
@@ -581,7 +580,7 @@ public class ClientRegistration implements ModelLoadingPlugin {
         for (Map.Entry<IResource, BlockRegistryObject<?, ?>> entry : MekanismBlocks.PROCESSED_RESOURCE_BLOCKS.entrySet()) {
             if (entry.getKey() instanceof PrimaryResource primaryResource) {
                 int tint = primaryResource.getTint();
-                ClientRegistrationUtil.registerItemColorHandler(event, (stack, index) -> index == 1 ? tint : -1, entry.getValue());
+                ClientRegistrationUtil.registerItemColorHandler((stack, index) -> index == 1 ? tint : -1, entry.getValue());
             }
         }
     }

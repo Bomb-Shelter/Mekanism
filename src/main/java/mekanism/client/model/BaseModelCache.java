@@ -88,9 +88,9 @@ public class BaseModelCache {
         //Register the model
         JSONModelData data = registerJSON(rl);
         //Manually run the JsonModelData#reload logic
-        data.bakedModel = baker.bake(rl, BlockModelRotation.X0_Y0, Material::sprite);
+        data.bakedModel = baker.bake(rl, BlockModelRotation.X0_Y0/*, Material::sprite TODO: Fabric port*/);
         if (getUnbakedModel(modelBakery, baker, mrl) instanceof BlockModel blockModel) {
-            data.model = blockModel.customData.getCustomGeometry();
+            data.model = blockModel.port_lib$getCustomData().getCustomGeometry();
         }
         return data;
     }
@@ -102,21 +102,21 @@ public class BaseModelCache {
     }
 
     private static UnbakedModel getUnbakedModel(ModelBakery modelBakery, ModelBaker baker, ModelResourceLocation rl) {
-        UnbakedModel unbakedModel = baker.getTopLevelModel(rl);
-        if (unbakedModel == null) {
+//        UnbakedModel unbakedModel = baker.getTopLevelModel(rl); TODO: Fabric port
+//        if (unbakedModel == null) {
             return modelBakery.getModel(rl.id());
-        }
-        return unbakedModel;
+//        }
+//        return unbakedModel;
     }
 
-    public static BakedModel getBakedModel(BakingCompleted evt, ModelResourceLocation rl) {
-        BakedModel bakedModel = evt.getModels().get(rl);
-        if (bakedModel == null) {
-            Mekanism.logger.error("Baked model doesn't exist: {}", rl);
-            return evt.getModelManager().getMissingModel();
-        }
-        return bakedModel;
-    }
+//    public static BakedModel getBakedModel(BakingCompleted evt, ModelResourceLocation rl) { TODO: Fabric port
+//        BakedModel bakedModel = evt.getModels().get(rl);
+//        if (bakedModel == null) {
+//            Mekanism.logger.error("Baked model doesn't exist: {}", rl);
+//            return evt.getModelManager().getMissingModel();
+//        }
+//        return bakedModel;
+//    }
 
     public static class MekanismModelData {
 
@@ -131,22 +131,22 @@ public class BaseModelCache {
             this.mrl = ModelResourceLocation.standalone(rl);
         }
 
-        protected void reload(BakingCompleted evt) {
-            bakedMap.clear();
-        }
-
-        protected void setup(RegisterAdditional event) {
-        }
+//        protected void reload(BakingCompleted evt) { TODO: Fabric port
+//            bakedMap.clear();
+//        }
+//
+//        protected void setup(RegisterAdditional event) {
+//        }
 
         public BakedModel bake(IGeometryBakingContext config) {
             BakedModel bakedModel = bakedMap.get(config);
             if (bakedModel == null) {
-                ModelBaker baker = Minecraft.getInstance().getModelManager().getModelBakery().new ModelBakerImpl(
-                      (modelLoc, material) -> material.sprite(),
-                      mrl
-                );
-                bakedModel = model.bake(config, baker, Material::sprite, BlockModelRotation.X0_Y0, ItemOverrides.EMPTY);
-                bakedMap.put(config, bakedModel);
+//                ModelBaker baker = Minecraft.getInstance().getModelManager().getModelBakery().new ModelBakerImpl(
+//                      (modelLoc, material) -> material.sprite(),
+//                      mrl
+//                );
+//                bakedModel = model.bake(config, baker, Material::sprite, BlockModelRotation.X0_Y0, ItemOverrides.EMPTY);
+//                bakedMap.put(config, bakedModel); TODO: Fabric port
             }
             return bakedModel;
         }
@@ -162,11 +162,11 @@ public class BaseModelCache {
             super(rl);
         }
 
-        @Override
-        protected void reload(BakingCompleted evt) {
-            super.reload(evt);
-            model = ObjLoader.INSTANCE.loadModel(new ObjModel.ModelSettings(rl, true, useDiffuseLighting(), true, true, null));
-        }
+//        @Override TODO: Fabric port
+//        protected void reload(BakingCompleted evt) {
+//            super.reload(evt);
+//            model = ObjLoader.INSTANCE.loadModel(new ObjModel.ModelSettings(rl, true, useDiffuseLighting(), true, true, null));
+//        }
 
         @Override
         public ObjModel getModel() {
@@ -186,23 +186,23 @@ public class BaseModelCache {
             super(rl);
         }
 
-        @Override
-        protected void reload(BakingCompleted evt) {
-            super.reload(evt);
-            bakedModel = BaseModelCache.getBakedModel(evt, mrl);
-            ModelBaker baker = evt.getModelBakery().new ModelBakerImpl(
-                  (modelLoc, material) -> material.sprite(),
-                  mrl
-            );
-            if (getUnbakedModel(evt.getModelBakery(), baker, mrl) instanceof BlockModel blockModel) {
-                model = blockModel.customData.getCustomGeometry();
-            }
-        }
-
-        @Override
-        protected void setup(RegisterAdditional event) {
-            event.register(mrl);
-        }
+//        @Override TODO: Fabric port
+//        protected void reload(BakingCompleted evt) {
+//            super.reload(evt);
+//            bakedModel = BaseModelCache.getBakedModel(evt, mrl);
+//            ModelBaker baker = evt.getModelBakery().new ModelBakerImpl(
+//                  (modelLoc, material) -> material.sprite(),
+//                  mrl
+//            );
+//            if (getUnbakedModel(evt.getModelBakery(), baker, mrl) instanceof BlockModel blockModel) {
+//                model = blockModel.customData.getCustomGeometry();
+//            }
+//        }
+//
+//        @Override
+//        protected void setup(RegisterAdditional event) {
+//            event.register(mrl);
+//        }
 
         public List<BakedQuad> getQuads(RandomSource random) {
             //TODO: Decide if this should just redirect to the other get quads method (some impls might be different depending on if it gets data and render type vs not)

@@ -42,6 +42,8 @@ import mekanism.common.util.EnumUtils;
 import mekanism.common.util.MekanismUtils;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandler;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
+import net.fabricmc.fabric.api.transfer.v1.client.fluid.FluidVariantRenderHandler;
+import net.fabricmc.fabric.api.transfer.v1.client.fluid.FluidVariantRendering;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -55,12 +57,12 @@ import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FastColor;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.Vec3;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-@EventBusSubscriber(modid = Mekanism.MODID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
 public class MekanismRenderer {
 
     //TODO: Replace various usages of LightTexture.FULL_BRIGHT with the getter for calculating glow light, at least if we end up making it only
@@ -86,24 +88,17 @@ public class MekanismRenderer {
      */
     public static TextureAtlasSprite getBaseFluidTexture(@NotNull Fluid fluid, @NotNull FluidTextureType type) {
         FluidRenderHandler handle = FluidRenderHandlerRegistry.INSTANCE.get(fluid);
-        ResourceLocation spriteLocation;
-        if (type == FluidTextureType.STILL) {
-            spriteLocation = properties.getStillTexture();
-        } else {
-            spriteLocation = properties.getFlowingTexture();
+        if (handle == null) {
+            handle = FluidRenderHandlerRegistry.INSTANCE.get(Fluids.WATER);
         }
-        return getSprite(spriteLocation);
+        TextureAtlasSprite sprites[] = handle.getFluidSprites(null, null, fluid.defaultFluidState());
+        return sprites[type.ordinal()];
     }
 
     public static TextureAtlasSprite getFluidTexture(@NotNull FluidStack fluidStack, @NotNull FluidTextureType type) {
-        IClientFluidTypeExtensions properties = IClientFluidTypeExtensions.of(fluidStack.getFluid());
-        ResourceLocation spriteLocation;
-        if (type == FluidTextureType.STILL) {
-            spriteLocation = properties.getStillTexture(fluidStack);
-        } else {
-            spriteLocation = properties.getFlowingTexture(fluidStack);
-        }
-        return getSprite(spriteLocation);
+        FluidVariantRenderHandler properties = FluidVariantRendering.getHandlerOrDefault(fluidStack.getFluid());
+        TextureAtlasSprite[] sprites = properties.getSprites(fluidStack.getVariant());
+        return sprites[type.ordinal()];
     }
 
     public static TextureAtlasSprite getChemicalTexture(@NotNull ChemicalStack stack) {
@@ -188,7 +183,7 @@ public class MekanismRenderer {
 
     public static void color(GuiGraphics guiGraphics, @NotNull FluidStack fluid) {
         if (!fluid.isEmpty()) {
-            color(guiGraphics, IClientFluidTypeExtensions.of(fluid.getFluid()).getTintColor(fluid));
+            color(guiGraphics, FluidVariantRendering.getColor(fluid.getVariant()));
         }
     }
 
@@ -213,7 +208,7 @@ public class MekanismRenderer {
     }
 
     public static int getColorARGB(@NotNull FluidStack fluidStack) {
-        return IClientFluidTypeExtensions.of(fluidStack.getFluid()).getTintColor(fluidStack);
+        return FluidVariantRendering.getColor(fluidStack.getVariant());
     }
 
     public static int getColorARGB(@NotNull FluidStack fluidStack, float fluidScale) {

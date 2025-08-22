@@ -15,6 +15,8 @@ import mekanism.common.Mekanism;
 import mekanism.common.content.network.transmitter.Transmitter;
 import mekanism.common.lib.transmitter.acceptor.NetworkAcceptorCache;
 import mekanism.common.util.EnumUtils;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
@@ -109,7 +111,7 @@ public abstract class DynamicNetwork<ACCEPTOR, NETWORK extends DynamicNetwork<AC
     }
 
     public boolean isRemote() {
-        return world == null ? EffectiveSide.get().isClient() : world.isClientSide;
+        return world == null ? FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT : world.isClientSide;
     }
 
     public void invalidate(@Nullable TRANSMITTER triggerTransmitter) {

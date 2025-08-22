@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 import mekanism.common.Mekanism;
 import mekanism.common.registration.MekanismDeferredHolder;
 import mekanism.common.registration.MekanismDeferredRegister;
+import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -17,10 +18,6 @@ import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
-import net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent;
-import org.jetbrains.annotations.NotNull;
 
 public class EntityTypeDeferredRegister extends MekanismDeferredRegister<EntityType<?>> {
 
@@ -64,17 +61,17 @@ public class EntityTypeDeferredRegister extends MekanismDeferredRegister<EntityT
     @Override
     public void register() {
         super.register();
-        bus.addListener(this::registerEntityAttributes);
-        bus.addListener(this::registerPlacements);
+        registerEntityAttributes();
+        registerPlacements();
     }
 
-    private void registerEntityAttributes(EntityAttributeCreationEvent event) {
+    private void registerEntityAttributes() {
         if (livingEntityAttributes == null) {
             Mekanism.logger.error("Entity Attributes have already been created. This should not happen.");
         } else {
             //Register our living entity attributes
             for (Map.Entry<Supplier<? extends EntityType<? extends LivingEntity>>, Supplier<AttributeSupplier.Builder>> entry : livingEntityAttributes.entrySet()) {
-                event.put(entry.getKey().get(), entry.getValue().get().build());
+                FabricDefaultAttributeRegistry.register(entry.getKey().get(), entry.getValue().get());
             }
             //And set the map to null to allow it to be garbage collected
             livingEntityAttributes = null;

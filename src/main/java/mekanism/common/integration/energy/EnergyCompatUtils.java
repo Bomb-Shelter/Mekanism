@@ -6,7 +6,7 @@ import mekanism.api.energy.IStrictEnergyHandler;
 import mekanism.api.fabric.lookup.ICapabilityProvider;
 import mekanism.common.capabilities.Capabilities;
 //import mekanism.common.integration.energy.fluxnetworks.FNEnergyCompat;
-import mekanism.common.integration.energy.forgeenergy.ForgeEnergyCompat;
+//import mekanism.common.integration.energy.forgeenergy.ForgeEnergyCompat;
 //import mekanism.common.integration.energy.grandpower.GPEnergyCompat;
 import mekanism.common.registration.impl.TileEntityTypeDeferredRegister.BlockEntityTypeBuilder;
 import mekanism.common.tile.base.CapabilityTileEntity;

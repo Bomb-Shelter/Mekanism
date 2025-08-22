@@ -5,8 +5,6 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import mekanism.common.Mekanism;
-import net.neoforged.fml.util.ObfuscationReflectionHelper;
-import net.neoforged.fml.util.ObfuscationReflectionHelper.UnableToFindFieldException;
 
 /**
  * Helper  to make reflecting and grabbing the value of fields in a cached way easier
@@ -29,12 +27,12 @@ public class FieldReflectionHelper<CLASS, TYPE> {
 
     public TYPE getValue(CLASS input) {
         if (field == null) {
-            try {
-                field = ObfuscationReflectionHelper.findField(clazz, fieldName);
-            } catch (UnableToFindFieldException e) {
-                Mekanism.logger.error("Error getting {} {} field.", clazz.getSimpleName(), fieldName, e);
-                return fallback.get();
-            }
+//            try { TODO: Fabric port
+//                field = ObfuscationReflectionHelper.findField(clazz, fieldName);
+//            } catch (UnableToFindFieldException e) {
+//                Mekanism.logger.error("Error getting {} {} field.", clazz.getSimpleName(), fieldName, e);
+//                return fallback.get();
+//            }
         }
         try {
             return (TYPE) field.get(input);

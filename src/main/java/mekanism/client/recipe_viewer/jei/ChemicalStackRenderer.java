@@ -18,13 +18,13 @@ import mekanism.common.MekanismLang;
 import mekanism.common.util.text.TextUtils;
 import mezz.jei.api.gui.builder.ITooltipBuilder;
 import mezz.jei.api.ingredients.IIngredientRenderer;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.TooltipFlag;
-import net.neoforged.neoforge.fluids.FluidType;
 import org.jetbrains.annotations.NotNull;
 
 public class ChemicalStackRenderer implements IIngredientRenderer<ChemicalStack> {
@@ -38,7 +38,7 @@ public class ChemicalStackRenderer implements IIngredientRenderer<ChemicalStack>
     private final int height;
 
     public ChemicalStackRenderer() {
-        this(FluidType.BUCKET_VOLUME, TooltipMode.ITEM_LIST, TEXTURE_SIZE, TEXTURE_SIZE);
+        this(FluidConstants.BUCKET, TooltipMode.ITEM_LIST, TEXTURE_SIZE, TEXTURE_SIZE);
     }
 
     public ChemicalStackRenderer(long capacityMb, int width, int height) {

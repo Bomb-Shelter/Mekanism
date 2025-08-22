@@ -65,7 +65,7 @@ import mekanism.common.item.block.machine.ItemBlockFluidTank.FluidTankItemDispen
 import mekanism.common.item.interfaces.IHasConditionalAttributes;
 import mekanism.common.item.loot.MekanismLootFunctions;
 import mekanism.common.item.predicate.MekanismItemPredicates;
-import mekanism.common.lib.MekAnnotationScanner;
+//import mekanism.common.lib.MekAnnotationScanner;
 import mekanism.common.lib.Version;
 import mekanism.common.lib.frequency.FrequencyManager;
 import mekanism.common.lib.frequency.FrequencyType;
@@ -230,6 +230,7 @@ public class Mekanism implements ModInitializer {
         MeltdownLevelData.init();
         MultiblockManager.init();
         PlayerExposure.init();
+        TransmitterNetworkRegistry.init();
     }
 
     public static synchronized void addModule(IModModule modModule) {
@@ -384,7 +385,7 @@ public class Mekanism implements ModInitializer {
         HolidayManager.init();
 
         //Collect annotation scan data
-        MekAnnotationScanner.collectScanData();
+//        MekAnnotationScanner.collectScanData(); TODO: Fabric port
         //Register dispenser behaviors
         MekanismFluids.FLUIDS.registerBucketDispenserBehavior();
         registerFluidTankBehaviors(MekanismBlocks.BASIC_FLUID_TANK, MekanismBlocks.ADVANCED_FLUID_TANK, MekanismBlocks.ELITE_FLUID_TANK,

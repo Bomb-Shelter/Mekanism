@@ -3,6 +3,7 @@ package mekanism.api.gear.config;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import io.github.fabricators_of_create.porting_lib.core.util.PortingLibStreamCodecs;
 import io.netty.buffer.ByteBuf;
 import java.util.List;
 import java.util.Objects;
@@ -169,7 +170,7 @@ public class ModuleEnumConfig<TYPE extends Enum<TYPE> & IHasTextComponent> exten
 
     @Override
     public StreamCodec<FriendlyByteBuf, ModuleConfig<TYPE>> namedStreamCodec(ResourceLocation name) {
-        return MekanismStreamCodecs.enumCodec(value.getDeclaringClass()).map(
+        return PortingLibStreamCodecs.enumCodec(value.getDeclaringClass()).map(
               value -> new ModuleEnumConfig<>(name, value, enumConstants),
               ModuleConfig::get
         );

@@ -122,7 +122,6 @@ import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.level.portal.DimensionTransition;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.common.damagesource.DamageContainer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -286,16 +285,16 @@ public class EntityRobit extends PathfinderMob implements IRobit, IMekanismInven
         return MathUtils.ceilToLong(DISTANCE_MULTIPLIER * Math.sqrt(distanceToSqr(xo, yo, zo)));
     }
 
-    @Override
-    public void onRemovedFromLevel() {
-        if (level() != null && !level().isClientSide && getFollowing() && getOwner() != null) {
-            //If this robit is currently following its owner and is being removed from the world (due to chunk unloading)
-            // register a ticket that loads the chunk for a second, so that it has time to have its following check run again
-            // (as it runs every 10 ticks, half a second), and then teleport to the owner.
-            ((ServerLevel) level()).getChunkSource().addRegionTicket(ROBIT_CHUNK_UNLOAD, new ChunkPos(blockPosition()), 2, getId());
-        }
-        super.onRemovedFromLevel();
-    }
+//    @Override TODO: Fabric port
+//    public void onRemovedFromLevel() {
+//        if (level() != null && !level().isClientSide && getFollowing() && getOwner() != null) {
+//            //If this robit is currently following its owner and is being removed from the world (due to chunk unloading)
+//            // register a ticket that loads the chunk for a second, so that it has time to have its following check run again
+//            // (as it runs every 10 ticks, half a second), and then teleport to the owner.
+//            ((ServerLevel) level()).getChunkSource().addRegionTicket(ROBIT_CHUNK_UNLOAD, new ChunkPos(blockPosition()), 2, getId());
+//        }
+//        super.onRemovedFromLevel();
+//    }
 
     @Override
     public void tick() {
@@ -440,7 +439,7 @@ public class EntityRobit extends PathfinderMob implements IRobit, IMekanismInven
             if (provider != null) {
                 gameEvent(GameEvent.ENTITY_INTERACT, player);
                 //Validate the provider isn't null, it shouldn't be but just in case
-                player.openMenu(provider, buf -> buf.writeVarInt(getId()));
+//                player.openMenu(provider, buf -> buf.writeVarInt(getId())); TODO: Fabric port
             }
         }
         return InteractionResult.sidedSuccess(level().isClientSide);
@@ -523,12 +522,12 @@ public class EntityRobit extends PathfinderMob implements IRobit, IMekanismInven
               () -> setSkin(MekanismRobitSkins.BASE, null));
     }
 
-    @Override
-    public void onDamageTaken(@NotNull DamageContainer damageContainer) {
-        energyContainer.extract(MathUtils.clampToLong(1_000D * damageContainer.getNewDamage()), Action.EXECUTE, AutomationType.INTERNAL);
-        //Don't actually allow taking damage to reduce the robit's health
-        setHealth(getMaxHealth());
-    }
+//    @Override TODO: Fabric port
+//    public void onDamageTaken(@NotNull DamageContainer damageContainer) {
+//        energyContainer.extract(MathUtils.clampToLong(1_000D * damageContainer.getNewDamage()), Action.EXECUTE, AutomationType.INTERNAL);
+//        //Don't actually allow taking damage to reduce the robit's health
+//        setHealth(getMaxHealth());
+//    }
 
     @Override
     protected void tickDeath() {
@@ -669,10 +668,10 @@ public class EntityRobit extends PathfinderMob implements IRobit, IMekanismInven
         return energyContainer;
     }
 
-    @Override
-    public ItemStack getPickedResult(@NotNull HitResult target) {
-        return getItemVariant();
-    }
+//    @Override TODO: Fabric port
+//    public ItemStack getPickedResult(@NotNull HitResult target) {
+//        return getItemVariant();
+//    }
 
     @Override
     public void clearRecipeErrors(int cacheIndex) {

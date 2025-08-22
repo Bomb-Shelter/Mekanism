@@ -19,6 +19,7 @@ import mekanism.common.tier.TransporterTier;
 import mekanism.common.util.ChemicalUtil;
 import mekanism.common.util.EnumUtils;
 import mekanism.common.util.FluidUtils;
+import net.fabricmc.fabric.api.tag.convention.v2.ConventionalFluidTags;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -55,7 +56,7 @@ public class MekanismCreativeTabs {
                       //Only add sources and fluids that aren't hidden
                       .filterElements(fluid -> fluid != Fluids.EMPTY && fluid.isSource(fluid.defaultFluidState()))
                       .listElements()
-                      .filter(holder -> !holder.is(Tags.Fluids.HIDDEN_FROM_RECIPE_VIEWERS))
+                      .filter(holder -> !holder.is(ConventionalFluidTags.HIDDEN_FROM_RECIPE_VIEWERS))
                       .forEach(holder -> output.accept(FluidUtils.getFilledVariant(MekanismBlocks.CREATIVE_FLUID_TANK.getItemHolder(), holder)));
             }
             if (chemical) {
