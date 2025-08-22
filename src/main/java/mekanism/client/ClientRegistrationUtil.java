@@ -4,6 +4,7 @@ import com.mojang.blaze3d.shaders.FogShape;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.lang.ref.WeakReference;
 
+import io.github.fabricators_of_create.porting_lib.item.injects.ItemPropertiesInjection;
 import io.github.fabricators_of_create.porting_lib.models.DynamicFluidContainerModel;
 import mekanism.api.text.EnumColor;
 import mekanism.client.gui.machine.GuiAdvancedElectricMachine;

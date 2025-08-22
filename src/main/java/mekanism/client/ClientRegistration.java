@@ -7,6 +7,7 @@ import com.google.common.collect.Table.Cell;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import io.github.fabricators_of_create.porting_lib.client_events.event.client.PlaySoundCallback;
 import io.github.fabricators_of_create.porting_lib.item.client.IItemDecorator;
 import io.github.fabricators_of_create.porting_lib.item.client.callbacks.ItemDecorationsCallback;
 import io.github.fabricators_of_create.porting_lib.models.SeparateTransformsModel;
@@ -210,6 +211,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ElytraItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.level.ItemLike;
@@ -227,7 +229,10 @@ public class ClientRegistration implements ModelLoadingPlugin {
     public static void init() {
         new ClientTickHandler();
         new RenderTickHandler();
-        NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, SoundHandler::onTilePlaySound);
+        SoundHandler.init();
+        PlaySoundCallback.EVENT.register((engine, sound, originalSound) -> {
+            return SoundHandler.onTilePlaySound(sound, originalSound);
+        });
         if (Mekanism.hooks.recipeViewerCompatEnabled()) {
             NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, RenderTickHandler::guiOpening);
         }
@@ -282,7 +287,7 @@ public class ClientRegistration implements ModelLoadingPlugin {
                 //Fallback to the vanilla check in case any mods like quark are making vanilla actually make use of the entity
                 canFly = stack.getDamageValue() < stack.getMaxDamage() - 1;
             } else {
-                canFly = MekanismItems.HDPE_REINFORCED_ELYTRA.get().canElytraFly(stack, entity);
+                canFly = MekanismItems.HDPE_REINFORCED_ELYTRA.get().useCustomElytra(entity, stack, false);
             }
             return canFly ? 0.0F : 1.0F;
         });
