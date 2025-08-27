@@ -102,10 +102,10 @@ public class MekanismClient implements ClientModInitializer {
         return Minecraft.getInstance().player;
     }
 
-    @SubscribeEvent
-    public static void onCloneRespawn(ClientPlayerNetworkEvent.Clone event) {
-        if (event.getOldPlayer().level() != event.getNewPlayer().level()) {
-            resetDimensionChange();
-        }
-    }
+//    @SubscribeEvent TODO: Fabric port
+//    public static void onCloneRespawn(ClientPlayerNetworkEvent.Clone event) {
+//        if (event.getOldPlayer().level() != event.getNewPlayer().level()) {
+//            resetDimensionChange();
+//        }
+//    }
 }

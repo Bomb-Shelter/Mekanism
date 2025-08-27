@@ -20,13 +20,13 @@ public class DatapackDeferredRegister<T> extends DeferredMapCodecRegister<T> {
         return new DatapackDeferredRegister<>(modid, MekanismAPI.ROBIT_SKIN_SERIALIZER_REGISTRY_NAME, MekanismAPI.ROBIT_SKIN_REGISTRY_NAME);
     }
 
-    public static DatapackDeferredRegister<BiomeModifier> biomeModifiers(String modid) {
-        return new DatapackDeferredRegister<>(modid, NeoForgeRegistries.Keys.BIOME_MODIFIER_SERIALIZERS, NeoForgeRegistries.Keys.BIOME_MODIFIERS);
-    }
-
-    public static DatapackDeferredRegister<StructureModifier> structureModifiers(String modid) {
-        return new DatapackDeferredRegister<>(modid, NeoForgeRegistries.Keys.STRUCTURE_MODIFIER_SERIALIZERS, NeoForgeRegistries.Keys.STRUCTURE_MODIFIERS);
-    }
+//    public static DatapackDeferredRegister<BiomeModifier> biomeModifiers(String modid) { TODO: Fabric port
+//        return new DatapackDeferredRegister<>(modid, NeoForgeRegistries.Keys.BIOME_MODIFIER_SERIALIZERS, NeoForgeRegistries.Keys.BIOME_MODIFIERS);
+//    }
+//
+//    public static DatapackDeferredRegister<StructureModifier> structureModifiers(String modid) {
+//        return new DatapackDeferredRegister<>(modid, NeoForgeRegistries.Keys.STRUCTURE_MODIFIER_SERIALIZERS, NeoForgeRegistries.Keys.STRUCTURE_MODIFIERS);
+//    }
 
     private final ResourceKey<Registry<T>> datapackRegistryName;
 

@@ -799,4 +799,24 @@ public abstract class GuiMekanism<CONTAINER extends AbstractContainerMenu> exten
     public LRU<GuiWindow>.LRUIterator getWindowsDescendingIterator() {
         return windows.descendingIterator();
     }
+
+    @Override
+    public int getGuiLeft() {
+        return this.leftPos;
+    }
+
+    @Override
+    public int getGuiTop() {
+        return this.topPos;
+    }
+
+    @Override
+    public int getXSize() {
+        return imageWidth;
+    }
+
+    @Override
+    public int getYSize() {
+        return imageHeight;
+    }
 }

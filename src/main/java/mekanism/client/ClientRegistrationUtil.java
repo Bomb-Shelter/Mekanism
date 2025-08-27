@@ -25,6 +25,7 @@ import mekanism.common.registries.MekanismDataComponents;
 import mekanism.common.tile.prefab.TileEntityAdvancedElectricMachine;
 import mekanism.common.tile.prefab.TileEntityElectricMachine;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.client.Camera;
@@ -79,7 +80,7 @@ public class ClientRegistrationUtil {
     private static final ItemColor COLORED_ITEM_COLOR = (stack, tintIndex) -> {
         Item item = stack.getItem();
         if (tintIndex == 1 && item instanceof IColoredItem) {
-            EnumColor color = stack.get(MekanismDataComponents.COLOR);
+            EnumColor color = stack.get(MekanismDataComponents.COLOR.get());
             if (color == null) {
                 return 0xFF555555;
             }
@@ -159,35 +160,32 @@ public class ClientRegistrationUtil {
         ItemProperties.register(item.value(), override, propertyGetter);
     }
 
-    public static void registerItemColorHandler(RegisterColorHandlersEvent.Item event, ItemColor itemColor, ItemLike... items) {
+    public static void registerItemColorHandler(ItemColor itemColor, ItemLike... items) {
         for (ItemLike itemProvider : items) {
-            event.register(itemColor, itemProvider);
+            ColorProviderRegistry.ITEM.register(itemColor, itemProvider);
         }
     }
 
     @SafeVarargs
-    public static void registerBlockColorHandler(RegisterColorHandlersEvent.Block event, BlockColor blockColor, Holder<Block>... blocks) {
+    public static void registerBlockColorHandler(BlockColor blockColor, Holder<Block>... blocks) {
         for (Holder<Block> blockProvider : blocks) {
-            event.register(blockColor, blockProvider.value());
+            ColorProviderRegistry.BLOCK.register(blockColor, blockProvider.value());
         }
     }
 
-    public static void registerBucketColorHandler(RegisterColorHandlersEvent.Item event, FluidDeferredRegister register) {
+    public static void registerBucketColorHandler(FluidDeferredRegister register) {
         for (Holder<Item> bucket : register.getBucketEntries()) {
-            event.register(BUCKET_ITEM_COLOR, bucket.value());
+            ColorProviderRegistry.ITEM.register(BUCKET_ITEM_COLOR, bucket.value());
         }
     }
 
-    public static void registerIColoredBlockHandler(RegisterColorHandlersEvent event, BlockRegistryObject<?, ?>... blocks) {
-        if (event instanceof RegisterColorHandlersEvent.Block blockEvent) {
-            registerBlockColorHandler(blockEvent, COLORED_BLOCK_COLOR, blocks);
-        } else if (event instanceof RegisterColorHandlersEvent.Item itemEvent) {
-            registerItemColorHandler(itemEvent, COLORED_BLOCK_ITEM_COLOR, blocks);
-        }
+    public static void registerIColoredBlockHandler(BlockRegistryObject<?, ?>... blocks) {
+        registerBlockColorHandler(COLORED_BLOCK_COLOR, blocks);
+        registerItemColorHandler(COLORED_BLOCK_ITEM_COLOR, blocks);
     }
 
-    public static void registerIColoredItemHandler(RegisterColorHandlersEvent.Item event, ItemLike... items) {
-        registerItemColorHandler(event, COLORED_ITEM_COLOR, items);
+    public static void registerIColoredItemHandler(ItemLike... items) {
+        registerItemColorHandler(COLORED_ITEM_COLOR, items);
     }
 
     public static void registerItemExtensions(RegisterClientExtensionsEvent event, IClientItemExtensions extension, ItemLike... items) {

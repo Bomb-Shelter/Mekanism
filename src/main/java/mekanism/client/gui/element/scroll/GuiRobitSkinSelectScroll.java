@@ -34,7 +34,6 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.neoforged.neoforge.client.model.data.ModelData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
@@ -163,8 +162,8 @@ public class GuiRobitSkinSelectScroll extends GuiElement {
     }
 
     @Override
-    public void onClick(double mouseX, double mouseY, int button) {
-        super.onClick(mouseX, mouseY, button);
+    public void onClick(double mouseX, double mouseY/*, int button*/) {
+        super.onClick(mouseX, mouseY/*, button*/);
         ResourceKey<RobitSkin> skin = getSkin(mouseX, mouseY, false);
         if (skin != null) {
             selectedSkin = skin;
