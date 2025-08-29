@@ -4,6 +4,9 @@ import com.mojang.blaze3d.shaders.FogShape;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.lang.ref.WeakReference;
 
+import io.github.fabricators_of_create.porting_lib.client_extensions.ClientExtensionsRegistry;
+import io.github.fabricators_of_create.porting_lib.client_extensions.IClientItemExtensions;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidType;
 import io.github.fabricators_of_create.porting_lib.item.injects.ItemPropertiesInjection;
 import io.github.fabricators_of_create.porting_lib.models.DynamicFluidContainerModel;
 import mekanism.api.text.EnumColor;
@@ -188,24 +191,24 @@ public class ClientRegistrationUtil {
         registerItemColorHandler(COLORED_ITEM_COLOR, items);
     }
 
-    public static void registerItemExtensions(RegisterClientExtensionsEvent event, IClientItemExtensions extension, ItemLike... items) {
+    public static void registerItemExtensions(IClientItemExtensions extension, ItemLike... items) {
         for (ItemLike item : items) {
-            event.registerItem(extension, item.asItem());
+            ClientExtensionsRegistry.registerItem(extension, item.asItem());
         }
     }
 
-    public static void registerBlockExtensions(RegisterClientExtensionsEvent event, BlockDeferredRegister allBlocks) {
+    public static void registerBlockExtensions(BlockDeferredRegister allBlocks) {
         for (Holder<Block> primaryEntry : allBlocks.getPrimaryEntries()) {
             if (primaryEntry.value() instanceof BlockMekanism) {
-                event.registerBlock(RenderPropertiesProvider.PARTICLE_HANDLER, primaryEntry);
+                ClientExtensionsRegistry.registerBlock(RenderPropertiesProvider.PARTICLE_HANDLER, primaryEntry);
             }
         }
     }
 
-    public static void registerFluidExtensions(RegisterClientExtensionsEvent event, FluidDeferredRegister allFluids) {
+    public static void registerFluidExtensions(FluidDeferredRegister allFluids) {
         for (Holder<FluidType> fluidTypeEntry : allFluids.getFluidTypeEntries()) {
             if (fluidTypeEntry.value() instanceof MekanismFluidType fluidType) {
-                event.registerFluidType(new IClientFluidTypeExtensions() {
+                ClientExtensionsRegistry.registerFluidType(new IClientFluidTypeExtensions() {
                     @NotNull
                     @Override
                     public ResourceLocation getStillTexture() {

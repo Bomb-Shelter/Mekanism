@@ -8,6 +8,7 @@ import mekanism.api.AutomationType;
 import mekanism.api.IContentsListener;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.functions.ConstantPredicates;
+import mekanism.common.fabric.FabricUtil;
 import mekanism.common.util.MekanismUtils;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -32,15 +33,15 @@ public class FuelInventorySlot extends BasicInventorySlot {
         if (isEmpty()) {
             return 0;
         }
-        int burnTime = current.getBurnTime(null) / 2;
+        int burnTime = FabricUtil.getBurnTime(current) / 2;
         if (burnTime != 0) {
-            if (current.hasCraftingRemainingItem()) {
+            if (current.getRecipeRemainder() != null) {
                 if (current.getCount() > 1) {
                     //If we have a container but have more than a single stack of it somehow just exit
                     return 0;
                 }
                 //If the item has a container, then replace it with the container
-                setStack(current.getCraftingRemainingItem());
+                setStack(current.getRecipeRemainder());
             } else {
                 //Otherwise, shrink the size of the stack by one
                 MekanismUtils.logMismatchedStackSize(shrinkStack(1, Action.EXECUTE), 1);

@@ -4,12 +4,11 @@ import mekanism.common.lib.Version;
 import mekanism.common.network.BasePacketHandler;
 import mekanism.generators.common.network.to_server.PacketGeneratorsGuiInteract;
 import mekanism.generators.common.network.to_server.PacketGeneratorsTileButtonPress;
-import net.neoforged.bus.api.IEventBus;
 
 public class GeneratorsPacketHandler extends BasePacketHandler {
 
-    public GeneratorsPacketHandler(IEventBus modEventBus, Version version) {
-        super(modEventBus, version);
+    public GeneratorsPacketHandler(Version version) {
+        super(version);
     }
 
     @Override

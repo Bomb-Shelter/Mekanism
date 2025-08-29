@@ -5,14 +5,15 @@ import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
+
+import committee.nova.mkb.api.IKeyConflictContext;
+import committee.nova.mkb.keybinding.KeyConflictContext;
+import committee.nova.mkb.keybinding.KeyModifier;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.functions.ConstantPredicates;
 import mekanism.api.text.IHasTranslationKey;
 import mekanism.common.MekanismLang;
 import net.minecraft.client.KeyMapping;
-import net.neoforged.neoforge.client.settings.IKeyConflictContext;
-import net.neoforged.neoforge.client.settings.KeyConflictContext;
-import net.neoforged.neoforge.client.settings.KeyModifier;
 import org.jetbrains.annotations.Nullable;
 
 @NothingNullByDefault

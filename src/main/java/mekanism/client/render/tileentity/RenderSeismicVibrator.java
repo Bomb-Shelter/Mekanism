@@ -19,7 +19,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.AABB;
-import net.neoforged.neoforge.client.model.data.ModelData;
 import org.jetbrains.annotations.Nullable;
 
 @NothingNullByDefault
@@ -75,11 +74,5 @@ public class RenderSeismicVibrator extends MekanismTileEntityRenderer<TileEntity
         matrix.pushPose();
         float piston = Math.max(0, (float) Math.sin((tile.clientPiston + (tile.getActive() ? partialTick : 0)) / 5F));
         matrix.translate(0, piston * 0.625, 0);
-    }
-
-    @Override
-    public AABB getRenderBoundingBox(TileEntitySeismicVibrator tile) {
-        BlockPos pos = tile.getBlockPos();
-        return AABB.encapsulatingFullBlocks(pos, pos.above());
     }
 }

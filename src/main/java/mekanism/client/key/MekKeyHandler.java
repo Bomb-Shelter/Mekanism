@@ -1,11 +1,12 @@
 package mekanism.client.key;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import committee.nova.mkb.api.IKeyBinding;
+import committee.nova.mkb.api.IKeyConflictContext;
+import committee.nova.mkb.keybinding.KeyConflictContext;
+import committee.nova.mkb.keybinding.KeyModifier;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.neoforged.neoforge.client.settings.IKeyConflictContext;
-import net.neoforged.neoforge.client.settings.KeyConflictContext;
-import net.neoforged.neoforge.client.settings.KeyModifier;
 import org.lwjgl.glfw.GLFW;
 
 public class MekKeyHandler {
@@ -17,16 +18,16 @@ public class MekKeyHandler {
         if (keyBinding.isDown()) {
             return true;
         }
-        if (keyBinding.getKeyConflictContext().isActive() && keyBinding.getKeyModifier().isActive(keyBinding.getKeyConflictContext())) {
+        if (((IKeyBinding) keyBinding).getKeyConflictContext().isActive() && ((IKeyBinding) keyBinding).getKeyModifier().isActive(((IKeyBinding) keyBinding).getKeyConflictContext())) {
             //Manually check in case keyBinding#pressed just never got a chance to be updated
             return isKeyDown(keyBinding);
         }
         //If we failed, due to us being a key modifier as our key, check the old way
-        return KeyModifier.isKeyCodeModifier(keyBinding.getKey()) && isKeyDown(keyBinding);
+        return KeyModifier.isKeyCodeModifier(((IKeyBinding) keyBinding).getKey()) && isKeyDown(keyBinding);
     }
 
     private static boolean isKeyDown(KeyMapping keyBinding) {
-        InputConstants.Key key = keyBinding.getKey();
+        InputConstants.Key key = ((IKeyBinding) keyBinding).getKey();
         int keyCode = key.getValue();
         if (keyCode != InputConstants.UNKNOWN.getValue()) {
             long windowHandle = Minecraft.getInstance().getWindow().getWindow();
@@ -47,18 +48,18 @@ public class MekKeyHandler {
         if (keyBinding.isDown()) {
             return true;
         }
-        IKeyConflictContext conflictContext = keyBinding.getKeyConflictContext();
+        IKeyConflictContext conflictContext = ((IKeyBinding) keyBinding).getKeyConflictContext();
         if (!conflictContext.isActive()) {
             //If the conflict context (game) isn't active try it as being a gui but without it normally actually conflicting with gui keybindings
             conflictContext = KeyConflictContext.GUI;
         }
         //If we have no modifier set on the radial key allow it to be "active" even if another modifier is pressed, as we only
         // check the radial menu at specific times, so we don't want to close it if the player hits shift or something
-        if (conflictContext.isActive() && (keyBinding.getKeyModifier() == KeyModifier.NONE || keyBinding.getKeyModifier().isActive(conflictContext))) {
+        if (conflictContext.isActive() && (((IKeyBinding) keyBinding).getKeyModifier() == KeyModifier.NONE || ((IKeyBinding) keyBinding).getKeyModifier().isActive(conflictContext))) {
             //Manually check in case keyBinding#pressed just never got a chance to be updated
             return isKeyDown(keyBinding);
         }
         //If we failed, due to us being a key modifier as our key, check the old way
-        return KeyModifier.isKeyCodeModifier(keyBinding.getKey()) && isKeyDown(keyBinding);
+        return KeyModifier.isKeyCodeModifier(((IKeyBinding) keyBinding).getKey()) && isKeyDown(keyBinding);
     }
 }

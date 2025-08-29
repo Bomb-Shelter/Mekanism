@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import io.github.fabricators_of_create.porting_lib.models.events.client.ModelEvent;
 import mekanism.api.gear.IModuleHelper;
 import mekanism.client.render.armor.MekaSuitArmor.ModuleOBJModelData;
 import mekanism.client.render.transmitter.RenderTransmitterBase;
@@ -53,7 +55,7 @@ public class MekanismModelCache extends BaseModelCache {
     }
 
     @Override
-    public void onBake(BakingCompleted evt) {
+    public void onBake(ModelEvent.BakingCompleted evt) {
         super.onBake(evt);
         callbacks.forEach(Runnable::run);
         BASE_ROBIT = getBakedModel(evt, ModelResourceLocation.inventory(Mekanism.rl("robit")));

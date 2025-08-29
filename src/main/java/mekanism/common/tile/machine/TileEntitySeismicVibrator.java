@@ -1,5 +1,6 @@
 package mekanism.common.tile.machine;
 
+import io.github.fabricators_of_create.porting_lib.blocks.extensions.CustomRenderBoundingBoxBlockEntity;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.Map;
@@ -26,9 +27,10 @@ import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.NotNull;
 
-public class TileEntitySeismicVibrator extends TileEntityMekanism implements IBoundingBlock {
+public class TileEntitySeismicVibrator extends TileEntityMekanism implements IBoundingBlock, CustomRenderBoundingBoxBlockEntity {
 
     public int clientPiston;
 
@@ -150,4 +152,10 @@ public class TileEntitySeismicVibrator extends TileEntityMekanism implements IBo
         return blocks;
     }
     //End computer related methods
+
+
+    @Override
+    public AABB getRenderBoundingBox() {
+        return AABB.encapsulatingFullBlocks(this.getBlockPos(), this.getBlockPos().above());
+    }
 }

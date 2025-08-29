@@ -4,6 +4,8 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import io.github.fabricators_of_create.porting_lib.level.events.ChunkEvent;
+import io.github.fabricators_of_create.porting_lib.level.events.LevelEvent;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import mekanism.api.text.EnumColor;
@@ -11,6 +13,7 @@ import mekanism.api.text.ILangEntry;
 import mekanism.api.text.TextComponentUtil;
 import mekanism.common.MekanismLang;
 import mekanism.common.base.MekanismPermissions;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.coordinates.ColumnPosArgument;
@@ -18,10 +21,13 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ColumnPos;
+import net.minecraft.server.level.FullChunkStatus;
 import net.minecraft.server.level.ServerChunkCache;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.chunk.LevelChunk;
 import org.jetbrains.annotations.Nullable;
 
 public class ChunkCommand {
@@ -40,7 +46,6 @@ public class ChunkCommand {
     private static final Long2ObjectMap<ChunkWatchSettings> chunkWatchers = new Long2ObjectOpenHashMap<>();
 
     static ArgumentBuilder<CommandSourceStack, ?> register() {
-        NeoForge.EVENT_BUS.register(ChunkCommand.class);
         return Commands.literal("chunk")
               .requires(MekanismPermissions.COMMAND_CHUNK)
               .then(WatchCommand.register())
@@ -139,37 +144,40 @@ public class ChunkCommand {
         }
     }
 
-    @SubscribeEvent
-    public static void onChunkLoad(ChunkEvent.Load event) {
-        handleChunkEvent(event, LOADED);
+    static {
+        ServerChunkEvents.CHUNK_LOAD.register(ChunkCommand::onChunkLoad);
+        ServerChunkEvents.CHUNK_UNLOAD.register(ChunkCommand::onChunkUnload);
+        ServerChunkEvents.CHUNK_LEVEL_TYPE_CHANGE.register(ChunkCommand::onTicketLevelChange);
     }
 
-    @SubscribeEvent
-    public static void onChunkUnload(ChunkEvent.Unload event) {
-        handleChunkEvent(event, UNLOADED);
+    public static void onChunkLoad(ServerLevel level, LevelChunk chunk) {
+        handleChunkEvent(level, chunk, LOADED);
     }
 
-    @SubscribeEvent
-    public static void onTicketLevelChange(ChunkTicketLevelUpdatedEvent event) {
-        if (chunkWatchers.isEmpty() || event.getLevel().players().isEmpty()) {
+    public static void onChunkUnload(ServerLevel level, LevelChunk chunk) {
+        handleChunkEvent(level, chunk, UNLOADED);
+    }
+
+    public static void onTicketLevelChange(ServerLevel level, LevelChunk chunk, FullChunkStatus oldLevelType, FullChunkStatus newLevelType) {
+        if (chunkWatchers.isEmpty() || level.players().isEmpty()) {
             return;
         }
-        ChunkWatchSettings settings = chunkWatchers.get(event.getChunkPos());
+        ChunkWatchSettings settings = chunkWatchers.get(chunk.getPos().toLong());
         if (settings != null) {
-            Component message = settings.translateTicketLevel(event.getOldTicketLevel(), event.getNewTicketLevel());
-            for (Player player : event.getLevel().players()) {
+            // TODO Fabric: is this accurate?
+            Component message = settings.translateTicketLevel(oldLevelType.ordinal(), newLevelType.ordinal());
+            for (Player player : level.players()) {
                 player.sendSystemMessage(message);
             }
         }
     }
 
-    private static void handleChunkEvent(ChunkEvent event, LangData direction) {
-        LevelAccessor level = event.getLevel();
+    private static void handleChunkEvent(ServerLevel level, LevelChunk chunk, LangData direction) {
         if (level != null && !level.isClientSide()) {
             if (chunkWatchers.isEmpty() || level.players().isEmpty()) {
                 return;
             }
-            ChunkWatchSettings settings = chunkWatchers.get(event.getChunk().getPos().toLong());
+            ChunkWatchSettings settings = chunkWatchers.get(chunk.getPos().toLong());
             if (settings != null) {
                 Component message = settings.translate(direction);
                 for (Player player : level.players()) {

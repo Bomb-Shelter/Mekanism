@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "id": "mekanism",
+  "id": "mekanismgenerators",
   "version": "${version}",
 
-  "name": "Mekanism",
-  "description": "Mekanism is a Minecraft add-on featuring high-tech machinery that can be used to create powerful tools, armor, and weapons.",
+  "name": "Mekanism: Generators",
+  "description": "Generators module for Mekanism",
   "authors": [
     "Aidancbrady", "Thommy101", "Thiakil", "pupnewfster", "dizzyd",
     "AlphaMode", "BluSpring"
   ],
   "contact": {
-      "sources": "https://github.com/Bomb-Shelter/Mekanism"
+    "sources": "https://github.com/Bomb-Shelter/Mekanism"
   },
 
   "license": "MIT",
@@ -21,25 +21,26 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "mekanism.common.Mekanism"
+      "mekanism.generators.common.MekanismGenerators"
     ],
     "client": [
-      "mekanism.client.MekanismClient"
+      "mekanism.generators.client.GeneratorsClient"
     ],
     "fabric-datagen": [
     ],
     "emi": [
-      "mekanism.client.recipe_viewer.emi.MekanismEmi"
+      "mekanism.generators.client.recipe_viewer.emi.GeneratorsEmi"
     ],
     "jei_mod_plugin": [
-      "mekanism.client.recipe_viewer.jei.MekanismJEI"
+      "mekanism.generators.client.recipe_viewer.jei.GeneratorsJEI"
     ]
   },
   "accessWidener": "mekanism.accesswidener",
   "depends": {
     "fabricloader": ">=${loader_version}",
     "fabric": ">=${fabric_version}",
-    "minecraft": ">=${minecraft_version}"
+    "minecraft": ">=${minecraft_version}",
+    "mekanism": ">=${version}"
   },
   "custom": {
     "banner": "logo.png"

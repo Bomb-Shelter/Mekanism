@@ -79,18 +79,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult.Type;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.bus.api.EventPriority;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.neoforge.client.ClientHooks;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.event.RenderArmEvent;
-import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
-import net.neoforged.neoforge.client.event.RenderHighlightEvent;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
-import net.neoforged.neoforge.client.event.ScreenEvent;
-import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
-import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
-import net.neoforged.neoforge.client.model.data.ModelData;
 import io.github.fabricators_of_create.porting_lib.common.util.Lazy;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -126,11 +114,11 @@ public class RenderTickHandler {
     }
 
     //Note: This listener is only registered if a recipe viewer is loaded
-    public static void guiOpening(ScreenEvent.Opening event) {
-        if (event.getCurrentScreen() instanceof GuiMekanism<?> screen) {
+    public static void guiOpening(Screen currentScreen, Screen newScreen) {
+        if (currentScreen instanceof GuiMekanism<?> screen) {
             if (Mekanism.hooks.jei.isLoaded()) {
                 //If JEI is loaded and our current screen is a mekanism gui, check if the new screen is a JEI recipe screen
-                if (event.getNewScreen() instanceof IRecipesGui) {
+                if (newScreen instanceof IRecipesGui) {
                     //If it is mark on our current screen that we are switching to JEI
                     screen.switchingToRecipeViewer = true;
                 }
@@ -138,7 +126,7 @@ public class RenderTickHandler {
             if (Mekanism.hooks.emi.isLoaded()) {
                 //If Emi is loaded and our current screen is a mekanism gui, check if the new screen is an Emi recipe screen
                 // https://github.com/emilyploszaj/emi/issues/481
-                if (isEmiScreen(event.getNewScreen())) {
+                if (isEmiScreen(newScreen)) {
                     //If it is mark on our current screen that we are switching to EMI
                     screen.switchingToRecipeViewer = true;
                 }

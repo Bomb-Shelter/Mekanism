@@ -4,7 +4,6 @@ import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.client.render.lib.QuadTransformation;
 import mekanism.common.base.holiday.ClientHolidayInfo;
 import net.minecraft.client.resources.model.BakedModel;
-import net.neoforged.neoforge.client.model.data.ModelData;
 import org.jetbrains.annotations.Nullable;
 
 @NothingNullByDefault
@@ -16,7 +15,7 @@ public class DigitalMinerBakedModel extends ExtensionBakedModel<Void> {
 
     @Nullable
     @Override
-    protected QuadsKey<Void> createKey(QuadsKey<Void> key, ModelData data) {
+    protected QuadsKey<Void> createKey(QuadsKey<Void> key, Void data) {
         QuadTransformation holidayTransform = ClientHolidayInfo.getMinerTransform();
         if (holidayTransform != null) {
             return key.transform(holidayTransform);

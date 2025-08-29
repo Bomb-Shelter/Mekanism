@@ -565,18 +565,19 @@ dependencies {
 
     //Dependencies for data generators for mod compat reference
     //datagenMainImplementation("org.appliedenergistics:appliedenergistics2:${ae2_version}")
-    datagenMainRuntimeOnly("com.github.glitchfiend:GlitchCore-fabric:${minecraft_version}-${glitchcore_version}")
-    datagenMainRuntimeOnly("com.github.glitchfiend:TerraBlender-fabric:${minecraft_version}-${terrablender_version}")
-    datagenMainImplementation("com.github.glitchfiend:BiomesOPlenty-fabric:${minecraft_version}-${biomesoplenty_version}")
-    datagenMainRuntimeOnly("curse.maven:corgilib-693313:${corgilib_id}")
-    datagenMainRuntimeOnly("curse.maven:geckolib-388172:${geckolib_id}")
-    datagenMainRuntimeOnly("curse.maven:oh-the-trees-youll-grow-962544:${ohthetreesyoullgrow_id}")
-    datagenMainImplementation("curse.maven:oh-the-biomes-weve-gone-1070751:${biomeswevegone_id}")
-    datagenMainImplementation("curse.maven:farmers-delight-refabricated-993166:${farmers_delight_id}")
+    modRuntimeOnly("com.github.glitchfiend:GlitchCore-fabric:${minecraft_version}-${glitchcore_version}")
+    modRuntimeOnly("com.github.glitchfiend:TerraBlender-fabric:${minecraft_version}-${terrablender_version}")
+    modImplementation("com.github.glitchfiend:BiomesOPlenty-fabric:${minecraft_version}-${biomesoplenty_version}")
+    modRuntimeOnly("curse.maven:corgilib-693313:${corgilib_id}")
+    modRuntimeOnly("curse.maven:geckolib-388172:${geckolib_id}")
+    modRuntimeOnly("curse.maven:oh-the-trees-youll-grow-962544:${ohthetreesyoullgrow_id}")
+    modImplementation("curse.maven:oh-the-biomes-weve-gone-1070751:${biomeswevegone_id}")
+    modImplementation("curse.maven:farmers-delight-refabricated-993166:${farmers_delight_id}")
     //datagenMainRuntimeOnly("curse.maven:projecte-226410:${projecte_id}")
 
     //Note: Even though yaml ops defines a FMLModType we have to pretend FML doesn't know how to handle it due to a lib yaml ops bundles not defining it
     datagenNonMod("com.thiakil:yaml-ops:${yamlops_version}")
+    include(modImplementation("curse.maven:modern-keybinding-fabric-695433:${mkb_version}"))
 }
 
 def getManifestAttributes(String title) {

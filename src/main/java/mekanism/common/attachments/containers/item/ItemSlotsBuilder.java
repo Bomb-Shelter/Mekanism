@@ -25,6 +25,7 @@ import mekanism.common.attachments.containers.fluid.AttachedFluids;
 import mekanism.common.capabilities.Capabilities;
 import mekanism.common.content.oredictionificator.OredictionificatorItemFilter;
 import mekanism.common.content.qio.IQIOCraftingWindowHolder;
+import mekanism.common.fabric.FabricUtil;
 import mekanism.common.integration.energy.EnergyCompatUtils;
 import mekanism.common.inventory.slot.EnergyInventorySlot;
 import mekanism.common.inventory.slot.FluidInventorySlot;
@@ -56,8 +57,8 @@ public class ItemSlotsBuilder {
           containerIndex, ConstantPredicates.alwaysTrueBi(), ConstantPredicates.internalOnly(), ConstantPredicates.alwaysTrue());
 
     //Copy of predicates from FuelInventorySlot
-    private static final BiPredicate<@NotNull ItemStack, @NotNull AutomationType> FUEL_CAN_EXTRACT = (stack, automationType) -> automationType == AutomationType.MANUAL || stack.getBurnTime(null) == 0;
-    private static final BiPredicate<@NotNull ItemStack, @NotNull AutomationType> FUEL_CAN_INSERT = (stack, automationType) -> stack.getBurnTime(null) != 0;
+    private static final BiPredicate<@NotNull ItemStack, @NotNull AutomationType> FUEL_CAN_EXTRACT = (stack, automationType) -> automationType == AutomationType.MANUAL || FabricUtil.getBurnTime(stack) == 0;
+    private static final BiPredicate<@NotNull ItemStack, @NotNull AutomationType> FUEL_CAN_INSERT = (stack, automationType) -> FabricUtil.getBurnTime(stack) != 0;
     private static final IBasicContainerCreator<ComponentBackedInventorySlot> FUEL_SLOT_CREATOR = (type, attachedTo, containerIndex) -> new ComponentBackedInventorySlot(attachedTo,
           containerIndex, FUEL_CAN_EXTRACT, FUEL_CAN_INSERT, ConstantPredicates.alwaysTrue());
 

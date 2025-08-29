@@ -9,6 +9,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import com.mojang.math.Transformation;
+import io.github.fabricators_of_create.porting_lib.models.events.client.ModelEvent;
 import io.github.fabricators_of_create.porting_lib.models.geometry.IGeometryBakingContext;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMaps;
@@ -585,7 +586,7 @@ public class MekaSuitArmor implements ICustomArmor, ISpecialGear {
         }
 
         @Override
-        protected void reload(BakingCompleted evt) {
+        protected void reload(ModelEvent.BakingCompleted evt) {
             super.reload(evt);
             Collection<ModuleModelSpec> modules = moduleModelSpec.values();
             for (String name : getModel().getRootComponentNames()) {

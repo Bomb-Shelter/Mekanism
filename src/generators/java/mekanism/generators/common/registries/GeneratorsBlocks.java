@@ -11,6 +11,7 @@ import mekanism.common.block.prefab.BlockBasicMultiblock;
 import mekanism.common.block.prefab.BlockTile;
 import mekanism.common.block.prefab.BlockTile.BlockTileModel;
 import mekanism.common.content.blocktype.BlockTypeTile;
+import mekanism.common.fabric.FabricUtil;
 import mekanism.common.item.block.ItemBlockTooltip;
 import mekanism.common.registration.impl.BlockDeferredRegister;
 import mekanism.common.registration.impl.BlockRegistryObject;
@@ -68,7 +69,7 @@ public class GeneratorsBlocks {
                             .addBasic(TileEntityHeatGenerator.HEAT_CAPACITY, TileEntityHeatGenerator.INVERSE_CONDUCTION_COEFFICIENT, TileEntityHeatGenerator.INVERSE_INSULATION_COEFFICIENT)
                             .build()
                       ).addAttachmentOnlyContainers(ContainerType.ITEM, () -> ItemSlotsBuilder.builder()
-                            .addFluidFuelSlot(0, s -> s.getBurnTime(null) != 0)
+                            .addFluidFuelSlot(0, s -> FabricUtil.getBurnTime(s) != 0)
                             .addEnergy()
                             .build()
                       )

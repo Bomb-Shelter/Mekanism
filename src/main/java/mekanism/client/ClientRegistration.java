@@ -7,10 +7,15 @@ import com.google.common.collect.Table.Cell;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import io.github.fabricators_of_create.porting_lib.client_events.event.client.EntityRenderersEvent;
 import io.github.fabricators_of_create.porting_lib.client_events.event.client.PlaySoundCallback;
+import io.github.fabricators_of_create.porting_lib.client_extensions.ClientExtensionsRegistry;
+import io.github.fabricators_of_create.porting_lib.gui.layered.GuiLayerRegistry;
+import io.github.fabricators_of_create.porting_lib.gui.layered.VanillaGuiLayers;
 import io.github.fabricators_of_create.porting_lib.item.client.IItemDecorator;
 import io.github.fabricators_of_create.porting_lib.item.client.callbacks.ItemDecorationsCallback;
 import io.github.fabricators_of_create.porting_lib.models.SeparateTransformsModel;
+import io.github.fabricators_of_create.porting_lib.models.events.client.ModelEvent;
 import io.github.fabricators_of_create.porting_lib.models.geometry.IGeometryLoader;
 import io.github.fabricators_of_create.porting_lib.models.geometry.RegisterGeometryLoadersCallback;
 import mekanism.api.gear.IModule;
@@ -186,8 +191,10 @@ import mekanism.common.util.WorldUtils;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
@@ -218,7 +225,7 @@ import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.NotNull;
 
-public class ClientRegistration implements ModelLoadingPlugin {
+public class ClientRegistration {
 
     private static final FieldReflectionHelper<SeparateTransformsModel.Baked, BakedModel> SEPARATE_PERSPECTIVE_BASE_MODEL =
           new FieldReflectionHelper<>(SeparateTransformsModel.Baked.class, "baseModel", () -> null);
@@ -234,7 +241,9 @@ public class ClientRegistration implements ModelLoadingPlugin {
             return SoundHandler.onTilePlaySound(sound, originalSound);
         });
         if (Mekanism.hooks.recipeViewerCompatEnabled()) {
-            NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, RenderTickHandler::guiOpening);
+            ScreenEvents.BEFORE_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
+                RenderTickHandler.guiOpening(client.screen, screen);
+            });
         }
         IModuleHelper moduleHelper = IModuleHelper.INSTANCE;
         moduleHelper.addMekaSuitModuleModels(Mekanism.rl("models/entity/mekasuit_modules.obj"));
@@ -308,20 +317,21 @@ public class ClientRegistration implements ModelLoadingPlugin {
         registerParticleFactories();
         registerBlockColorHandlers();
         registerItemColorHandlers();
+        registerOverlays();
+        registerClientExtensions();
     }
 
     public static void registerKeybindings() {
         MekanismKeyHandler.registerKeybindings();
     }
 
-    @SubscribeEvent
-    public static void registerOverlays(RegisterGuiLayersEvent event) {
+    public static void registerOverlays() {
         //Note: We don't need to include our modid in the id as the active context is grabbed for making an RL inside the event
-        event.registerBelowAll(Mekanism.rl("radiation_overlay"), RadiationOverlay.INSTANCE);
-        event.registerAbove(VanillaGuiLayers.ARMOR_LEVEL, Mekanism.rl("energy_level"), MekaSuitEnergyLevel.INSTANCE);
+        GuiLayerRegistry.registerBelowAll(Mekanism.rl("radiation_overlay"), RadiationOverlay.INSTANCE);
+        GuiLayerRegistry.registerAbove(VanillaGuiLayers.ARMOR_LEVEL, Mekanism.rl("energy_level"), MekaSuitEnergyLevel.INSTANCE);
         //Render status overlay after item name rather than action bar (record_overlay) so that things like the sleep fade will render in front of our overlay
-        event.registerAbove(VanillaGuiLayers.SELECTED_ITEM_NAME, Mekanism.rl("status_overlay"), MekanismStatusOverlay.INSTANCE);
-        event.registerAbove(VanillaGuiLayers.SUBTITLE_OVERLAY, Mekanism.rl("hud"), MekanismHUD.INSTANCE);
+        GuiLayerRegistry.registerAbove(VanillaGuiLayers.SELECTED_ITEM_NAME, Mekanism.rl("status_overlay"), MekanismStatusOverlay.INSTANCE);
+        GuiLayerRegistry.registerAbove(VanillaGuiLayers.SUBTITLE_OVERLAY, Mekanism.rl("hud"), MekanismHUD.INSTANCE);
     }
 
     public static void registerRenderers() {
@@ -478,41 +488,37 @@ public class ClientRegistration implements ModelLoadingPlugin {
         loaders.put(Mekanism.rl("transmitter"), TransmitterLoader.INSTANCE);
     }
 
-    @Override
-    public void onInitializeModelLoader(Context context) {
-        context.addModels();
+    static {
+        ModelEvent.RegisterAdditional.EVENT.register(ClientRegistration::registerAdditionalModels);
+        ModelEvent.ModifyBakingResult.EVENT.register(ClientRegistration::onModelBake);
+        ModelEvent.BakingCompleted.EVENT.register(ClientRegistration::onModelBake);
     }
 
-    @SubscribeEvent
-    public static void registerAdditionalModels(Context context) {
+    public static void registerAdditionalModels(ModelEvent.RegisterAdditional event) {
         MekanismModelCache.INSTANCE.setup(event);
     }
 
-    @SubscribeEvent
-    public static void onModelBake(ModifyBakingResult event) {
+    public static void onModelBake(ModelEvent.ModifyBakingResult event) {
         event.getModels().replaceAll((rl, model) -> {
             CustomModelRegistryObject obj = customModels.get(rl.id());
             return obj == null ? model : obj.createModel(model, event);
         });
     }
 
-    @SubscribeEvent
-    public static void onModelBake(BakingCompleted event) {
+    public static void onModelBake(ModelEvent.BakingCompleted event) {
         MekanismModelCache.INSTANCE.onBake(event);
     }
 
-    @SubscribeEvent
-    public static void registerParticleFactories(RegisterParticleProvidersEvent event) {
-        event.registerSpriteSet(MekanismParticleTypes.LASER.get(), LaserParticle.Factory::new);
-        event.registerSpriteSet(MekanismParticleTypes.JETPACK_FLAME.get(), JetpackFlameParticle.Factory::new);
-        event.registerSpriteSet(MekanismParticleTypes.JETPACK_SMOKE.get(), JetpackSmokeParticle.Factory::new);
-        event.registerSpriteSet(MekanismParticleTypes.SCUBA_BUBBLE.get(), ScubaBubbleParticle.Factory::new);
-        event.registerSpriteSet(MekanismParticleTypes.RADIATION.get(), RadiationParticle.Factory::new);
+    public static void registerParticleFactories() {
+        ParticleFactoryRegistry.getInstance().register(MekanismParticleTypes.LASER.get(), LaserParticle.Factory::new);
+        ParticleFactoryRegistry.getInstance().register(MekanismParticleTypes.JETPACK_FLAME.get(), JetpackFlameParticle.Factory::new);
+        ParticleFactoryRegistry.getInstance().register(MekanismParticleTypes.JETPACK_SMOKE.get(), JetpackSmokeParticle.Factory::new);
+        ParticleFactoryRegistry.getInstance().register(MekanismParticleTypes.SCUBA_BUBBLE.get(), ScubaBubbleParticle.Factory::new);
+        ParticleFactoryRegistry.getInstance().register(MekanismParticleTypes.RADIATION.get(), RadiationParticle.Factory::new);
     }
 
-    @SubscribeEvent
-    public static void registerBlockColorHandlers(RegisterColorHandlersEvent.Block event) {
-        ClientRegistrationUtil.registerBlockColorHandler(event, (state, world, pos, tintIndex) -> {
+    public static void registerBlockColorHandlers() {
+        ClientRegistrationUtil.registerBlockColorHandler((state, world, pos, tintIndex) -> {
                   if (tintIndex == 1) {
                       BaseTier tier = Attribute.getBaseTier(state.getBlockHolder());
                       if (tier != null) {
@@ -607,33 +613,35 @@ public class ClientRegistration implements ModelLoadingPlugin {
               MekanismBlocks.BASIC_UNIVERSAL_CABLE, MekanismBlocks.ADVANCED_UNIVERSAL_CABLE, MekanismBlocks.ELITE_UNIVERSAL_CABLE, MekanismBlocks.ULTIMATE_UNIVERSAL_CABLE);
     }
 
-    @SubscribeEvent
-    public static void registerClientExtensions(RegisterClientExtensionsEvent event) {
-        event.registerItem(new MekCustomArmorRenderProperties(RenderJetpack.ARMORED_RENDERER, JetpackArmor.ARMORED_JETPACK), MekanismItems.ARMORED_JETPACK);
-        event.registerItem(new MekCustomArmorRenderProperties(RenderJetpack.RENDERER, JetpackArmor.JETPACK), MekanismItems.JETPACK);
-        event.registerItem(new MekCustomArmorRenderProperties(RenderFreeRunners.ARMORED_RENDERER, FreeRunnerArmor.ARMORED_FREE_RUNNERS), MekanismItems.ARMORED_FREE_RUNNERS);
-        event.registerItem(new MekCustomArmorRenderProperties(RenderFreeRunners.RENDERER, FreeRunnerArmor.FREE_RUNNERS), MekanismItems.FREE_RUNNERS);
-        event.registerItem(new MekCustomArmorRenderProperties(RenderScubaMask.RENDERER, ScubaMaskArmor.SCUBA_MASK), MekanismItems.SCUBA_MASK);
-        event.registerItem(new MekCustomArmorRenderProperties(RenderScubaTank.RENDERER, ScubaTankArmor.SCUBA_TANK), MekanismItems.SCUBA_TANK);
-        event.registerItem(new MekRenderProperties(RenderAtomicDisassembler.RENDERER), MekanismItems.ATOMIC_DISASSEMBLER);
-        event.registerItem(new MekRenderProperties(RenderFlameThrower.RENDERER), MekanismItems.FLAMETHROWER);
+    public static void registerClientExtensions() {
+        ClientExtensionsRegistry.registerItem(new MekCustomArmorRenderProperties(RenderJetpack.ARMORED_RENDERER, JetpackArmor.ARMORED_JETPACK), MekanismItems.ARMORED_JETPACK);
+        ClientExtensionsRegistry.registerItem(new MekCustomArmorRenderProperties(RenderJetpack.RENDERER, JetpackArmor.JETPACK), MekanismItems.JETPACK);
+        ClientExtensionsRegistry.registerItem(new MekCustomArmorRenderProperties(RenderFreeRunners.ARMORED_RENDERER, FreeRunnerArmor.ARMORED_FREE_RUNNERS), MekanismItems.ARMORED_FREE_RUNNERS);
+        ClientExtensionsRegistry.registerItem(new MekCustomArmorRenderProperties(RenderFreeRunners.RENDERER, FreeRunnerArmor.FREE_RUNNERS), MekanismItems.FREE_RUNNERS);
+        ClientExtensionsRegistry.registerItem(new MekCustomArmorRenderProperties(RenderScubaMask.RENDERER, ScubaMaskArmor.SCUBA_MASK), MekanismItems.SCUBA_MASK);
+        ClientExtensionsRegistry.registerItem(new MekCustomArmorRenderProperties(RenderScubaTank.RENDERER, ScubaTankArmor.SCUBA_TANK), MekanismItems.SCUBA_TANK);
+        ClientExtensionsRegistry.registerItem(new MekRenderProperties(RenderAtomicDisassembler.RENDERER), MekanismItems.ATOMIC_DISASSEMBLER);
+        ClientExtensionsRegistry.registerItem(new MekRenderProperties(RenderFlameThrower.RENDERER), MekanismItems.FLAMETHROWER);
 
-        event.registerItem(MekaSuitArmor.HELMET, MekanismItems.MEKASUIT_HELMET);
-        event.registerItem(MekaSuitArmor.BODYARMOR, MekanismItems.MEKASUIT_BODYARMOR);
-        event.registerItem(MekaSuitArmor.PANTS, MekanismItems.MEKASUIT_PANTS);
-        event.registerItem(MekaSuitArmor.BOOTS, MekanismItems.MEKASUIT_BOOTS);
+        ClientExtensionsRegistry.registerItem(MekaSuitArmor.HELMET, MekanismItems.MEKASUIT_HELMET);
+        ClientExtensionsRegistry.registerItem(MekaSuitArmor.BODYARMOR, MekanismItems.MEKASUIT_BODYARMOR);
+        ClientExtensionsRegistry.registerItem(MekaSuitArmor.PANTS, MekanismItems.MEKASUIT_PANTS);
+        ClientExtensionsRegistry.registerItem(MekaSuitArmor.BOOTS, MekanismItems.MEKASUIT_BOOTS);
 
-        ClientRegistrationUtil.registerItemExtensions(event, new MekRenderProperties(RenderEnergyCubeItem.RENDERER), MekanismBlocks.BASIC_ENERGY_CUBE,
+        ClientRegistrationUtil.registerItemExtensions(new MekRenderProperties(RenderEnergyCubeItem.RENDERER), MekanismBlocks.BASIC_ENERGY_CUBE,
               MekanismBlocks.ADVANCED_ENERGY_CUBE, MekanismBlocks.ELITE_ENERGY_CUBE, MekanismBlocks.ULTIMATE_ENERGY_CUBE, MekanismBlocks.CREATIVE_ENERGY_CUBE);
-        ClientRegistrationUtil.registerItemExtensions(event, new MekRenderProperties(RenderFluidTankItem.RENDERER), MekanismBlocks.BASIC_FLUID_TANK,
+        ClientRegistrationUtil.registerItemExtensions(new MekRenderProperties(RenderFluidTankItem.RENDERER), MekanismBlocks.BASIC_FLUID_TANK,
               MekanismBlocks.ADVANCED_FLUID_TANK, MekanismBlocks.ELITE_FLUID_TANK, MekanismBlocks.ULTIMATE_FLUID_TANK, MekanismBlocks.CREATIVE_FLUID_TANK);
 
-        event.registerBlock(RenderPropertiesProvider.boundingParticles(), MekanismBlocks.BOUNDING_BLOCK);
-        ClientRegistrationUtil.registerBlockExtensions(event, MekanismBlocks.BLOCKS);
-        ClientRegistrationUtil.registerFluidExtensions(event, MekanismFluids.FLUIDS);
+        ClientExtensionsRegistry.registerBlock(RenderPropertiesProvider.boundingParticles(), MekanismBlocks.BOUNDING_BLOCK);
+        ClientRegistrationUtil.registerBlockExtensions(MekanismBlocks.BLOCKS);
+        ClientRegistrationUtil.registerFluidExtensions(MekanismFluids.FLUIDS);
     }
 
-    @SubscribeEvent
+    static {
+        EntityRenderersEvent.AddLayers.EVENT.register(ClientRegistration::addLayers);
+    }
+
     public static void addLayers(EntityRenderersEvent.AddLayers event) {
         //Add our own custom armor and elytra layer to the various player renderers
         for (PlayerSkin.Model skin : event.getSkins()) {
@@ -708,6 +716,6 @@ public class ClientRegistration implements ModelLoadingPlugin {
     @FunctionalInterface
     public interface CustomModelRegistryObject {
 
-        BakedModel createModel(BakedModel original, ModifyBakingResult event);
+        BakedModel createModel(BakedModel original, ModelEvent.ModifyBakingResult event);
     }
 }

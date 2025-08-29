@@ -3,12 +3,13 @@ package mekanism.common.inventory.container.sync.list;
 import java.util.Collection;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+
+import io.github.fabricators_of_create.porting_lib.common.util.FriendlyByteBufUtil;
 import mekanism.common.inventory.container.sync.ISyncableData;
 import mekanism.common.network.PacketUtils;
 import mekanism.common.network.to_client.container.property.ByteArrayPropertyData;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.neoforged.neoforge.common.util.FriendlyByteBufUtil;
 import org.jetbrains.annotations.NotNull;
 
 /**

@@ -6,6 +6,7 @@ import java.util.Map;
 import io.github.fabricators_of_create.porting_lib.models.data.ModelData;
 import io.github.fabricators_of_create.porting_lib.models.data.ModelProperty;
 import mekanism.api.annotations.NothingNullByDefault;
+import net.fabricmc.fabric.api.renderer.v1.model.ForwardingBakedModel;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -18,7 +19,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
 @NothingNullByDefault
-public class DataBasedBakedModel extends BakedModelWrapper<BakedModel> {
+public class DataBasedBakedModel extends ForwardingBakedModel {
 
     private final Map<ModelProperty<Void>, BakedModel> propertyBased;
 

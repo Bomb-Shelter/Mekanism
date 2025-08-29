@@ -20,6 +20,7 @@ import mekanism.common.capabilities.holder.heat.IHeatCapacitorHolder;
 import mekanism.common.capabilities.holder.slot.IInventorySlotHolder;
 import mekanism.common.capabilities.holder.slot.InventorySlotHelper;
 import mekanism.common.config.listener.ConfigBasedCachedLongSupplier;
+import mekanism.common.fabric.FabricUtil;
 import mekanism.common.integration.computer.SpecialComputerMethodWrapper.ComputerFluidTankWrapper;
 import mekanism.common.integration.computer.SpecialComputerMethodWrapper.ComputerHeatCapacitorWrapper;
 import mekanism.common.integration.computer.SpecialComputerMethodWrapper.ComputerIInventorySlotWrapper;
@@ -35,6 +36,7 @@ import mekanism.common.util.WorldUtils;
 import mekanism.generators.common.config.MekanismGeneratorsConfig;
 import mekanism.generators.common.registries.GeneratorsBlocks;
 import mekanism.generators.common.slot.FluidFuelInventorySlot;
+import net.fabricmc.fabric.api.registry.FuelRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockPos.MutableBlockPos;
 import net.minecraft.core.Direction;
@@ -95,7 +97,7 @@ public class TileEntityHeatGenerator extends TileEntityGenerator {
         InventorySlotHelper builder = InventorySlotHelper.forSide(facingSupplier);
         //Divide the burn time by 20 as that is the ratio of how much a bucket of lava would burn for
         //TODO: Eventually we may want to grab the 20 dynamically in case some mod is changing the burn time of a lava bucket
-        builder.addSlot(fuelSlot = FluidFuelInventorySlot.forFuel(lavaTank, stack -> stack.getBurnTime(null) / 20, size -> new FluidStack(Fluids.LAVA, size),
+        builder.addSlot(fuelSlot = FluidFuelInventorySlot.forFuel(lavaTank, stack -> FabricUtil.getBurnTime(stack) / 20, size -> new FluidStack(Fluids.LAVA, size),
               listener, 17, 35), RelativeSide.FRONT, RelativeSide.LEFT, RelativeSide.BACK, RelativeSide.TOP, RelativeSide.BOTTOM);
         builder.addSlot(energySlot = EnergyInventorySlot.drain(getEnergyContainer(), listener, 143, 35), RelativeSide.RIGHT);
         return builder.build();

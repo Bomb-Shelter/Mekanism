@@ -10,6 +10,7 @@ import mekanism.common.capabilities.holder.heat.IHeatCapacitorHolder;
 import mekanism.common.capabilities.holder.slot.IInventorySlotHolder;
 import mekanism.common.capabilities.holder.slot.InventorySlotHelper;
 import mekanism.common.config.MekanismConfig;
+import mekanism.common.fabric.FabricUtil;
 import mekanism.common.integration.computer.SpecialComputerMethodWrapper.ComputerHeatCapacitorWrapper;
 import mekanism.common.integration.computer.SpecialComputerMethodWrapper.ComputerIInventorySlotWrapper;
 import mekanism.common.integration.computer.annotation.ComputerMethod;
@@ -51,7 +52,7 @@ public class TileEntityFuelwoodHeater extends TileEntityMekanism {
     @Override
     protected IInventorySlotHolder getInitialInventory(IContentsListener listener) {
         InventorySlotHelper builder = InventorySlotHelper.forSide(facingSupplier);
-        builder.addSlot(fuelSlot = FuelInventorySlot.forFuel(stack -> stack.getBurnTime(null), listener, 15, 29));
+        builder.addSlot(fuelSlot = FuelInventorySlot.forFuel(stack -> FabricUtil.getBurnTime(stack), listener, 15, 29));
         return builder.build();
     }
 

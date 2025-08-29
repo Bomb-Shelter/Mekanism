@@ -1,5 +1,8 @@
 package mekanism.client.model;
 
+import io.github.fabricators_of_create.porting_lib.models.PortingLibModels;
+import io.github.fabricators_of_create.porting_lib.models.events.client.ModelEvent.BakingCompleted;
+import io.github.fabricators_of_create.porting_lib.models.events.client.ModelEvent.RegisterAdditional;
 import io.github.fabricators_of_create.porting_lib.models.geometry.IGeometryBakingContext;
 import io.github.fabricators_of_create.porting_lib.models.geometry.IUnbakedGeometry;
 import io.github.fabricators_of_create.porting_lib.models.obj.ObjLoader;
@@ -41,6 +44,8 @@ public class BaseModelCache {
 
     private final String modid;
 
+    private ModelBakery modelBakery;
+
     protected BaseModelCache(String modid) {
         this.modid = modid;
     }
@@ -50,6 +55,7 @@ public class BaseModelCache {
     }
 
     public void onBake(BakingCompleted evt) {
+        this.modelBakery = evt.getModelBakery();
         for (MekanismModelData m : modelMap.values()) {
             m.reload(evt);
         }
@@ -78,9 +84,7 @@ public class BaseModelCache {
     }
 
     protected JSONModelData registerJSONAndBake(ResourceLocation rl) {
-        ModelManager modelManager = Minecraft.getInstance().getModelManager();
-        ModelBakery modelBakery = modelManager.getModelBakery();
-        ModelResourceLocation mrl = ModelResourceLocation.standalone(rl);
+        ModelResourceLocation mrl = PortingLibModels.standalone(rl);
         ModelBaker baker = modelBakery.new ModelBakerImpl(
               (modelLoc, material) -> material.sprite(),
               mrl
@@ -102,21 +106,21 @@ public class BaseModelCache {
     }
 
     private static UnbakedModel getUnbakedModel(ModelBakery modelBakery, ModelBaker baker, ModelResourceLocation rl) {
-//        UnbakedModel unbakedModel = baker.getTopLevelModel(rl); TODO: Fabric port
-//        if (unbakedModel == null) {
+        UnbakedModel unbakedModel = baker.getTopLevelModel(rl);
+        if (unbakedModel == null) {
             return modelBakery.getModel(rl.id());
-//        }
-//        return unbakedModel;
+        }
+        return unbakedModel;
     }
 
-//    public static BakedModel getBakedModel(BakingCompleted evt, ModelResourceLocation rl) { TODO: Fabric port
-//        BakedModel bakedModel = evt.getModels().get(rl);
-//        if (bakedModel == null) {
-//            Mekanism.logger.error("Baked model doesn't exist: {}", rl);
-//            return evt.getModelManager().getMissingModel();
-//        }
-//        return bakedModel;
-//    }
+    public static BakedModel getBakedModel(BakingCompleted evt, ModelResourceLocation rl) {
+        BakedModel bakedModel = evt.getModels().get(rl);
+        if (bakedModel == null) {
+            Mekanism.logger.error("Baked model doesn't exist: {}", rl);
+            return evt.getModelManager().getMissingModel();
+        }
+        return bakedModel;
+    }
 
     public static class MekanismModelData {
 
@@ -126,27 +130,30 @@ public class BaseModelCache {
         protected final ModelResourceLocation mrl;
         private final Map<IGeometryBakingContext, BakedModel> bakedMap = new Object2ObjectOpenHashMap<>();
 
+        private ModelBakery modelBakery;
+
         protected MekanismModelData(ResourceLocation rl) {
             this.rl = rl;
-            this.mrl = ModelResourceLocation.standalone(rl);
+            this.mrl = PortingLibModels.standalone(rl);
         }
 
-//        protected void reload(BakingCompleted evt) { TODO: Fabric port
-//            bakedMap.clear();
-//        }
-//
-//        protected void setup(RegisterAdditional event) {
-//        }
+        protected void reload(BakingCompleted evt) {
+            bakedMap.clear();
+            this.modelBakery = evt.getModelBakery();
+        }
+
+        protected void setup(RegisterAdditional event) {
+        }
 
         public BakedModel bake(IGeometryBakingContext config) {
             BakedModel bakedModel = bakedMap.get(config);
             if (bakedModel == null) {
-//                ModelBaker baker = Minecraft.getInstance().getModelManager().getModelBakery().new ModelBakerImpl(
-//                      (modelLoc, material) -> material.sprite(),
-//                      mrl
-//                );
-//                bakedModel = model.bake(config, baker, Material::sprite, BlockModelRotation.X0_Y0, ItemOverrides.EMPTY);
-//                bakedMap.put(config, bakedModel); TODO: Fabric port
+                ModelBaker baker = modelBakery.new ModelBakerImpl(
+                      (modelLoc, material) -> material.sprite(),
+                      mrl
+                );
+                bakedModel = model.bake(config, baker, Material::sprite, BlockModelRotation.X0_Y0, ItemOverrides.EMPTY);
+                bakedMap.put(config, bakedModel);
             }
             return bakedModel;
         }
@@ -162,11 +169,11 @@ public class BaseModelCache {
             super(rl);
         }
 
-//        @Override TODO: Fabric port
-//        protected void reload(BakingCompleted evt) {
-//            super.reload(evt);
-//            model = ObjLoader.INSTANCE.loadModel(new ObjModel.ModelSettings(rl, true, useDiffuseLighting(), true, true, null));
-//        }
+        @Override
+        protected void reload(BakingCompleted evt) {
+            super.reload(evt);
+            model = ObjLoader.INSTANCE.loadModel(new ObjModel.ModelSettings(rl, true, useDiffuseLighting(), true, true, null));
+        }
 
         @Override
         public ObjModel getModel() {
@@ -186,23 +193,23 @@ public class BaseModelCache {
             super(rl);
         }
 
-//        @Override TODO: Fabric port
-//        protected void reload(BakingCompleted evt) {
-//            super.reload(evt);
-//            bakedModel = BaseModelCache.getBakedModel(evt, mrl);
-//            ModelBaker baker = evt.getModelBakery().new ModelBakerImpl(
-//                  (modelLoc, material) -> material.sprite(),
-//                  mrl
-//            );
-//            if (getUnbakedModel(evt.getModelBakery(), baker, mrl) instanceof BlockModel blockModel) {
-//                model = blockModel.customData.getCustomGeometry();
-//            }
-//        }
-//
-//        @Override
-//        protected void setup(RegisterAdditional event) {
-//            event.register(mrl);
-//        }
+        @Override
+        protected void reload(BakingCompleted evt) {
+            super.reload(evt);
+            bakedModel = BaseModelCache.getBakedModel(evt, mrl);
+            ModelBaker baker = evt.getModelBakery().new ModelBakerImpl(
+                  (modelLoc, material) -> material.sprite(),
+                  mrl
+            );
+            if (getUnbakedModel(evt.getModelBakery(), baker, mrl) instanceof BlockModel blockModel) {
+                model = blockModel.port_lib$getCustomData().getCustomGeometry();
+            }
+        }
+
+        @Override
+        protected void setup(RegisterAdditional event) {
+            event.register(mrl);
+        }
 
         public List<BakedQuad> getQuads(RandomSource random) {
             //TODO: Decide if this should just redirect to the other get quads method (some impls might be different depending on if it gets data and render type vs not)

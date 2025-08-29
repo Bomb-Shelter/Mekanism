@@ -123,3 +123,8 @@ accessible class net/minecraft/client/gui/components/SubtitleOverlay$Subtitle
 accessible method net/minecraft/world/entity/player/Player closeContainer ()V
 
 accessible field net/minecraft/world/item/ItemStackLinkedSet TYPE_AND_TAG Lit/unimi/dsi/fastutil/Hash$Strategy;
+
+accessible field net/minecraft/client/KeyMapping isDown Z
+mutable field net/minecraft/client/KeyMapping isDown Z
+accessible method net/minecraft/client/renderer/entity/LivingEntityRenderer addLayer (Lnet/minecraft/client/renderer/entity/layers/RenderLayer;)Z
+transitive-accessible field net/minecraft/world/level/biome/Biome climateSettings Lnet/minecraft/world/level/biome/Biome$ClimateSettings;

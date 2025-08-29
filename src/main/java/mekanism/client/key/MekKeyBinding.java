@@ -4,10 +4,12 @@ import com.mojang.blaze3d.platform.InputConstants;
 import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
+
+import committee.nova.mkb.api.IKeyBinding;
+import committee.nova.mkb.api.IKeyConflictContext;
+import committee.nova.mkb.keybinding.KeyModifier;
 import mekanism.api.annotations.ParametersAreNotNullByDefault;
 import net.minecraft.client.KeyMapping;
-import net.neoforged.neoforge.client.settings.IKeyConflictContext;
-import net.neoforged.neoforge.client.settings.KeyModifier;
 import org.jetbrains.annotations.Nullable;
 
 @ParametersAreNotNullByDefault
@@ -24,7 +26,7 @@ public class MekKeyBinding extends KeyMapping {
 
     MekKeyBinding(String description, IKeyConflictContext keyConflictContext, KeyModifier keyModifier, InputConstants.Key key, String category,
           @Nullable BiConsumer<KeyMapping, Boolean> onKeyDown, @Nullable Consumer<KeyMapping> onKeyUp, @Nullable BooleanSupplier toggleable, boolean repeating) {
-        super(description, keyConflictContext, keyModifier, key, category);
+        super(description, key.getType(), key.getValue(), category);
         this.onKeyDown = onKeyDown;
         this.onKeyUp = onKeyUp;
         this.toggleable = toggleable;
@@ -39,7 +41,7 @@ public class MekKeyBinding extends KeyMapping {
     public void setDown(boolean value) {
         if (isToggleable()) {
             //If it is a toggleable keybinding mimic the behavior of vanilla's toggleable keybinding
-            if (value && isConflictContextAndModifierActive()) {
+            if (value && ((IKeyBinding) this).isConflictContextAndModifierActive()) {
                 super.setDown(!this.isDown());
             }
         } else {
@@ -61,6 +63,6 @@ public class MekKeyBinding extends KeyMapping {
 
     @Override
     public boolean isDown() {
-        return isDown && (isConflictContextAndModifierActive() || isToggleable());
+        return isDown && (((IKeyBinding) this).isConflictContextAndModifierActive() || isToggleable());
     }
 }

@@ -1,5 +1,7 @@
 package mekanism.client;
 
+import io.github.fabricators_of_create.porting_lib.client_events.event.client.ClientPlayerNetworkCloneCallback;
+import io.github.fabricators_of_create.porting_lib.entity.events.player.PlayerEvents;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -21,6 +23,7 @@ import mekanism.common.recipe.MekanismRecipeType;
 import net.fabricmc.api.ClientModInitializer;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.Connection;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -30,11 +33,15 @@ public class MekanismClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
+        //container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
         ClientHolidayInfo.init();
         MekanismShaders.init();
         ClientRegistration.init();
         MekanismRenderer.init();
+
+        ClientPlayerNetworkCloneCallback.EVENT.register((multiPlayerGameMode, oldPlayer, newPlayer, networkManager) -> {
+            onCloneRespawn(oldPlayer, newPlayer);
+        });
     }
 
     public static final Map<UUID, SecurityData> clientSecurityMap = new Object2ObjectOpenHashMap<>();
@@ -102,10 +109,9 @@ public class MekanismClient implements ClientModInitializer {
         return Minecraft.getInstance().player;
     }
 
-//    @SubscribeEvent TODO: Fabric port
-//    public static void onCloneRespawn(ClientPlayerNetworkEvent.Clone event) {
-//        if (event.getOldPlayer().level() != event.getNewPlayer().level()) {
-//            resetDimensionChange();
-//        }
-//    }
+    public static void onCloneRespawn(LocalPlayer oldPlayer, LocalPlayer newPlayer) {
+        if (oldPlayer.level() != newPlayer.level()) {
+            resetDimensionChange();
+        }
+    }
 }
