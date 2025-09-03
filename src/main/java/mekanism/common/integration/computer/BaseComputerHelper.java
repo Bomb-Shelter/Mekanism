@@ -11,6 +11,7 @@ import java.util.UUID;
 import java.util.function.Function;
 
 import io.github.fabricators_of_create.porting_lib.common.util.Lazy;
+import io.github.fabricators_of_create.porting_lib.tags.Tags;
 import mekanism.api.SerializationConstants;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.security.SecurityMode;

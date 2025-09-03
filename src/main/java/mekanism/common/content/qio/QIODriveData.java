@@ -26,7 +26,7 @@ public class QIODriveData {
         countCapacity = driveItem.getCountCapacity(driveStack);
         typeCapacity = driveItem.getTypeCapacity(driveStack);
         // load item map from drive stack
-        driveStack.getOrDefault(MekanismDataComponents.DRIVE_CONTENTS, DriveContents.EMPTY).loadItemMap(this);
+        driveStack.getOrDefault(MekanismDataComponents.DRIVE_CONTENTS.get(), DriveContents.EMPTY).loadItemMap(this);
         // update cached item count value
         itemCount = itemMap.values().longStream().sum();
 
@@ -107,7 +107,7 @@ public class QIODriveData {
         public void updateMetadata(QIODriveData data) {
             ItemStack stack = getDriveStack();
             if (stack.getItem() instanceof IQIODriveItem) {
-                stack.set(MekanismDataComponents.DRIVE_METADATA, new DriveMetadata(data));
+                stack.set(MekanismDataComponents.DRIVE_METADATA.get(), new DriveMetadata(data));
             } else {
                 Mekanism.logger.error("Tried to update QIO meta values on an invalid ItemStack ({}). Something has gone very wrong!", stack.getItem());
             }

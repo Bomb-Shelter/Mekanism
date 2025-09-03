@@ -1,7 +1,9 @@
 package mekanism.common.item;
 
 import com.mojang.serialization.Codec;
+import io.github.fabricators_of_create.porting_lib.item.extensions.SneakBypassUseItem;
 import io.github.fabricators_of_create.porting_lib.tool.ItemAbility;
+import io.github.fabricators_of_create.porting_lib.tool.addons.ItemAbilityItem;
 import io.netty.buffer.ByteBuf;
 import java.util.List;
 import java.util.Locale;
@@ -67,14 +69,14 @@ import io.github.fabricators_of_create.porting_lib.common.util.Lazy;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class ItemConfigurator extends Item implements IRadialModeItem<ConfiguratorMode>, IItemHUDProvider {
+public class ItemConfigurator extends Item implements IRadialModeItem<ConfiguratorMode>, IItemHUDProvider, ItemAbilityItem, SneakBypassUseItem {
 
     private static final Lazy<RadialData<ConfiguratorMode>> LAZY_RADIAL_DATA = Lazy.of(() ->
           IRadialDataHelper.INSTANCE.dataForEnum(Mekanism.rl("configurator_mode"), ConfiguratorMode.class));
 
     public ItemConfigurator(Properties properties) {
         super(properties.rarity(Rarity.UNCOMMON).stacksTo(1)
-              .component(MekanismDataComponents.CONFIGURATOR_MODE, ConfiguratorMode.CONFIGURATE_ITEMS)
+              .component(MekanismDataComponents.CONFIGURATOR_MODE.get(), ConfiguratorMode.CONFIGURATE_ITEMS)
         );
     }
 
@@ -111,7 +113,7 @@ public class ItemConfigurator extends Item implements IRadialModeItem<Configurat
         } else if (action == MekanismItemAbilities.WRENCH_ROTATE) {
             return getMode(stack) == ConfiguratorMode.ROTATE;
         }
-        return super.canPerformAction(stack, action);
+        return ItemAbilityItem.super.canPerformAction(stack, action);
     }
 
     @NotNull

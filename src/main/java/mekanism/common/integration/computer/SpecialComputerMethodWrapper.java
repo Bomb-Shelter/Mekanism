@@ -53,13 +53,13 @@ public class SpecialComputerMethodWrapper {
 
         @WrappingComputerMethodIndex(1)
         @WrappingComputerMethodHelp("Get the capacity of the %s.")
-        public static int getCapacity(IExtendedFluidTank tank) {
+        public static long getCapacity(IExtendedFluidTank tank) {
             return tank.getCapacity();
         }
 
         @WrappingComputerMethodIndex(2)
         @WrappingComputerMethodHelp("Get the amount needed to fill the %s.")
-        public static int getNeeded(IExtendedFluidTank tank) {
+        public static long getNeeded(IExtendedFluidTank tank) {
             return tank.getNeeded();
         }
 

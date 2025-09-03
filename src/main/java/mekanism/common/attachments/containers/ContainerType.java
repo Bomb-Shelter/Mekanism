@@ -72,7 +72,7 @@ public class ContainerType<CONTAINER extends INBTSerializable<CompoundTag>, ATTA
         @Override
         @SuppressWarnings("unchecked")
         public void registerItemCapabilities(Item item, boolean exposeWhenStacked, IMekanismConfig... requiredConfigs) {
-            EnergyCompatUtils.registerItemCapabilities(event, item, (ICapabilityProvider<ItemStack, Void, IStrictEnergyHandler>) getCapabilityProvider(exposeWhenStacked, requiredConfigs));
+            EnergyCompatUtils.registerItemCapabilities(item, (ICapabilityProvider<ItemStack, Void, IStrictEnergyHandler>) getCapabilityProvider(exposeWhenStacked, requiredConfigs));
         }
     };
     public static final ContainerType<IInventorySlot, AttachedItems, ComponentBackedItemHandler> ITEM = new ContainerType<>(MekanismDataComponents.ATTACHED_ITEMS,
@@ -247,7 +247,7 @@ public class ContainerType<CONTAINER extends INBTSerializable<CompoundTag>, ATTA
     }
 
     public ATTACHED getOrEmpty(ItemStack stack) {
-        return stack.getOrDefault(component, emptyAttachment);
+        return stack.getOrDefault(component.get(), emptyAttachment);
     }
 
     //TODO - 1.21: Re-evaluate usages and see if they should be going via capability instead?
@@ -287,10 +287,10 @@ public class ContainerType<CONTAINER extends INBTSerializable<CompoundTag>, ATTA
     }
 
     public boolean supports(ItemStack stack) {
-        return stack.has(component) || knownDefaultCreators.containsKey(stack.getItem());
+        return stack.has(component.get()) || knownDefaultCreators.containsKey(stack.getItem());
     }
 
-    public void addDefault(Holder<Item> item, DataComponentPatch.Builder builder) {
+    public void addDefault(Holder<Item> item, DataComponentMap.Builder builder) {
         Lazy<? extends IContainerCreator<? extends CONTAINER, ATTACHED>> lazy = knownDefaultCreators.get(item.value());
         if (lazy != null) {
             //Supports the type
@@ -345,7 +345,7 @@ public class ContainerType<CONTAINER extends INBTSerializable<CompoundTag>, ATTA
         if (handler != null) {
             read(provider, handler.getContainers(), save(provider, containers));
             //TODO - 1.21: FIX the getattached here?
-            stack.set(component, handler.getAttached());
+            stack.set(component.get(), handler.getAttached());
             if (stack.getCount() > 1) {
                 Mekanism.logger.error("Copied {} to a stack ({}). This might lead to duplication of data.", getComponentName(), stack);
             }
@@ -353,7 +353,7 @@ public class ContainerType<CONTAINER extends INBTSerializable<CompoundTag>, ATTA
     }
 
     public void copyToTile(TileEntityMekanism tile, BlockEntity.DataComponentInput input) {
-        ATTACHED attachedData = input.get(component);
+        ATTACHED attachedData = input.get(component.get());
         if (attachedData != null) {
             copyToTile.copy(tile, input, getContainers(tile), attachedData);
         }
@@ -371,7 +371,7 @@ public class ContainerType<CONTAINER extends INBTSerializable<CompoundTag>, ATTA
         if (!containers.isEmpty()) {
             ATTACHED attachedData = copyFromTile.copy(tile, builder, containers);
             if (attachedData != null) {
-                builder.set(component, attachedData);
+                builder.set(component.get(), attachedData);
             }
         }
     }

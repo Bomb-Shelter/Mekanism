@@ -306,7 +306,7 @@ public class TileComponentFrequency implements ITileComponent {
                 // Currently we only really need the QIO to support it, as the other colorable frequency (teleporters)
                 // don't need the item to be aware of the color
                 if (type == FrequencyType.QIO && frequencyData.selectedFrequency instanceof IColorableFrequency colorableFrequency) {
-                    builder.set(MekanismDataComponents.COLOR, colorableFrequency.getColor());
+                    builder.set(MekanismDataComponents.COLOR.get(), colorableFrequency.getColor());
                 }
             }
         }

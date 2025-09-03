@@ -4,6 +4,7 @@ import java.util.function.Predicate;
 import java.util.function.ToIntBiFunction;
 import mekanism.common.block.attribute.Attribute.TileAttribute;
 import mekanism.common.block.states.BlockStateHelper;
+import mekanism.common.fabric.FabricUtil;
 import mekanism.common.tile.base.TileEntityMekanism;
 import mekanism.common.util.WorldUtils;
 import net.minecraft.core.BlockPos;
@@ -101,7 +102,7 @@ public class Attributes {
                 return false;
             }
             //Super implementation
-            return state.isFaceSturdy(reader, pos, Direction.UP) && state.getLightEmission(reader, pos) < 14;
+            return state.isFaceSturdy(reader, pos, Direction.UP) && FabricUtil.getLightEmission(state, reader, pos) < 14;
         });
 
         private final StateArgumentPredicate<EntityType<?>> spawningPredicate;

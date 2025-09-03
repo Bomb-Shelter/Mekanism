@@ -217,7 +217,7 @@ public class SpecialConverters {
         itemFilter.setItemStack(stack);
     }
 
-    static Map<String, Object> wrapStack(String name, String sizeKey, int amount, @NotNull DataComponentPatch components) {
+    static Map<String, Object> wrapStack(String name, String sizeKey, long amount, @NotNull DataComponentPatch components) {
         int elements = 2;
         boolean hasComponents = !components.isEmpty() && amount > 0;
         if (hasComponents) {

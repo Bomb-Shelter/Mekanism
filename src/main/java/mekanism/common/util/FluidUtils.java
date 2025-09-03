@@ -9,6 +9,8 @@ import mekanism.api.fluid.IMekanismFluidHandler;
 import mekanism.common.attachments.containers.ContainerType;
 import mekanism.common.capabilities.Capabilities;
 import mekanism.common.content.network.distribution.FluidHandlerTarget;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.world.InteractionHand;
@@ -57,7 +59,7 @@ public final class FluidUtils {
         // chemicals
         if (stack.getFluid().isSame(Fluids.LAVA)) {//Special case lava
             return 0xFFDB6B19;
-        } else if (FMLEnvironment.dist.isClient()) {
+        } else if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
             //Note: We can only return an accurate result on the client side. This method should never be called from the server
             // but in case it is make sure we only run on the client side
             return IClientFluidTypeExtensions.of(stack.getFluid()).getTintColor(stack);

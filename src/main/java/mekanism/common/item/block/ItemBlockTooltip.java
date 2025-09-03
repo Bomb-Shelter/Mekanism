@@ -4,6 +4,9 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.function.LongSupplier;
 import java.util.function.Predicate;
+
+import io.github.fabricators_of_create.porting_lib.item.extensions.OnDestroyedItem;
+import io.github.fabricators_of_create.porting_lib.item.extensions.ReequipAnimationItem;
 import mekanism.api.AutomationType;
 import mekanism.api.Upgrade;
 import mekanism.api.functions.ConstantPredicates;
@@ -48,7 +51,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 
-public class ItemBlockTooltip<BLOCK extends Block & IHasDescription> extends ItemBlockMekanism<BLOCK> implements ICapabilityAware, IAttachmentAware {
+public class ItemBlockTooltip<BLOCK extends Block & IHasDescription> extends ItemBlockMekanism<BLOCK> implements ICapabilityAware, IAttachmentAware, OnDestroyedItem, ReequipAnimationItem {
 
     private final boolean hasDetails;
 
@@ -131,7 +134,7 @@ public class ItemBlockTooltip<BLOCK extends Block & IHasDescription> extends Ite
             //TODO: Only ignore the energy attachment?
             return slotChanged || oldStack.getItem() != newStack.getItem();
         }
-        return super.shouldCauseReequipAnimation(oldStack, newStack, slotChanged);
+        return ReequipAnimationItem.super.shouldCauseReequipAnimation(oldStack, newStack, slotChanged);
     }
 
     @Override

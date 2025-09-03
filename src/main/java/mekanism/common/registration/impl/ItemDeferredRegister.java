@@ -13,6 +13,7 @@ import mekanism.common.content.gear.ModuleHelper;
 import mekanism.common.item.ItemModule;
 import mekanism.common.registration.MekanismDeferredHolder;
 import mekanism.common.registration.MekanismDeferredRegister;
+import net.fabricmc.fabric.api.item.v1.DefaultItemComponentEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponentType;
@@ -40,15 +41,17 @@ public class ItemDeferredRegister extends MekanismDeferredRegister<Item> {
         // and then see if any need to apply attachments
         forEntries(ItemRegistryObject::attachDefaultContainers);
 
-        bus.addListener(EventPriority.LOWEST, ModifyDefaultComponentsEvent.class, event -> forEntries(registryObject -> {
-            if (ContainerType.anySupports(registryObject)) {
-                event.modify(registryObject, builder -> {
-                    for (ContainerType<?, ?, ?> type : ContainerType.TYPES) {
-                        type.addDefault(registryObject, builder);
-                    }
-                });
-            }
-        }));
+        DefaultItemComponentEvents.MODIFY.register(context -> {
+            forEntries(registryObject -> {
+                if (ContainerType.anySupports(registryObject)) {
+                    context.modify(registryObject.asItem(), builder -> {
+                        for (ContainerType<?, ?, ?> type : ContainerType.TYPES) {
+                            type.addDefault(registryObject, builder);
+                        }
+                    });
+                }
+            });
+        });
     }
 
     private void forEntries(Consumer<ItemRegistryObject<?>> consumer) {

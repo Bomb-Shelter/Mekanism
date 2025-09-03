@@ -1,5 +1,6 @@
 package mekanism.common.content.transporter;
 
+import io.github.fabricators_of_create.porting_lib.core.util.PortingLibStreamCodecs;
 import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.longs.LongList;
@@ -38,7 +39,7 @@ import org.jetbrains.annotations.Nullable;
 public class TransporterStack {
 
     //Make sure to call updateForPos before calling this method
-    public static StreamCodec<RegistryFriendlyByteBuf, TransporterStack> STREAM_CODEC = NeoForgeStreamCodecs.composite(
+    public static StreamCodec<RegistryFriendlyByteBuf, TransporterStack> STREAM_CODEC = PortingLibStreamCodecs.composite(
           EnumColor.OPTIONAL_STREAM_CODEC, stack -> Optional.ofNullable(stack.color),
           ByteBufCodecs.VAR_INT, stack -> stack.progress,
           ByteBufCodecs.VAR_LONG, stack -> stack.originalLocation,

@@ -27,7 +27,7 @@ public abstract class MekanismSavedData extends SavedData {
             DATA handler = createFunction.get();
             handler.load(tag, provider);
             return handler;
-        }), name);
+        }, null), name);
     }
 
     /**

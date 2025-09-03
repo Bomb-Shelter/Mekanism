@@ -3,6 +3,9 @@ package mekanism.common.tile.base;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import io.github.fabricators_of_create.porting_lib.blocks.extensions.CustomDataPacketHandlingBlockEntity;
+import io.github.fabricators_of_create.porting_lib.blocks.extensions.CustomUpdateTagHandlingBlockEntity;
 import mekanism.api.Chunk3D;
 import mekanism.common.Mekanism;
 import mekanism.common.network.PacketUtils;
@@ -30,7 +33,7 @@ import org.jetbrains.annotations.Nullable;
  * Extension of TileEntity that adds various helpers we use across the majority of our Tiles even those that are not an instance of TileEntityMekanism. Additionally, we
  * improve the performance of markDirty by not firing neighbor updates unless the markDirtyComparator method is overridden.
  */
-public abstract class TileEntityUpdateable extends BlockEntity implements ITileWrapper {
+public abstract class TileEntityUpdateable extends BlockEntity implements ITileWrapper, CustomUpdateTagHandlingBlockEntity, CustomDataPacketHandlingBlockEntity {
 
     @Nullable
     private GlobalPos cachedCoord;
@@ -179,7 +182,7 @@ public abstract class TileEntityUpdateable extends BlockEntity implements ITileW
     }
 
     protected void updateModelData() {
-        requestModelDataUpdate();
+        //requestModelDataUpdate(); // TODO Fabric: ?
         WorldUtils.updateBlock(getLevel(), getBlockPos(), getBlockState());
     }
 

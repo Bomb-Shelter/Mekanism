@@ -1,6 +1,7 @@
 package mekanism.common.tile.base;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.BiFunction;
 import mekanism.api.chemical.IChemicalHandler;
@@ -82,7 +83,7 @@ public abstract class CapabilityTileEntity extends TileEntityUpdateable {
         //Clear our internal cached capability instances and then invalidate the capabilities to the world
         // that way when queried from the invalidation listener we will ensure we can provide the up to date instance
         capabilityCache.invalidateAll();
-        invalidateCapabilities();
+        invalidateCapabilities(Collections.emptyList(), null);
     }
 
     @Override
@@ -103,25 +104,25 @@ public abstract class CapabilityTileEntity extends TileEntityUpdateable {
 
     public final void invalidateCapability(@NotNull BlockApiLookup<?, @Nullable Direction> capability, @Nullable Direction side) {
         capabilityCache.invalidate(capability, side);
-        invalidateCapabilities();
+        invalidateCapabilities(Collections.singleton(capability), side);
     }
 
     public final void invalidateCapabilityAll(@NotNull BlockApiLookup<?, @Nullable Direction> capability) {
         capabilityCache.invalidateAll(capability);
-        invalidateCapabilities();
+        invalidateCapabilities(Collections.singleton(capability), null);
     }
 
     public final void invalidateCapabilities(@NotNull Collection<BlockApiLookup<?, @Nullable Direction>> capabilities, @Nullable Direction side) {
         for (BlockApiLookup<?, @Nullable Direction> capability : capabilities) {
             capabilityCache.invalidate(capability, side);
         }
-        invalidateCapabilities();
+        invalidateCapabilities(capabilities, side);
     }
 
     public final void invalidateCapabilitiesAll(@NotNull Collection<BlockApiLookup<?, @Nullable Direction>> capabilities) {
         for (BlockApiLookup<?, @Nullable Direction> capability : capabilities) {
             capabilityCache.invalidateAll(capability);
         }
-        invalidateCapabilities();
+        invalidateCapabilities(capabilities, null);
     }
 }

@@ -55,7 +55,7 @@ public class FluidDeferredRegister {
             Level world = source.level();
             DispensibleContainerItem bucket = (DispensibleContainerItem) stack.getItem();
             BlockPos pos = source.pos().relative(source.state().getValue(DispenserBlock.FACING));
-            if (bucket.emptyContents(null, world, pos, null, stack)) {
+            if (bucket.emptyContents(null, world, pos, null)) {
                 bucket.checkExtraContent(null, world, stack, pos);
                 return new ItemStack(Items.BUCKET);
             }
