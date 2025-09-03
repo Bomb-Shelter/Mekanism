@@ -6,9 +6,12 @@ import java.util.Optional;
 import java.util.function.LongSupplier;
 import java.util.function.Predicate;
 
+import io.github.fabricators_of_create.porting_lib.entity.events.EntityInvulnerabilityCheckEvent;
+import io.github.fabricators_of_create.porting_lib.entity.events.living.LivingDamageEvent;
 import io.github.fabricators_of_create.porting_lib.entity.events.living.LivingDeathEvent;
 import io.github.fabricators_of_create.porting_lib.entity.events.living.LivingEvents.LivingJumpEvent;
 import io.github.fabricators_of_create.porting_lib.entity.events.living.LivingFallEvent;
+import io.github.fabricators_of_create.porting_lib.entity.events.living.LivingHurtEvent;
 import io.github.fabricators_of_create.porting_lib.entity.events.tick.PlayerTickEvent;
 import io.github.fabricators_of_create.porting_lib.entity.events.player.PlayerEvents.BreakSpeed;
 import mekanism.api.Action;
@@ -26,6 +29,7 @@ import mekanism.common.content.gear.IBlastingItem;
 import mekanism.common.content.gear.mekasuit.ModuleGravitationalModulatingUnit;
 import mekanism.common.content.gear.mekasuit.ModuleHydraulicPropulsionUnit;
 import mekanism.common.content.gear.mekasuit.ModuleLocomotiveBoostingUnit;
+import mekanism.common.fabric.FabricUtil;
 import mekanism.common.item.gear.ItemFreeRunners;
 import mekanism.common.item.gear.ItemMekaSuitArmor;
 import mekanism.common.item.gear.ItemScubaMask;
@@ -89,6 +93,8 @@ public class CommonPlayerTickHandler {
         LivingFallEvent.EVENT.register(this::livingFall);
         LivingJumpEvent.EVENT.register(this::onLivingJump);
         BreakSpeed.EVENT.register(this::getBreakSpeed);
+        EntityInvulnerabilityCheckEvent.EVENT.register(this::checkEntityInvulnerability);
+        LivingHurtEvent.EVENT.register(this::onEntityAttacked);
     }
 
     public void onTick(PlayerTickEvent.Post event) {
@@ -164,7 +170,6 @@ public class CommonPlayerTickHandler {
         }
     }
 
-    @SubscribeEvent
     public void checkEntityInvulnerability(EntityInvulnerabilityCheckEvent event) {
         if (!event.isInvulnerable() && event.getEntity() instanceof LivingEntity entity) {
             if (MekanismDamageTypes.RADIATION.is(event.getSource())) {
@@ -174,11 +179,9 @@ public class CommonPlayerTickHandler {
         }
     }
 
-    @SubscribeEvent
-    public void onEntityAttacked(LivingIncomingDamageEvent event) {
+    public void onEntityAttacked(LivingHurtEvent event) {
         LivingEntity entity = event.getEntity();
-        DamageContainer damageContainer = event.getContainer();
-        float damage = damageContainer.getNewDamage();
+        float damage = event.getAmount();
         if (damage <= 0 || !entity.isAlive()) {
             //If some mod does weird things and causes the damage value to be negative or zero then exit
             // as our logic assumes there is actually damage happening and can crash if someone tries to
@@ -189,7 +192,7 @@ public class CommonPlayerTickHandler {
             // entity can't take damage while dead
             return;
         }
-        DamageSource source = damageContainer.getSource();
+        DamageSource source = event.getSource();
         //Gas Mask checks
         if (source.is(MekanismAPITags.DamageTypes.IS_PREVENTABLE_MAGIC)) {
             ItemStack headStack = entity.getItemBySlot(EquipmentSlot.HEAD);
@@ -205,13 +208,13 @@ public class CommonPlayerTickHandler {
             //TODO - 1.21: Should we rewrite this to try and take advantage of the new reduction system? It would be kind of nice to move this to the
             // spot that reduction from armor happens. Though then the base armor reduction will apply before our energy based reduction
             // Is that fine? Maybe it is better, or maybe it is worse from a balance standpoint
-            float ratioAbsorbed = ItemMekaSuitArmor.getDamageAbsorbed(player, damageContainer.getSource(), damage);
+            float ratioAbsorbed = ItemMekaSuitArmor.getDamageAbsorbed(player, event.getSource(), damage);
             if (ratioAbsorbed > 0) {
                 float damageRemaining = damage * Math.max(0, 1 - ratioAbsorbed);
                 if (damageRemaining <= 0) {
                     event.setCanceled(true);
                 } else {
-                    damageContainer.setNewDamage(damageRemaining);
+                    event.setAmount(damageRemaining);
                 }
             }
         }
@@ -256,7 +259,7 @@ public class CommonPlayerTickHandler {
                         player.playStepSound(posOn, stateOn);
                     } else {
                         //Fallback to default implementation
-                        SoundType soundtype = stateOn.getSoundType(entity.level(), posOn, entity);
+                        SoundType soundtype = FabricUtil.getSoundType(stateOn, entity.level(), posOn, entity);
                         entity.playSound(soundtype.getStepSound(), soundtype.getVolume() * 0.15F, soundtype.getPitch());
                     }
                 } else {

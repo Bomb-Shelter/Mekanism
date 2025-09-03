@@ -2,6 +2,7 @@ package mekanism.common.lib.transmitter;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import io.github.fabricators_of_create.porting_lib.level.events.ChunkTicketLevelUpdatedEvent;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
@@ -136,7 +137,10 @@ public class TransmitterNetworkRegistry {
         }
     }
 
-    @SubscribeEvent
+    static {
+        ChunkTicketLevelUpdatedEvent.EVENT.register(TransmitterNetworkRegistry::onTicketLevelChange);
+    }
+
     public static void onTicketLevelChange(ChunkTicketLevelUpdatedEvent event) {
         int newTicketLevel = event.getNewTicketLevel();
         int oldTicketLevel = event.getOldTicketLevel();

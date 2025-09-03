@@ -8,6 +8,7 @@ import io.github.fabricators_of_create.porting_lib.entity.EffectCures;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidType;
 import io.github.fabricators_of_create.porting_lib.level.LevelHooks;
 import io.github.fabricators_of_create.porting_lib.level.events.BlockEvent;
+import io.github.fabricators_of_create.porting_lib.tags.Tags;
 import io.github.fabricators_of_create.porting_lib.util.UsernameCache;
 import it.unimi.dsi.fastutil.longs.Long2DoubleArrayMap;
 import it.unimi.dsi.fastutil.longs.Long2DoubleMap;
@@ -160,7 +161,7 @@ public final class MekanismUtils {
     @NotNull
     public static String getModId(@NotNull ItemStack stack) {
         Item item = stack.getItem();
-        String modid = item.getCreatorModId(stack);
+        String modid = stack.getCreatorNamespace();
         if (modid == null) {
             Mekanism.logger.error("Unexpected null registry name for item of class type: {}", item.getClass().getSimpleName());
             return "";
@@ -591,7 +592,7 @@ public final class MekanismUtils {
             return "<???>";
         }
         String ret = UsernameCache.getLastKnownUsername(uuid);
-        if (ret == null && !warnedFails.contains(uuid) && EffectiveSide.get().isServer()) { // see if MC/Yggdrasil knows about it?!
+        if (ret == null && !warnedFails.contains(uuid) && ServerLifecycleHooks.getCurrentServer() != null) { // see if MC/Yggdrasil knows about it?!
             Optional<GameProfile> gp = ServerLifecycleHooks.getCurrentServer().getProfileCache().get(uuid);
             if (gp.isPresent()) {
                 ret = gp.get().getName();
@@ -845,7 +846,7 @@ public final class MekanismUtils {
             targetState = targetState.getBlock().playerWillDestroy(world, foundPos, targetState, player);
             Block block = targetState.getBlock();
             //Remove the block
-            if (targetState.onDestroyedByPlayer(world, foundPos, player, true, fluidState)) {
+            if (targetState.port_lib$onDestroyedByPlayer(world, foundPos, player, true, fluidState)) {
                 block.destroy(world, foundPos, targetState);
                 //Harvest the block allowing it to handle block drops, incrementing block mined count, and adding exhaustion
                 block.playerDestroy(world, player, foundPos, targetState, tileEntity, stack);

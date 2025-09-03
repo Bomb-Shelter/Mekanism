@@ -4,11 +4,14 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import io.github.fabricators_of_create.porting_lib.models.data.ModelData;
 import mekanism.common.util.EnumUtils;
+import net.fabricmc.fabric.api.renderer.v1.Renderer;
+import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
@@ -68,7 +71,7 @@ public abstract class MekanismISTER extends BlockEntityWithoutLevelRenderer impl
      * @implNote Heavily based on/from vanilla's ItemRenderer#render code that calls the renderByItem method on the ISBER
      */
     protected void renderBlockItem(@NotNull ItemStack stack, @NotNull ItemDisplayContext displayContext, @NotNull PoseStack matrix, @NotNull MultiBufferSource renderer,
-          int light, int overlayLight, ModelData modelData) {
+          int light, int overlayLight, Object modelData) {
         if (!(stack.getItem() instanceof BlockItem blockItem)) {
             return;
         }
@@ -87,8 +90,9 @@ public abstract class MekanismISTER extends BlockEntityWithoutLevelRenderer impl
         long seed = 42;
         RandomSource random = RandomSource.create();
         boolean hasEffect = stack.hasFoil();
-        for (BakedModel model : baseModel.getRenderPasses(stack, fabulous)) {
-            for (RenderType renderType : model.getRenderTypes(stack, fabulous)) {
+        RenderType renderType = ItemBlockRenderTypes.getRenderType(stack, false);
+//        for (BakedModel model : baseModel.getRenderPasses(stack, fabulous)) {
+//            for (RenderType renderType : model.getRenderTypes(stack, fabulous)) {
                 VertexConsumer buffer;
                 if (fabulous) {
                     buffer = ItemRenderer.getFoilBufferDirect(renderer, renderType, true, hasEffect);
@@ -98,11 +102,11 @@ public abstract class MekanismISTER extends BlockEntityWithoutLevelRenderer impl
                 //Note: Manually call the render quads lists rather than using renderModelLists so that we can pass the proper render type and model data
                 for (Direction direction : EnumUtils.DIRECTIONS) {
                     random.setSeed(seed);
-                    itemRenderer.renderQuadList(matrix, buffer, model.getQuads(defaultState, direction, random, modelData, renderType), stack, light, overlayLight);
+                    itemRenderer.renderQuadList(matrix, buffer, baseModel.getQuads(defaultState, direction, random/*, modelData, renderType*/), stack, light, overlayLight);
                 }
                 random.setSeed(seed);
-                itemRenderer.renderQuadList(matrix, buffer, model.getQuads(defaultState, null, random, modelData, renderType), stack, light, overlayLight);
-            }
-        }
+                itemRenderer.renderQuadList(matrix, buffer, baseModel.getQuads(defaultState, null, random/*, modelData, renderType*/), stack, light, overlayLight);
+//            }
+//        }
     }
 }

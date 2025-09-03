@@ -2,6 +2,10 @@ package mekanism.client.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import io.github.fabricators_of_create.porting_lib.client_events.event.client.RenderArmEvent;
+import io.github.fabricators_of_create.porting_lib.client_extensions.IClientItemExtensions;
+import io.github.fabricators_of_create.porting_lib.gui.events.RenderGuiLayerCallback;
+import io.github.fabricators_of_create.porting_lib.gui.layered.VanillaGuiLayers;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -45,8 +49,13 @@ import mekanism.common.tile.interfaces.ISideConfiguration;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.WorldUtils;
 import mezz.jei.api.runtime.IRecipesGui;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.model.HumanoidModel.ArmPose;
 import net.minecraft.client.model.PlayerModel;
@@ -63,6 +72,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -143,22 +153,41 @@ public class RenderTickHandler {
         }) == Boolean.TRUE;
     }
 
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public void renderPostHighest(ScreenEvent.Render.Post event) {
-        if (event.getScreen() instanceof GuiMekanism) {
+    public RenderTickHandler() {
+        ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
+            if (screen instanceof GuiMekanism<?>) {
+                ScreenEvents.afterRender(screen).register((screen1, drawContext, mouseX, mouseY, tickDelta) -> {
+                    renderPostHighest(screen1, drawContext);
+                    renderPostLowest(screen1, drawContext);
+                });
+            }
+        });
+
+        WorldRenderEvents.AFTER_TRANSLUCENT.register(context -> {
+            renderWorld(context, true); // AFTER_TRANSLUCENT
+            renderWorld(context, false); // AFTER_PARTICLES
+        });
+
+        RenderGuiLayerCallback.PRE.register((guiGraphics, partialTick, name, layer) -> renderCrosshair(name));
+        RenderArmEvent.EVENT.register(this::renderArm);
+        ClientTickEvents.END_CLIENT_TICK.register(client -> tickEnd());
+        WorldRenderEvents.BLOCK_OUTLINE.register((worldRenderContext, blockOutlineContext) -> onBlockHover(worldRenderContext, blockOutlineContext));
+    }
+
+    public void renderPostHighest(Screen screen, GuiGraphics guiGraphics) {
+        if (screen instanceof GuiMekanism) {
             //Translate forward how far we go, so that things like recipe viewers draw far enough forward
             // Note: We will pop this in a listener at the lowest priority
-            PoseStack pose = event.getGuiGraphics().pose();
+            PoseStack pose = guiGraphics.pose();
             pose.pushPose();
             pose.translate(0, 0, GuiMekanism.maxZOffset);
         }
     }
 
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public void renderPostLowest(ScreenEvent.Render.Post event) {
-        if (event.getScreen() instanceof GuiMekanism) {
+    public void renderPostLowest(Screen screen, GuiGraphics guiGraphics) {
+        if (screen instanceof GuiMekanism) {
             //Matching pop to the push we did in renderPostHighest
-            event.getGuiGraphics().pose().popPose();
+            guiGraphics.pose().popPose();
         }
     }
 
@@ -166,16 +195,15 @@ public class RenderTickHandler {
         transparentRenderers.add(render);
     }
 
-    @SubscribeEvent
-    public void renderWorld(RenderLevelStageEvent event) {
-        if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
+    public void renderWorld(WorldRenderContext context, boolean isAfterTranslucent) {
+        if (isAfterTranslucent) {
             //Only do matrix transforms and mess with buffers if we actually have any renders to render
             if (!transparentRenderers.isEmpty()) {
-                Camera camera = event.getCamera();
+                Camera camera = context.camera();
                 MultiBufferSource.BufferSource renderer = minecraft.renderBuffers().bufferSource();
-                PoseStack poseStack = event.getPoseStack();
-                int renderTick = event.getRenderTick();
-                float partialTick = event.getPartialTick().getGameTimeDeltaPartialTick(false);
+                PoseStack poseStack = context.matrixStack();
+                int renderTick = context.worldRenderer().ticks;
+                float partialTick = context.tickCounter().getGameTimeDeltaPartialTick(false);
                 ProfilerFiller profiler = minecraft.getProfiler();
                 profiler.push(ProfilerConstants.DELAYED);
                 if (transparentRenderers.size() == 1) {
@@ -199,22 +227,22 @@ public class RenderTickHandler {
                 transparentRenderers.clear();
                 profiler.pop();
             }
-        } else if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES && boltRenderer.hasBoltsToRender()) {
+        } else if (/*event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES &&*/ boltRenderer.hasBoltsToRender()) {
             MultiBufferSource.BufferSource renderer = minecraft.renderBuffers().bufferSource();
-            boltRenderer.render(event.getPartialTick().getGameTimeDeltaPartialTick(false), event.getPoseStack(), renderer, event.getCamera().getPosition());
+            boltRenderer.render(context.tickCounter().getGameTimeDeltaPartialTick(false), context.matrixStack(), renderer, context.camera().getPosition());
             renderer.endBatch(MekanismRenderType.MEK_LIGHTNING);
         }
     }
 
-    @SubscribeEvent
-    public void renderCrosshair(RenderGuiLayerEvent.Pre event) {
-        if (event.getName().equals(VanillaGuiLayers.CROSSHAIR) && minecraft.screen instanceof GuiRadialSelector screen && screen.shouldHideCrosshair()) {
+    public boolean renderCrosshair(ResourceLocation name) {
+        if (name.equals(VanillaGuiLayers.CROSSHAIR) && minecraft.screen instanceof GuiRadialSelector screen && screen.shouldHideCrosshair()) {
             //Hide the crosshair if we have a radial menu open and are drawing the back button
-            event.setCanceled(true);
+            return true;
         }
+
+        return false;
     }
 
-    @SubscribeEvent
     public void renderArm(RenderArmEvent event) {
         AbstractClientPlayer player = event.getPlayer();
         ItemStack chestStack = player.getItemBySlot(EquipmentSlot.CHEST);
@@ -239,8 +267,7 @@ public class RenderTickHandler {
         }
     }
 
-    @SubscribeEvent
-    public void tickEnd(ClientTickEvent.Post event) {
+    public void tickEnd() {
         //Note: We check that the game mode is not null as if it is that means the world is unloading, and we don't actually want to be rendering
         // as our data may be out of date or invalid. For example configs could unload while it is still unloading
         Level world;
@@ -361,19 +388,18 @@ public class RenderTickHandler {
         return true;
     }
 
-    @SubscribeEvent
-    public void onBlockHover(RenderHighlightEvent.Block event) {
+    public boolean onBlockHover(WorldRenderContext renderContext, WorldRenderContext.BlockOutlineContext outlineContext) {
         Player player = minecraft.player;
         if (player == null) {
-            return;
+            return true;
         }
-        BlockHitResult rayTraceResult = event.getTarget();
-        if (rayTraceResult.getType() != Type.MISS) {
+        //BlockHitResult rayTraceResult = outlineContext.getTarget();
+        if (/*rayTraceResult.getType() != Type.MISS*/ true) {
             Level world = player.level();
-            BlockPos pos = rayTraceResult.getBlockPos();
-            MultiBufferSource renderer = event.getMultiBufferSource();
-            Camera info = event.getCamera();
-            PoseStack matrix = event.getPoseStack();
+            BlockPos pos = outlineContext.blockPos();
+            MultiBufferSource renderer = renderContext.consumers();
+            Camera info = renderContext.camera();
+            PoseStack matrix = renderContext.matrixStack();
             ProfilerFiller profiler = world.getProfiler();
             BlockState blockState = world.getBlockState(pos);
 
@@ -386,12 +412,12 @@ public class RenderTickHandler {
                     if (!blocks.isEmpty()) {
                         outliningArea = true;
                         Vec3 renderView = info.getPosition();
-                        LevelRenderer levelRenderer = event.getLevelRenderer();
+                        LevelRenderer levelRenderer = renderContext.worldRenderer();
                         Lazy<VertexConsumer> lineConsumer = Lazy.of(() -> renderer.getBuffer(RenderType.lines()));
                         for (Entry<BlockPos, BlockState> block : blocks.entrySet()) {
                             BlockPos blastingTarget = block.getKey();
                             // simulate ray tracing results for all block positions
-                            if (!pos.equals(blastingTarget) && !ClientHooks.onDrawHighlight(levelRenderer, info, rayTraceResult.withPosition(blastingTarget), event.getDeltaTracker(), matrix, renderer)) {
+                            if (!pos.equals(blastingTarget) /*&& !ClientHooks.onDrawHighlight(levelRenderer, info, rayTraceResult.withPosition(blastingTarget), event.getDeltaTracker(), matrix, renderer)*/) { // TODO Fabric: is this needed?
                                 levelRenderer.renderHitOutline(matrix, lineConsumer.get(), player, renderView.x, renderView.y, renderView.z, blastingTarget, block.getValue());
                             }
                         }
@@ -430,7 +456,7 @@ public class RenderTickHandler {
                                 if (wireFrameRenderer.isCombined()) {
                                     renderQuadsWireFrame(actualState, buffer, matrix, world.random);
                                 }
-                                wireFrameRenderer.renderWireFrame(tile, event.getDeltaTracker().getGameTimeDeltaPartialTick(false), matrix, buffer);
+                                wireFrameRenderer.renderWireFrame(tile, renderContext.tickCounter().getGameTimeDeltaPartialTick(false), matrix, buffer);
                                 matrix.popPose();
                                 shouldCancel = true;
                             }
@@ -455,9 +481,10 @@ public class RenderTickHandler {
                 stack = player.getOffhandItem();
                 if (stack.isEmpty() || !(stack.getItem() instanceof ItemConfigurator)) {
                     if (shouldCancel) {
-                        event.setCanceled(true);
+                        return false;
                     }
-                    return;
+
+                    return true;
                 }
             }
             profiler.push(ProfilerConstants.CONFIGURABLE_MACHINE);
@@ -468,7 +495,7 @@ public class RenderTickHandler {
                 if (tile instanceof ISideConfiguration configurable) {
                     TileComponentConfig config = configurable.getConfig();
                     if (config.supports(type)) {
-                        Direction face = rayTraceResult.getDirection();
+                        Direction face = outlineContext.entity().getDirection().getOpposite(); // TODO Fabric: is this correct?
                         ConfigInfo configInfo = config.getConfig(type);
                         if (configInfo != null) {
                             RelativeSide side = RelativeSide.fromDirections(configurable.getDirection(), face);
@@ -490,9 +517,11 @@ public class RenderTickHandler {
             }
             profiler.pop();
             if (shouldCancel) {
-                event.setCanceled(true);
+                return false;
             }
         }
+
+        return true;
     }
 
     private void renderQuadsWireFrame(BlockState state, VertexConsumer buffer, PoseStack matrix, RandomSource rand) {

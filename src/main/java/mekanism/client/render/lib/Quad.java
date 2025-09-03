@@ -105,10 +105,10 @@ public class Quad {
         }
     }
 
-    public boolean transform(QuadTransformation... transformations) {
+    public boolean transform(MutableQuadView quadView, QuadTransformation... transformations) {
         boolean transformed = false;
         for (QuadTransformation transform : transformations) {
-            transformed |= transform.transform(this);
+            transformed |= transform.transform(quadView);
         }
         return transformed;
     }

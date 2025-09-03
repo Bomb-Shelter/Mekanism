@@ -13,6 +13,7 @@ import java.util.Objects;
 import java.util.function.BiPredicate;
 import java.util.function.Supplier;
 
+import io.github.fabricators_of_create.porting_lib.render_types.RenderTypeGroup;
 import mekanism.api.RelativeSide;
 import mekanism.client.model.baked.ExtensionBakedModel.QuadsKey;
 import mekanism.client.model.energycube.EnergyCubeGeometry.FaceData;
@@ -20,9 +21,14 @@ import mekanism.client.render.lib.QuadTransformation;
 import mekanism.common.tile.TileEntityEnergyCube;
 import mekanism.common.tile.TileEntityEnergyCube.CubeSideState;
 import mekanism.common.util.EnumUtils;
+import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
+import net.fabricmc.fabric.api.renderer.v1.material.BlendMode;
+import net.fabricmc.fabric.api.renderer.v1.material.RenderMaterial;
+import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
 import net.fabricmc.fabric.api.renderer.v1.model.ModelHelper;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.minecraft.Util;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
@@ -57,7 +63,7 @@ public class EnergyCubeBakedModel implements BakedModel {
     private final Map<RelativeSide, FaceData> activeLEDs;
     private final Map<RelativeSide, FaceData> ports;
     private final Map<RelativeSide, FaceData> activePorts;
-    private final ChunkRenderTypeSet blockRenderTypes;
+    private final RenderTypeGroup blockRenderTypes;
     private final List<RenderType> itemRenderTypes;
     private final List<RenderType> fabulousItemRenderTypes;
     private final boolean isAmbientOcclusion;
@@ -93,7 +99,7 @@ public class EnergyCubeBakedModel implements BakedModel {
             this.itemRenderTypes = null;
             this.fabulousItemRenderTypes = null;
         } else {
-            this.blockRenderTypes = ChunkRenderTypeSet.of(renderTypes.block());
+            this.blockRenderTypes = renderTypes;
             this.itemRenderTypes = Collections.singletonList(renderTypes.entity());
             this.fabulousItemRenderTypes = Collections.singletonList(renderTypes.entityFabulous());
         }
@@ -112,28 +118,75 @@ public class EnergyCubeBakedModel implements BakedModel {
             if (data.length != EnumUtils.SIDES.length) {
                 //If there is no side data then treat everything as inactive
                 sideStates = INACTIVE;
+            } else {
+                sideStates = data;
             }
         } else {
             sideStates = INACTIVE;
         }
 
-        for (int i = 0; i < 7; i++) {
+        QuadEmitter emitter = context.getEmitter();
+        RenderMaterial material = RendererAccess.INSTANCE.getRenderer().materialFinder()
+            .blendMode(BlendMode.CUTOUT)
+            .find();
 
+        RenderMaterial emissiveMaterial = RendererAccess.INSTANCE.getRenderer().materialFinder()
+            .blendMode(BlendMode.CUTOUT)
+            .emissive(true)
+            .find();
+
+        for (BakedQuad face : frame.getFaces(null)) {
+            emitter.fromVanilla(face, material, null)
+                .emit();
+        }
+
+        for (int i = 0; i < EnumUtils.SIDES.length; i++) {
+            RelativeSide dir = EnumUtils.SIDES[i];
+            CubeSideState sideState = sideStates[i];
+
+            if (sideState == CubeSideState.ACTIVE_LIT) {
+                for (BakedQuad face : activeLEDs.get(dir).getFaces(null)) {
+                    emitter.fromVanilla(face, emissiveMaterial, null)
+                        .emit();
+                }
+
+                for (BakedQuad face : activePorts.get(dir).getFaces(null)) {
+                    emitter.fromVanilla(face, emissiveMaterial, null)
+                        .emit();
+                }
+            } else {
+                for (BakedQuad face : leds.get(dir).getFaces(null)) {
+                    emitter.fromVanilla(face, material, null)
+                        .emit();
+                }
+
+                if (sideState == CubeSideState.ACTIVE_UNLIT) {
+                    for (BakedQuad face : ports.get(dir).getFaces(null)) {
+                        emitter.fromVanilla(face, emissiveMaterial, null)
+                            .emit();
+                    }
+                }
+            }
         }
     }
 
     @NotNull
     @Override
-    public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand, @NotNull ModelData data,
-          @Nullable RenderType renderType) {
+    public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand/*, @NotNull ModelData data,
+          @Nullable RenderType renderType*/) {
+        CubeSideState[] sideStates = INACTIVE;
+
+        /*
         CubeSideState[] sideStates = data.get(TileEntityEnergyCube.SIDE_STATE_PROPERTY);
         if (sideStates == null || sideStates.length != EnumUtils.SIDES.length) {
             //If there is no side data then treat everything as inactive
             sideStates = INACTIVE;
         }
+         */
+
         //Note: We intentionally ignore the state and use null here to minimize cache size as it doesn't actually matter
         // or get used for energy cube models
-        QuadsKey<CubeSideState[]> key = new QuadsKey<>(null, side, rand, renderType, frame.getFaces(side));
+        QuadsKey<CubeSideState[]> key = new QuadsKey<>(null, side, rand, BlendMode.CUTOUT, frame.getFaces(side));
         key.data(sideStates, Arrays.hashCode(sideStates), DATA_EQUALITY_CHECK);
         return cache.getUnchecked(key);
     }
@@ -200,7 +253,7 @@ public class EnergyCubeBakedModel implements BakedModel {
         return transforms;
     }
 
-    @NotNull
+    /*@NotNull
     @Override
     public ChunkRenderTypeSet getRenderTypes(@NotNull BlockState state, @NotNull RandomSource rand, @NotNull ModelData data) {
         return blockRenderTypes == null ? IDynamicBakedModel.super.getRenderTypes(state, rand, data) : blockRenderTypes;
@@ -217,5 +270,5 @@ public class EnergyCubeBakedModel implements BakedModel {
             return itemRenderTypes;
         }
         return IDynamicBakedModel.super.getRenderTypes(stack, fabulous);
-    }
+    }*/
 }

@@ -474,6 +474,7 @@ repositories { RepositoryHandler handler ->
         it.filter {
             includeGroup('org.appliedenergistics')
             includeGroup('me.lucko')
+            includeGroup('org.reflections')
         }
     }
 }
@@ -578,6 +579,8 @@ dependencies {
     //Note: Even though yaml ops defines a FMLModType we have to pretend FML doesn't know how to handle it due to a lib yaml ops bundles not defining it
     datagenNonMod("com.thiakil:yaml-ops:${yamlops_version}")
     include(modImplementation("curse.maven:modern-keybinding-fabric-695433:${mkb_version}"))
+
+    include(implementation("org.reflections:reflections:${reflections_version}"))
 }
 
 def getManifestAttributes(String title) {

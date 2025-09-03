@@ -2,6 +2,7 @@ package mekanism.client.render.item.block;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import io.github.fabricators_of_create.porting_lib.models.data.ModelData;
 import mekanism.api.RelativeSide;
 import mekanism.client.model.ModelEnergyCore;
 import mekanism.client.render.MekanismRenderer;
@@ -25,7 +26,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.client.model.data.ModelData;
 import org.jetbrains.annotations.NotNull;
 
 public class RenderEnergyCubeItem extends MekanismISTER {
@@ -57,8 +57,7 @@ public class RenderEnergyCubeItem extends MekanismISTER {
             }
             sideStates[side.ordinal()] = state;
         }
-        ModelData modelData = ModelData.of(TileEntityEnergyCube.SIDE_STATE_PROPERTY, sideStates);
-        renderBlockItem(stack, displayContext, matrix, renderer, light, overlayLight, modelData);
+        renderBlockItem(stack, displayContext, matrix, renderer, light, overlayLight, sideStates);
         double energyPercentage = StorageUtils.getEnergyRatio(stack);
         if (energyPercentage > 0) {
             float ticks = Minecraft.getInstance().levelRenderer.getTicks() + MekanismRenderer.getPartialTick();

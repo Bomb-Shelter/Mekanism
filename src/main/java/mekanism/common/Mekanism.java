@@ -66,6 +66,7 @@ import mekanism.common.item.interfaces.IHasConditionalAttributes;
 import mekanism.common.item.loot.MekanismLootFunctions;
 import mekanism.common.item.predicate.MekanismItemPredicates;
 //import mekanism.common.lib.MekAnnotationScanner;
+import mekanism.common.lib.MekAnnotationScanner;
 import mekanism.common.lib.Version;
 import mekanism.common.lib.frequency.FrequencyManager;
 import mekanism.common.lib.frequency.FrequencyType;
@@ -211,7 +212,7 @@ public class Mekanism implements ModInitializer {
         addReloadListenersLowest();
         CommonLifecycleEvents.TAGS_LOADED.register(this::onTagsReload);
         DataMapsUpdatedEvent.EVENT.register(this::onDataMapsUpdated);
-        NeoForge.EVENT_BUS.addListener(MekanismPermissions::registerPermissionNodes);
+//        NeoForge.EVENT_BUS.addListener(MekanismPermissions::registerPermissionNodes);
         IncompleteRecipeScanner.init();
 //        modEventBus.addListener(EventPriority.HIGH, Capabilities::registerProxyableCapabilities);
         Capabilities.registerCapabilities();
@@ -385,7 +386,7 @@ public class Mekanism implements ModInitializer {
         HolidayManager.init();
 
         //Collect annotation scan data
-//        MekAnnotationScanner.collectScanData(); TODO: Fabric port
+        MekAnnotationScanner.collectScanData("mekanism", "mekanism");
         //Register dispenser behaviors
         MekanismFluids.FLUIDS.registerBucketDispenserBehavior();
         registerFluidTankBehaviors(MekanismBlocks.BASIC_FLUID_TANK, MekanismBlocks.ADVANCED_FLUID_TANK, MekanismBlocks.ELITE_FLUID_TANK,
@@ -395,11 +396,11 @@ public class Mekanism implements ModInitializer {
               MekanismItems.MEKASUIT_BOOTS);
 
         //Register player tracker
-        NeoForge.EVENT_BUS.register(new CommonPlayerTracker());
-        NeoForge.EVENT_BUS.register(new CommonPlayerTickHandler());
-        NeoForge.EVENT_BUS.register(worldTickHandler);
+        new CommonPlayerTracker();
+        new CommonPlayerTickHandler();
+        //NeoForge.EVENT_BUS.register(worldTickHandler);
 
-        NeoForge.EVENT_BUS.register(RadiationManager.get());
+        RadiationManager.get();
 
         //Fake player info
         logger.info("Fake player readout: UUID = {}, name = {}", gameProfile.getId(), gameProfile.getName());

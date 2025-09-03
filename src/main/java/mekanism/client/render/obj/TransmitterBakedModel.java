@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import io.github.fabricators_of_create.porting_lib.models.geometry.IGeometryBakingContext;
 import io.github.fabricators_of_create.porting_lib.models.geometry.SimpleModelState;
@@ -20,6 +21,13 @@ import mekanism.client.render.obj.TransmitterModelConfiguration.IconStatus;
 import mekanism.common.lib.transmitter.ConnectionType;
 import mekanism.common.tile.transmitter.TileEntityTransmitter;
 import mekanism.common.util.EnumUtils;
+import net.fabricmc.fabric.api.renderer.v1.Renderer;
+import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
+import net.fabricmc.fabric.api.renderer.v1.material.BlendMode;
+import net.fabricmc.fabric.api.renderer.v1.material.RenderMaterial;
+import net.fabricmc.fabric.api.renderer.v1.mesh.Mesh;
+import net.fabricmc.fabric.api.renderer.v1.model.ForwardingBakedModel;
+import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -29,9 +37,11 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.ModelState;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
@@ -40,35 +50,35 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 @NothingNullByDefault
-public class TransmitterBakedModel extends BakedModelWrapper<BakedModel> {
+public class TransmitterBakedModel extends ForwardingBakedModel {
 
-    private static final ChunkRenderTypeSet CUTOUT = ChunkRenderTypeSet.of(RenderType.cutout());
-    private static final ChunkRenderTypeSet FULL = ChunkRenderTypeSet.of(RenderType.cutout(), RenderType.translucent());
+    //private static final ChunkRenderTypeSet CUTOUT = ChunkRenderTypeSet.of(RenderType.cutout());
+    //private static final ChunkRenderTypeSet FULL = ChunkRenderTypeSet.of(RenderType.cutout(), RenderType.translucent());
 
     private final IGeometryBakingContext owner;
     private final ModelBaker baker;
     private final Function<Material, TextureAtlasSprite> spriteGetter;
     private final ModelState modelTransform;
     private final ItemOverrides overrides;
-    private final LoadingCache<SidedConnection, List<BakedQuad>> internalPartsCache;
+    private final LoadingCache<SidedConnection, Mesh> internalPartsCache;
     @Nullable
-    private final LoadingCache<SidedConnection, List<BakedQuad>> glassPartsCache;
+    private final LoadingCache<SidedConnection, Mesh> glassPartsCache;
     //TODO: Debate making transmitter models actually have cleanup code and have them also add listeners for opaque transmitters so that when the config
     // changes then these update accordingly
-    private final LoadingCache<TransmitterDataKey, List<BakedQuad>> cache = CacheBuilder.newBuilder().build(new CacheLoader<>() {
+    private final LoadingCache<TransmitterDataKey, List<Mesh>> cache = CacheBuilder.newBuilder().build(new CacheLoader<>() {
         @NotNull
         @Override
-        public List<BakedQuad> load(@NotNull TransmitterDataKey key) {
+        public List<Mesh> load(@NotNull TransmitterDataKey key) {
             //Glass cache should never be null if we have renderGlass as true
-            LoadingCache<SidedConnection, List<BakedQuad>> partsCache = key.renderGlass ? Objects.requireNonNull(glassPartsCache) : internalPartsCache;
-            List<BakedQuad> quads = new ArrayList<>();
+            LoadingCache<SidedConnection, Mesh> partsCache = key.renderGlass ? Objects.requireNonNull(glassPartsCache) : internalPartsCache;
+            List<Mesh> meshes = new ArrayList<>();
             for (Direction side : EnumUtils.DIRECTIONS) {
                 ConnectionType connectionType = key.data.getConnectionType(side);
                 IconStatus iconStatus = TransmitterModelConfiguration.getIconStatus(key.data, side, connectionType);
                 SidedConnection sidedConnection = new SidedConnection(side, connectionType, iconStatus);
-                quads.addAll(partsCache.getUnchecked(sidedConnection));
+                meshes.add(partsCache.getUnchecked(sidedConnection));
             }
-            return quads;
+            return meshes;
         }
     });
 
@@ -82,10 +92,10 @@ public class TransmitterBakedModel extends BakedModelWrapper<BakedModel> {
         this.spriteGetter = spriteGetter;
         this.modelTransform = modelTransform;
         this.overrides = overrides;
-        this.internalPartsCache = CacheBuilder.newBuilder().build(createPartCacheLoader(internal));
-        this.glassPartsCache = glass == null ? null : CacheBuilder.newBuilder().build(createPartCacheLoader(glass));
+        this.internalPartsCache = CacheBuilder.newBuilder().build(createPartCacheLoader(internal, false));
+        this.glassPartsCache = glass == null ? null : CacheBuilder.newBuilder().build(createPartCacheLoader(glass, true));
     }
-
+    /*
     @Override
     public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, RandomSource rand) {
         return getQuads(state, side, rand, ModelData.EMPTY, null);
@@ -128,22 +138,41 @@ public class TransmitterBakedModel extends BakedModelWrapper<BakedModel> {
     public List<BakedModel> getRenderPasses(ItemStack stack, boolean fabulous) {
         return Collections.singletonList(this);
     }
+     */
+
+    @Override
+    public void emitBlockQuads(BlockAndTintGetter blockView, BlockState state, BlockPos pos, Supplier<RandomSource> randomSupplier, RenderContext context) {
+        Object renderData = blockView.getBlockEntityRenderData(pos);;
+
+        if (renderData instanceof TransmitterModelData data) {
+            var meshes = cache.getUnchecked(new TransmitterDataKey(data, glassPartsCache != null));
+            var emitter = context.getEmitter();
+
+            for (Mesh mesh : meshes) {
+                mesh.outputTo(emitter);
+            }
+
+            return;
+        }
+
+        super.emitBlockQuads(blockView, state, pos, randomSupplier, context);
+    }
 
     private static String getPartName(Direction side, ConnectionType connectionType) {
         return side.getSerializedName() + connectionType.name();
     }
 
-    private CacheLoader<SidedConnection, List<BakedQuad>> createPartCacheLoader(ObjModel model) {
+    private CacheLoader<SidedConnection, Mesh> createPartCacheLoader(ObjModel model, boolean isGlass) {
         return new CacheLoader<>() {
             @NotNull
             @Override
-            public List<BakedQuad> load(@NotNull SidedConnection key) {
+            public Mesh load(@NotNull SidedConnection key) {
                 Direction side = key.side();
                 ConnectionType connectionType = key.connection();
                 String part = getPartName(side, connectionType);
                 if (!model.getRootComponentNames().contains(part)) {
                     //Validate the model actually has the part (this should always be true but if for some reason it isn't short circuit)
-                    return Collections.emptyList();
+                    return (quad) -> {};
                 }
                 IconStatus iconStatus = key.status();
                 ModelState transform = modelTransform;
@@ -158,7 +187,21 @@ public class TransmitterBakedModel extends BakedModelWrapper<BakedModel> {
                 BakedModel bakedModel = model.bake(new TransmitterModelConfiguration(owner, part, iconStatus), baker, spriteGetter, transform, overrides);
                 //Note: We don't actually care about the state, or the side anywhere and the model returns the proper values even if we don't provide a render type
                 // We also just use a new random source as we don't have one in our current context
-                return bakedModel.getQuads(null, null, RandomSource.create(), ModelData.EMPTY, null);
+                var quads = bakedModel.getQuads(null, null, RandomSource.create()/*, ModelData.EMPTY, null*/);
+
+                var renderer = RendererAccess.INSTANCE.getRenderer();
+                var material = renderer.materialFinder()
+                    .blendMode(isGlass ? BlendMode.TRANSLUCENT : BlendMode.CUTOUT)
+                    .find();
+                var meshBuilder = renderer.meshBuilder();
+                var emitter = meshBuilder.getEmitter();
+
+                for (BakedQuad quad : quads) {
+                    emitter.fromVanilla(quad, material, null)
+                        .emit();
+                }
+
+                return meshBuilder.build();
             }
         };
     }

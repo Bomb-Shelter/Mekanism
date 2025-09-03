@@ -80,7 +80,7 @@ public class DriveArrayBakedModel extends ExtensionOverrideBakedModel<byte[]> {
                 Mesh mesh = MekanismModelCache.INSTANCE.QIO_DRIVES[status.ordinal()].emitMesh(blockState, side, key.getRandom(), renderType);
                 mesh.forEach(quadView -> {
                     Quad quad = new Quad(quadView);
-                    if (quad.transform(transformation, rotation)) {
+                    if (quad.transform(quadView, transformation, rotation)) {
                         //Bake and add the quad if we transformed it
                         quad.bake(emitter, renderType);
                     } else {

@@ -84,7 +84,7 @@ public class ExtensionBakedModel<T> extends ForwardingBakedModel {
         if (hasTransform) {
             context.pushTransform(quad -> {
                 Quad newQuad = new Quad(quad);
-                if (key.getTransformation().transform(newQuad))
+                if (key.getTransformation().transform(quad))
                     newQuad.bake(quad, null);
                 return true;
             });
@@ -95,7 +95,7 @@ public class ExtensionBakedModel<T> extends ForwardingBakedModel {
         }
     }
 
-    @NotNull
+    /*@NotNull
     @Override
     public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, RandomSource rand, ModelData data, @Nullable RenderType renderType) {
         List<BakedQuad> quads = super.getQuads(state, side, rand, data, renderType);
@@ -116,7 +116,7 @@ public class ExtensionBakedModel<T> extends ForwardingBakedModel {
             cachedRenderPasses.put(superPasses, passes);
         }
         return passes;
-    }
+    }*/
 
     protected ExtensionBakedModel<T> wrapModel(BakedModel model) {
         return new ExtensionBakedModel<>(model);

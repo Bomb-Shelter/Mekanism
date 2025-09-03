@@ -2,6 +2,8 @@ package mekanism.client.model.robit;
 
 import java.util.List;
 import java.util.function.BiPredicate;
+
+import io.github.fabricators_of_create.porting_lib.models.data.ModelData;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.robit.RobitSkin;
 import mekanism.client.RobitSpriteUploader;
@@ -26,7 +28,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.client.model.data.ModelData;
 import org.jetbrains.annotations.Nullable;
 
 @NothingNullByDefault

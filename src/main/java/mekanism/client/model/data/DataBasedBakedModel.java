@@ -2,11 +2,13 @@ package mekanism.client.model.data;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import io.github.fabricators_of_create.porting_lib.models.data.ModelData;
 import io.github.fabricators_of_create.porting_lib.models.data.ModelProperty;
 import mekanism.api.annotations.NothingNullByDefault;
 import net.fabricmc.fabric.api.renderer.v1.model.ForwardingBakedModel;
+import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -30,7 +32,7 @@ public class DataBasedBakedModel extends ForwardingBakedModel {
 
     private BakedModel getModelForData(ModelData data) {
         if (data.getProperties().isEmpty()) {
-            return originalModel;
+            return getWrappedModel();
         }
         //TODO: Allow supporting multiple properties at once to combine a result?
         for (Map.Entry<ModelProperty<Void>, BakedModel> entry : propertyBased.entrySet()) {
@@ -38,10 +40,19 @@ public class DataBasedBakedModel extends ForwardingBakedModel {
                 return entry.getValue();
             }
         }
-        return originalModel;
+        return getWrappedModel();
     }
 
     @Override
+    public void emitBlockQuads(BlockAndTintGetter blockView, BlockState state, BlockPos pos, Supplier<RandomSource> randomSupplier, RenderContext context) {
+        Object renderData = blockView.getBlockEntityRenderData(pos);
+
+        if (renderData instanceof ModelData modelData) {
+            getModelForData(modelData).emitBlockQuads(blockView, state, pos, randomSupplier, context);
+        }
+    }
+
+    /*@Override
     public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, RandomSource rand, ModelData extraData, @Nullable RenderType renderType) {
         return getModelForData(extraData).getQuads(state, side, rand, extraData, renderType);
     }
@@ -64,5 +75,5 @@ public class DataBasedBakedModel extends ForwardingBakedModel {
     @Override
     public ChunkRenderTypeSet getRenderTypes(BlockState state, RandomSource rand, ModelData data) {
         return getModelForData(data).getRenderTypes(state, rand, data);
-    }
+    }*/
 }
